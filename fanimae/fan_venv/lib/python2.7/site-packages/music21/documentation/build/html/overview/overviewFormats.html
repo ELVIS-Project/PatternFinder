@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Overview: Importing File and Data Formats &mdash; music21 Documentation</title>
+    
+    <link rel="stylesheet" href="../_static/m21.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.0.11',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/copybutton.js"></script>
+    <link rel="top" title="music21 Documentation" href="../index.html" />
+    <link rel="up" title="Music21 Concepts Overview" href="index.html" />
+    <link rel="next" title="Overview: Post-Tonal Tools" href="overviewPostTonal.html" />
+    <link rel="prev" title="Advanced Streams" href="overviewStreams.html" /><link href='http://fonts.googleapis.com/css?family=Source+Code+Pro|Open+Sans:300italic,400italic,700italic,400,300,700' rel='stylesheet' type='text/css'>
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="overviewPostTonal.html" title="Overview: Post-Tonal Tools"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="overviewStreams.html" title="Advanced Streams"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">music21</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Music21 Concepts Overview</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="overviewStreams.html"
+                        title="previous chapter">Advanced Streams</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="overviewPostTonal.html"
+                        title="next chapter">Overview: Post-Tonal Tools</a></p>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Overview: Importing File and Data Formats</a><ul>
+<li><a class="reference internal" href="#parsing-musicxml-files">Parsing MusicXML Files</a></li>
+<li><a class="reference internal" href="#getting-musicxml-files">Getting MusicXML Files</a></li>
+<li><a class="reference internal" href="#parsing-humdrum-files">Parsing Humdrum Files</a></li>
+<li><a class="reference internal" href="#getting-humdrum-files">Getting Humdrum Files</a></li>
+<li><a class="reference internal" href="#parsing-abc-files">Parsing ABC Files</a></li>
+<li><a class="reference internal" href="#getting-abc-files">Getting ABC Files</a></li>
+<li><a class="reference internal" href="#parsing-musedata-files">Parsing Musedata Files</a></li>
+<li><a class="reference internal" href="#parsing-midi-files">Parsing MIDI Files</a></li>
+</ul>
+</li>
+</ul>
+
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about/index.html">About Music21</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../usersGuide/index.html">Users Guide</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../moduleReference/index.html">Module Reference</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installing/index.html">Installation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Music21 Concepts Overview</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="overviewStreams.html">Advanced Streams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overviewStreams.html#advanced-topic-ordering-streams">Advanced Topic: Ordering Streams</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Overview: Importing File and Data Formats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overviewPostTonal.html">Overview: Post-Tonal Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overviewMeters.html">Overview: Meters, Time Signatures, and Processing Beams, Accents, and Beats</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../developerReference/index.html">Developer Reference</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/overview/overviewFormats.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="overview-importing-file-and-data-formats">
+<span id="overviewformats"></span><h1>Overview: Importing File and Data Formats<a class="headerlink" href="#overview-importing-file-and-data-formats" title="Permalink to this headline">¶</a></h1>
+<p>Music21 can import and export a variety of musical data formats. Many examples
+of these formats are distributed with music21 as part of the corpus module (see
+<a class="reference internal" href="../moduleReference/moduleCorpus.html#modulecorpus"><span>music21.corpus</span></a>).</p>
+<p>The converter module, as well as the module function
+<a class="reference internal" href="../moduleReference/moduleConverter.html#music21.converter.parse" title="music21.converter.parse"><code class="xref py py-func docutils literal"><span class="pre">music21.converter.parse()</span></code></a> handle importing all supported formats. For
+complete documentation on file and data formats, see <a class="reference internal" href="../moduleReference/moduleConverter.html#moduleconverter"><span>music21.converter</span></a>.</p>
+<div class="section" id="parsing-musicxml-files">
+<h2>Parsing MusicXML Files<a class="headerlink" href="#parsing-musicxml-files" title="Permalink to this headline">¶</a></h2>
+<p>We can parse a MusicXML file by providing the <a class="reference internal" href="../moduleReference/moduleConverter.html#music21.converter.parse" title="music21.converter.parse"><code class="xref py py-func docutils literal"><span class="pre">music21.converter.parse()</span></code></a>
+function with a local file path or an URL to a file path. The function will
+determine the file format. An appropriate <a class="reference internal" href="../moduleReference/moduleStream.html#music21.stream.Stream" title="music21.stream.Stream"><code class="xref py py-class docutils literal"><span class="pre">Stream</span></code></a>  or
+Stream subclass will be returned. For example, given a MusicXML file stored at
+the file path &#8220;/Volumes/xdisc/_scratch/bwv1007-01.xml&#8221;, a Stream can be created
+from the file with the following.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">music21</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sBach</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s">&#39;/Volumes/xdisc/_scratch/bwv1007-01.xml&#39;</span><span class="p">)</span> 
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sBach</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>  
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="../_images/overviewFormats-01.png"><img alt="../_images/overviewFormats-01.png" src="../_images/overviewFormats-01.png" style="width: 600px;" /></a>
+<p>Alternative, we can provide a URL to the <a class="reference internal" href="../moduleReference/moduleConverter.html#music21.converter.parse" title="music21.converter.parse"><code class="xref py py-func docutils literal"><span class="pre">music21.converter.parse()</span></code></a>
+function that points to the desired file. Assuming proper system configuration
+(see <a class="reference internal" href="../tutorials/environment.html#environment"><span>Configuring Environment Settings</span></a>), the file will be downloaded and parsed.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">url</span> <span class="o">=</span> <span class="s">&#39;http://kern.ccarh.org/cgi-bin/ksdata?l=cc/bach/cello&amp;file=bwv1007-01.krn&amp;f=xml&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sAlt</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span> 
+</pre></div>
+</div>
+<p>Note that presently music21 offers limited support for compressed .mxl MusicXML
+files; this feature will be expanded in the future.</p>
+</div>
+<div class="section" id="getting-musicxml-files">
+<h2>Getting MusicXML Files<a class="headerlink" href="#getting-musicxml-files" title="Permalink to this headline">¶</a></h2>
+<p>Numerous MusicXML files can be found at the following URLs.</p>
+<p><a class="reference external" href="http://www.wikifonia.org">http://www.wikifonia.org</a></p>
+<p><a class="reference external" href="http://kern.ccarh.org">http://kern.ccarh.org</a></p>
+<p><a class="reference external" href="http://www.gutenberg.org">http://www.gutenberg.org</a></p>
+</div>
+<div class="section" id="parsing-humdrum-files">
+<h2>Parsing Humdrum Files<a class="headerlink" href="#parsing-humdrum-files" title="Permalink to this headline">¶</a></h2>
+<p>Parsing Humdrum files is exactly as parsing other data formats. Simply call the
+<a class="reference internal" href="../moduleReference/moduleConverter.html#music21.converter.parse" title="music21.converter.parse"><code class="xref py py-func docutils literal"><span class="pre">music21.converter.parse()</span></code></a> function on the desired file path or URL.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sLassus</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s">&#39;/Volumes/xdisc/_scratch/matona.krn&#39;</span><span class="p">)</span> 
+</pre></div>
+</div>
+</div>
+<div class="section" id="getting-humdrum-files">
+<h2>Getting Humdrum Files<a class="headerlink" href="#getting-humdrum-files" title="Permalink to this headline">¶</a></h2>
+<p>Over one hundred thousand Kern files can be found at the following URL.</p>
+<p><a class="reference external" href="http://kern.humdrum.org/">http://kern.humdrum.org/</a></p>
+</div>
+<div class="section" id="parsing-abc-files">
+<h2>Parsing ABC Files<a class="headerlink" href="#parsing-abc-files" title="Permalink to this headline">¶</a></h2>
+<p>Parsing ABC files is exactly as parsing other data formats. Simply call the
+<a class="reference internal" href="../moduleReference/moduleConverter.html#music21.converter.parse" title="music21.converter.parse"><code class="xref py py-func docutils literal"><span class="pre">music21.converter.parse()</span></code></a> function on the desired file path or URL.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">music21</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">o</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s">&#39;/Volumes/xdisc/_scratch/oVenusBant.abc&#39;</span><span class="p">)</span> 
+</pre></div>
+</div>
+<p>Note that many ABC files define more than one complete musical work. If an ABC
+file defines more than one work, an <a class="reference internal" href="../moduleReference/moduleStream.html#music21.stream.Opus" title="music21.stream.Opus"><code class="xref py py-class docutils literal"><span class="pre">Opus</span></code></a> object is
+returned. Opus objects, a Stream subclass, provide convenience methods for
+accessing multiple Score objects.</p>
+<p>Reference work numbers (e.g., the &#8220;X:&#8221; metadata tag in ABC) are stored in
+<a class="reference internal" href="../moduleReference/moduleMetadata.html#music21.metadata.Metadata" title="music21.metadata.Metadata"><code class="xref py py-class docutils literal"><span class="pre">Metadata</span></code></a> objects in each contained Score. Access to
+these numbers from the Opus is available with the
+<a class="reference internal" href="../moduleReference/moduleStream.html#music21.stream.Opus.getNumbers" title="music21.stream.Opus.getNumbers"><code class="xref py py-meth docutils literal"><span class="pre">music21.stream.Opus.getNumbers()</span></code></a> method. Additionally, the
+<a class="reference internal" href="../moduleReference/moduleStream.html#music21.stream.Score" title="music21.stream.Score"><code class="xref py py-class docutils literal"><span class="pre">Score</span></code></a> object can be directly obtained with the
+<a class="reference internal" href="../moduleReference/moduleStream.html#music21.stream.Opus.getScoreByNumber" title="music21.stream.Opus.getScoreByNumber"><code class="xref py py-meth docutils literal"><span class="pre">getScoreByNumber()</span></code></a> method.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">music21</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">o</span> <span class="o">=</span> <span class="n">corpus</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s">&#39;josquin/ovenusbant&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">o</span><span class="o">.</span><span class="n">getNumbers</span><span class="p">()</span>
+<span class="go">[&#39;1&#39;, &#39;2&#39;, &#39;3&#39;]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">getScoreByNumber</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">title</span>
+<span class="go">&#39;O Venus bant&#39;</span>
+</pre></div>
+</div>
+<p>Direct access to Score objects contained in an Opus by title is available with
+the <a class="reference internal" href="../moduleReference/moduleStream.html#music21.stream.Opus.getScoreByTitle" title="music21.stream.Opus.getScoreByTitle"><code class="xref py py-meth docutils literal"><span class="pre">getScoreByTitle()</span></code></a> method.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">music21</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">o</span> <span class="o">=</span> <span class="n">corpus</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s">&#39;essenFolksong/erk5&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">getScoreByTitle</span><span class="p">(</span><span class="s">&#39;Vrienden, kommt alle gaere&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In some cases an ABC file may define individual parts each as a separate score.
+When parsed, these parts can be combined from the Opus into a single Score with
+the <a class="reference internal" href="../moduleReference/moduleStream.html#music21.stream.Opus.mergeScores" title="music21.stream.Opus.mergeScores"><code class="xref py py-meth docutils literal"><span class="pre">music21.stream.Opus.mergeScores()</span></code></a> method.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">music21</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">o</span> <span class="o">=</span> <span class="n">corpus</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s">&#39;josquin/milleRegrets&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">mergeScores</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">title</span>
+<span class="go">&#39;Mille regrets&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">parts</span><span class="p">)</span>
+<span class="go">4</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="getting-abc-files">
+<h2>Getting ABC Files<a class="headerlink" href="#getting-abc-files" title="Permalink to this headline">¶</a></h2>
+<p>Large collections of ABC are available from numerous on-line repositories. The
+following links are just a few of the many resources available.</p>
+<p><a class="reference external" href="http://abcnotation.com">http://abcnotation.com</a></p>
+<p><a class="reference external" href="http://www.serpentpublications.org">http://www.serpentpublications.org</a></p>
+</div>
+<div class="section" id="parsing-musedata-files">
+<h2>Parsing Musedata Files<a class="headerlink" href="#parsing-musedata-files" title="Permalink to this headline">¶</a></h2>
+<p>Both stage 1 and stage 2 Musedata file formats are supported by Music21.
+Multi-part Musedata (stage 2) files, zipped archives, and directories
+containing individual files for each part (stage 1 or stage 2) can be imported
+with the <a class="reference internal" href="../moduleReference/moduleConverter.html#music21.converter.parse" title="music21.converter.parse"><code class="xref py py-func docutils literal"><span class="pre">music21.converter.parse()</span></code></a> function on the desired file path or
+URL.</p>
+<p>Note that access restrictions prevent demonstrating Musedata conversion.</p>
+</div>
+<div class="section" id="parsing-midi-files">
+<h2>Parsing MIDI Files<a class="headerlink" href="#parsing-midi-files" title="Permalink to this headline">¶</a></h2>
+<p>MIDI input and output is handled in the same was other formats. Simply call the
+<a class="reference internal" href="../moduleReference/moduleConverter.html#music21.converter.parse" title="music21.converter.parse"><code class="xref py py-func docutils literal"><span class="pre">music21.converter.parse()</span></code></a> function on the desired file path or URL.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="overviewPostTonal.html" title="Overview: Post-Tonal Tools"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="overviewStreams.html" title="Advanced Streams"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">music21</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Music21 Concepts Overview</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2006-2015, Michael Scott Cuthbert and cuthbertLab.
+      Last updated on Sep 13, 2015.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

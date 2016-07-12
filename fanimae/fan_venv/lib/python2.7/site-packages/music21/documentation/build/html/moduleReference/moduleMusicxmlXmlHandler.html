@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>music21.musicxml.xmlHandler &mdash; music21 Documentation</title>
+    
+    <link rel="stylesheet" href="../_static/m21.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/copybutton.js"></script>
+    <link rel="top" title="music21 Documentation" href="../index.html" />
+    <link rel="up" title="Module Reference" href="index.html" />
+    <link rel="next" title="music21.musicxml.xmlObjects" href="moduleMusicxmlXmlObjects.html" />
+    <link rel="prev" title="music21.musicxml.toMxObjects" href="moduleMusicxmlToMxObjects.html" /><link href='http://fonts.googleapis.com/css?family=Source+Code+Pro|Open+Sans:300italic,400italic,700italic,400,300,700' rel='stylesheet' type='text/css'>
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="moduleMusicxmlXmlObjects.html" title="music21.musicxml.xmlObjects"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="moduleMusicxmlToMxObjects.html" title="music21.musicxml.toMxObjects"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">music21</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="moduleMusicxmlToMxObjects.html"
+                        title="previous chapter">music21.musicxml.toMxObjects</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="moduleMusicxmlXmlObjects.html"
+                        title="next chapter">music21.musicxml.xmlObjects</a></p>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">music21.musicxml.xmlHandler</a><ul>
+<li><a class="reference internal" href="#document">Document</a></li>
+<li><a class="reference internal" href="#handler">Handler</a></li>
+</ul>
+</li>
+</ul>
+
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about/index.html">About Music21</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../usersGuide/index.html">User&#8217;s Guide</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Module Reference</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installing/index.html">Installation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../developerReference/index.html">Developer Reference</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/moduleReference/moduleMusicxmlXmlHandler.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="music21-musicxml-xmlhandler">
+<span id="modulemusicxmlxmlhandler"></span><h1>music21.musicxml.xmlHandler<a class="headerlink" href="#music21-musicxml-xmlhandler" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-music21.musicxml.xmlHandler"></span><p>Converts musicxml xml text to the intermediate mxObjects format.</p>
+<div class="section" id="document">
+<h2>Document<a class="headerlink" href="#document" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="music21.musicxml.xmlHandler.Document">
+<em class="property">class </em><code class="descclassname">music21.musicxml.xmlHandler.</code><code class="descname">Document</code><a class="headerlink" href="#music21.musicxml.xmlHandler.Document" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represent a MusicXML document, 
+importing and writing</p>
+</dd></dl>
+
+<p class="rubric"><a class="reference internal" href="#music21.musicxml.xmlHandler.Document" title="music21.musicxml.xmlHandler.Document"><code class="xref py py-class docutils literal"><span class="pre">Document</span></code></a> methods</p>
+<dl class="method">
+<dt id="music21.musicxml.xmlHandler.Document.getBestTitle">
+<code class="descclassname">Document.</code><code class="descname">getBestTitle</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.xmlHandler.Document.getBestTitle" title="Permalink to this definition">¶</a></dt>
+<dd><p>title may be stored in more than one place</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="music21.musicxml.xmlHandler.Document.open">
+<code class="descclassname">Document.</code><code class="descname">open</code><span class="sig-paren">(</span><em>fp</em>, <em>audit=False</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.xmlHandler.Document.open" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="music21.musicxml.xmlHandler.Document.openPickle">
+<code class="descclassname">Document.</code><code class="descname">openPickle</code><span class="sig-paren">(</span><em>fp</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.xmlHandler.Document.openPickle" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="music21.musicxml.xmlHandler.Document.read">
+<code class="descclassname">Document.</code><code class="descname">read</code><span class="sig-paren">(</span><em>xmlString</em>, <em>audit=False</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.xmlHandler.Document.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load MusicXML from a string, instead of from a file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="music21.musicxml.xmlHandler.Document.repr">
+<code class="descclassname">Document.</code><code class="descname">repr</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.xmlHandler.Document.repr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="music21.musicxml.xmlHandler.Document.reprTest">
+<code class="descclassname">Document.</code><code class="descname">reprTest</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.xmlHandler.Document.reprTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Basic display for testing</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="music21.musicxml.xmlHandler.Document.write">
+<code class="descclassname">Document.</code><code class="descname">write</code><span class="sig-paren">(</span><em>fp</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.xmlHandler.Document.write" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="music21.musicxml.xmlHandler.Document.writePickle">
+<code class="descclassname">Document.</code><code class="descname">writePickle</code><span class="sig-paren">(</span><em>fp</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.xmlHandler.Document.writePickle" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="handler">
+<h2>Handler<a class="headerlink" href="#handler" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="music21.musicxml.xmlHandler.Handler">
+<em class="property">class </em><code class="descclassname">music21.musicxml.xmlHandler.</code><code class="descname">Handler</code><span class="sig-paren">(</span><em>tagLib=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.xmlHandler.Handler" title="Permalink to this definition">¶</a></dt>
+<dd><p>The SAX handler reads the MusicXML file and builds a 
+corresponding MusicXMLElement object structure.</p>
+<p>this is the main conversion handler for musicxml to mxObjects</p>
+</dd></dl>
+
+<p class="rubric"><a class="reference internal" href="#music21.musicxml.xmlHandler.Handler" title="music21.musicxml.xmlHandler.Handler"><code class="xref py py-class docutils literal"><span class="pre">Handler</span></code></a> methods</p>
+<dl class="method">
+<dt id="music21.musicxml.xmlHandler.Handler.characters">
+<code class="descclassname">Handler.</code><code class="descname">characters</code><span class="sig-paren">(</span><em>charData</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.xmlHandler.Handler.characters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Because each _Handler sub-class defines its own _tags, 
+and because each Tag knows whether it is to receive character data or not, 
+this method can be found in the base-class and need not be defined for each sub-class.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="music21.musicxml.xmlHandler.Handler.endElement">
+<code class="descclassname">Handler.</code><code class="descname">endElement</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.xmlHandler.Handler.endElement" title="Permalink to this definition">¶</a></dt>
+<dd><p>This handler method builds up the nested MusicXMLElement objects. 
+For simple entities, the charData or attributes might be assigned 
+directly to the attribute of another MusicXMLElement. In other cases, 
+the MusicXMLElement object stored (in the _mxObjs dict) is assigned 
+to another MusicXMLElement.</p>
+<p>After assigning the MusicXMLElement to wherever it resides, 
+the storage location (the _mxObjs dict) must be set to None.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="music21.musicxml.xmlHandler.Handler.getContent">
+<code class="descclassname">Handler.</code><code class="descname">getContent</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.xmlHandler.Handler.getContent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="music21.musicxml.xmlHandler.Handler.setDocumentLocator">
+<code class="descclassname">Handler.</code><code class="descname">setDocumentLocator</code><span class="sig-paren">(</span><em>locator</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.xmlHandler.Handler.setDocumentLocator" title="Permalink to this definition">¶</a></dt>
+<dd><p>A locator object can be used to get line numbers from the XML document.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="music21.musicxml.xmlHandler.Handler.startElement">
+<code class="descclassname">Handler.</code><code class="descname">startElement</code><span class="sig-paren">(</span><em>name</em>, <em>attrs</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.xmlHandler.Handler.startElement" title="Permalink to this definition">¶</a></dt>
+<dd><p>This handler method, in general, simply creates the 
+appropriate MusicXMLElement object and stores it (in the _mxObjs dict). 
+Attributes are loaded if necessary. For a few entities (note, measure) addtional 
+special handling is necessary.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="moduleMusicxmlXmlObjects.html" title="music21.musicxml.xmlObjects"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="moduleMusicxmlToMxObjects.html" title="music21.musicxml.toMxObjects"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">music21</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2006-2015, Michael Scott Cuthbert and cuthbertLab.
+      Last updated on Sep 28, 2015.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

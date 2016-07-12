@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>music21.musicxml.fromMxObjects &mdash; music21 Documentation</title>
+    
+    <link rel="stylesheet" href="../_static/m21.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/copybutton.js"></script>
+    <link rel="top" title="music21 Documentation" href="../index.html" />
+    <link rel="up" title="Module Reference" href="index.html" />
+    <link rel="next" title="music21.musicxml.m21ToString" href="moduleMusicxmlM21ToString.html" />
+    <link rel="prev" title="music21.musedata.translate" href="moduleMusedataTranslate.html" /><link href='http://fonts.googleapis.com/css?family=Source+Code+Pro|Open+Sans:300italic,400italic,700italic,400,300,700' rel='stylesheet' type='text/css'>
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="moduleMusicxmlM21ToString.html" title="music21.musicxml.m21ToString"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="moduleMusedataTranslate.html" title="music21.musedata.translate"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">music21</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="moduleMusedataTranslate.html"
+                        title="previous chapter">music21.musedata.translate</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="moduleMusicxmlM21ToString.html"
+                        title="next chapter">music21.musicxml.m21ToString</a></p>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">music21.musicxml.fromMxObjects</a><ul>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+</ul>
+</li>
+</ul>
+
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about/index.html">About Music21</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../usersGuide/index.html">User&#8217;s Guide</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Module Reference</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installing/index.html">Installation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../developerReference/index.html">Developer Reference</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/moduleReference/moduleMusicxmlFromMxObjects.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="music21-musicxml-frommxobjects">
+<span id="modulemusicxmlfrommxobjects"></span><h1>music21.musicxml.fromMxObjects<a class="headerlink" href="#music21-musicxml-frommxobjects" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-music21.musicxml.fromMxObjects"></span><p>Low-level conversion routines from MusicXML to music21.</p>
+<p>This module supposes that the musicxml document has already been parsed by xml.sax (by 
+base.Document.read() ) and is stored as a collection of mxObjects &#8211; equivalent parsing 
+methods could be created and fed into <cite>mxScoreToScore</cite> to make this work.</p>
+<div class="section" id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxScoreToScore">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxScoreToScore</code><span class="sig-paren">(</span><em>mxScore</em>, <em>spannerBundle=None</em>, <em>inputM21=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxScoreToScore" title="Permalink to this definition">¶</a></dt>
+<dd><p>Translate an mxScore into a music21 Score object 
+or puts it into the
+given inputM21 object (which does not necessarily 
+have to be a <a class="reference internal" href="moduleStream.html#music21.stream.Score" title="music21.stream.Score"><code class="xref py py-class docutils literal"><span class="pre">Score</span></code></a>
+object.  It can be any <a class="reference internal" href="moduleStream.html#music21.stream.Stream" title="music21.stream.Stream"><code class="xref py py-class docutils literal"><span class="pre">Stream</span></code></a> 
+object)</p>
+<p>All spannerBundles accumulated at all lower levels 
+are inserted here.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.addToStaffReference">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">addToStaffReference</code><span class="sig-paren">(</span><em>mxObjectOrNumber</em>, <em>music21Object</em>, <em>staffReference</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.addToStaffReference" title="Permalink to this definition">¶</a></dt>
+<dd><p>Utility routine for importing musicXML objects; 
+here, we store a reference to the music21 object in a dictionary, 
+where keys are the staff values. Staff values may be None, 1, 2, etc.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.configureStaffGroupFromMxPartGroup">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">configureStaffGroupFromMxPartGroup</code><span class="sig-paren">(</span><em>staffGroup</em>, <em>mxPartGroup</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.configureStaffGroupFromMxPartGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an already instantiated spanner.StaffGroup, 
+configure it with parameters from an mxPartGroup.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.musicXMLTypeToType">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">musicXMLTypeToType</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.musicXMLTypeToType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Utility function to convert a MusicXML duration type to an music21 duration type.</p>
+<p>Changes &#8216;long&#8217; to &#8216;longa&#8217; and deals with a Guitar Pro 5.2 bug in MusicXML
+export, that exports a 32nd note with the type &#8216;32th&#8217;.</p>
+<div class="highlight-python"><div class="highlight"><pre>&gt;&gt;&gt; musicxml.fromMxObjects.musicXMLTypeToType(&#39;long&#39;)
+&#39;longa&#39;
+&gt;&gt;&gt; musicxml.fromMxObjects.musicXMLTypeToType(&#39;32th&#39;)
+&#39;32nd&#39;
+&gt;&gt;&gt; musicxml.fromMxObjects.musicXMLTypeToType(&#39;quarter&#39;)
+&#39;quarter&#39;
+&gt;&gt;&gt; musicxml.fromMxObjects.musicXMLTypeToType(None)
+Traceback (most recent call last):
+FromMxObjectsException...
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxArticulationToArticulation">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxArticulationToArticulation</code><span class="sig-paren">(</span><em>mxArticulationMark</em>, <em>inputM21=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxArticulationToArticulation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert an mxArticulationMark to a music21.articulations.Articulation
+object or one of its subclasses.</p>
+<p>Example: Provided an musicxml.mxObjects.ArticulationMark object (not an mxArticulations object)
+configure the music21 object.</p>
+<p>Create both a musicxml.mxObjects.ArticulationMark object and a conflicting music21 object:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mxArticulationMark</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">ArticulationMark</span><span class="p">(</span><span class="s">&#39;accent&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxArticulationMark</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;placement&#39;</span><span class="p">,</span> <span class="s">&#39;below&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">articulations</span><span class="o">.</span><span class="n">Tenuto</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">placement</span> <span class="o">=</span> <span class="s">&#39;above&#39;</span>
+</pre></div>
+</div>
+<p>Now override the music21 object with the mxArticulationMark object&#8217;s characteristics</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxArticulationToArticulation</span><span class="p">(</span><span class="n">mxArticulationMark</span><span class="p">,</span> <span class="n">inputM21</span> <span class="o">=</span> <span class="n">a</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s">&#39;Tenuto&#39;</span> <span class="ow">in</span> <span class="n">a</span><span class="o">.</span><span class="n">classes</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s">&#39;Accent&#39;</span> <span class="ow">in</span> <span class="n">a</span><span class="o">.</span><span class="n">classes</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">placement</span>
+<span class="go">&#39;below&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxClefToClef">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxClefToClef</code><span class="sig-paren">(</span><em>mxClefList</em>, <em>inputM21=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxClefToClef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a MusicXML Clef object, return a music21 
+Clef object</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Clef</span><span class="p">()</span>   
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;sign&#39;</span><span class="p">,</span> <span class="s">&#39;G&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;line&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">clef</span><span class="o">.</span><span class="n">Clef</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span>
+<span class="go">&lt;music21.clef.Clef&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s">&#39;TrebleClef&#39;</span> <span class="ow">in</span> <span class="n">b</span><span class="o">.</span><span class="n">classes</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxClefToClef</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">sign</span>
+<span class="go">&#39;G&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s">&#39;TrebleClef&#39;</span> <span class="ow">in</span> <span class="n">b</span><span class="o">.</span><span class="n">classes</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span>
+<span class="go">&lt;music21.clef.TrebleClef&gt;</span>
+</pre></div>
+</div>
+<p>Create a new clef from thin air:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Clef</span><span class="p">()</span>   
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;sign&#39;</span><span class="p">,</span> <span class="s">&#39;TAB&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxClefToClef</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span>
+<span class="go">&lt;music21.clef.TabClef&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxCreatorToContributor">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxCreatorToContributor</code><span class="sig-paren">(</span><em>mxCreator</em>, <em>inputM21=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxCreatorToContributor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an mxCreator, fill the necessary parameters of a Contributor.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mxCreator</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Creator</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxCreator</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;type&#39;</span><span class="p">,</span> <span class="s">&#39;composer&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxCreator</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;charData&#39;</span><span class="p">,</span> <span class="s">&#39;Beethoven, Ludwig van&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxCreatorToContributor</span><span class="p">(</span><span class="n">mxCreator</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span>
+<span class="go">&lt;music21.metadata.primitives.Contributor object at 0x...&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">role</span>
+<span class="go">&#39;composer&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">name</span>
+<span class="go">&#39;Beethoven, Ludwig van&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxCreditToTextBox">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxCreditToTextBox</code><span class="sig-paren">(</span><em>mxCredit</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxCreditToTextBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a MusicXML credit to a music21 TextBox</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Credit</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">CreditWords</span><span class="p">(</span><span class="s">&#39;testing&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;page&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tb</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxCreditToTextBox</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tb</span><span class="o">.</span><span class="n">page</span>
+<span class="go">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tb</span><span class="o">.</span><span class="n">content</span>
+<span class="go">&#39;testing&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxDefaultsToScoreLayout">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxDefaultsToScoreLayout</code><span class="sig-paren">(</span><em>mxDefaults</em>, <em>inputM21=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxDefaultsToScoreLayout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a <a class="reference internal" href="moduleMusicxmlMxObjects.html#music21.musicxml.mxObjects.Defaults" title="music21.musicxml.mxObjects.Defaults"><code class="xref py py-class docutils literal"><span class="pre">Defaults</span></code></a> 
+object to a <a class="reference internal" href="moduleLayout.html#music21.layout.ScoreLayout" title="music21.layout.ScoreLayout"><code class="xref py py-class docutils literal"><span class="pre">ScoreLayout</span></code></a> 
+object</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxDirectionToSpanners">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxDirectionToSpanners</code><span class="sig-paren">(</span><em>targetLast</em>, <em>mxDirection</em>, <em>spannerBundle</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxDirectionToSpanners" title="Permalink to this definition">¶</a></dt>
+<dd><p>Some spanners, such as MusicXML octave-shift, are encoded as MusicXML directions.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxFermataToFermata">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxFermataToFermata</code><span class="sig-paren">(</span><em>mxFermata</em>, <em>inputM21=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxFermataToFermata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert an mxFermata object to a music21 expressions.Fermata
+object.</p>
+<p>If inputM21 is None, creates a new Fermata object
+and returns it.  Otherwise changes the current Fermata
+object and returns nothing.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mxFermata</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Fermata</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxFermata</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;type&#39;</span><span class="p">,</span> <span class="s">&#39;inverted&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fermata</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxFermataToFermata</span><span class="p">(</span><span class="n">mxFermata</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fermata</span><span class="o">.</span><span class="n">type</span>
+<span class="go">&#39;inverted&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxGraceToGrace">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxGraceToGrace</code><span class="sig-paren">(</span><em>noteOrChord</em>, <em>mxGrace=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxGraceToGrace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a completely formed, non-grace Note or Chord, create and 
+return a m21 grace version of the same.</p>
+<p>If mxGrace is None, no change is made and the same object is returned.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxKeyListToKeySignature">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxKeyListToKeySignature</code><span class="sig-paren">(</span><em>mxKeyList</em>, <em>inputM21=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxKeyListToKeySignature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a mxKey object or keyList, return a music21.key.KeySignature
+object and return it, or if inputM21 is None, change its
+attributes and return nothing.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mxk</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Key</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxk</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;fifths&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ks</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">KeySignature</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxKeyListToKeySignature</span><span class="p">(</span><span class="n">mxk</span><span class="p">,</span> <span class="n">ks</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ks</span><span class="o">.</span><span class="n">sharps</span>
+<span class="go">5 </span>
+</pre></div>
+</div>
+<p>Or just get a new KeySignature object from scratch:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mxk</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;fifths&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ks2</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxKeyListToKeySignature</span><span class="p">(</span><span class="n">mxk</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ks2</span>
+<span class="go">&lt;music21.key.KeySignature of 2 flats&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxNotationsToSpanners">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxNotationsToSpanners</code><span class="sig-paren">(</span><em>target</em>, <em>mxNotations</em>, <em>spannerBundle</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxNotationsToSpanners" title="Permalink to this definition">¶</a></dt>
+<dd><p>General routines for gathering spanners from notes via mxNotations objects and placing them 
+in a spanner bundle.</p>
+<p>Spanners may be found in musicXML notations and directions objects.</p>
+<p>The passed-in spannerBundle will be edited in-place; existing spanners may be completed, or 
+new spanners may be added.</p>
+<p>The <cite>target</cite> object is a reference to the relevant music21 object this spanner is associated 
+with.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxNoteToGeneralNoteHelper">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxNoteToGeneralNoteHelper</code><span class="sig-paren">(</span><em>n</em>, <em>mxNote</em>, <em>spannerBundle=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxNoteToGeneralNoteHelper" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper function for things common to notes and rests.</p>
+<p>n can be a note or rest...</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxOrnamentToExpressionOrArticulation">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxOrnamentToExpressionOrArticulation</code><span class="sig-paren">(</span><em>mxOrnament</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxOrnamentToExpressionOrArticulation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert mxOrnament into a music21 ornament.</p>
+<p>This only processes non-spanner ornaments. 
+Many mxOrnaments are spanners: these are handled elsewhere.</p>
+<p>Returns None if cannot be converted or not defined.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxPageLayoutToPageLayout">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxPageLayoutToPageLayout</code><span class="sig-paren">(</span><em>mxPageLayout</em>, <em>inputM21=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxPageLayoutToPageLayout" title="Permalink to this definition">¶</a></dt>
+<dd><p>get a PageLayout object from an mxPageLayout</p>
+<p>Called out from mxPrintToPageLayout because it
+is also used in the &lt;defaults&gt; tag</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxPrintToPageLayout">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxPrintToPageLayout</code><span class="sig-paren">(</span><em>mxPrint</em>, <em>inputM21=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxPrintToPageLayout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an mxPrint object, set object data for 
+the print section of a layout.PageLayout object</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mxPrint</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Print</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxPrint</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;new-page&#39;</span><span class="p">,</span> <span class="s">&#39;yes&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxPrint</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;page-number&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxPageLayout</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">PageLayout</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxPageLayout</span><span class="o">.</span><span class="n">pageHeight</span> <span class="o">=</span> <span class="mi">4000</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxPageMargins</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">PageMargins</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxPageMargins</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;leftMargin&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxPageMargins</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;rightMargin&#39;</span><span class="p">,</span> <span class="mf">30.2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxPageLayout</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mxPageMargins</span><span class="p">)</span> 
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxPrint</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mxPageLayout</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">pl</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxPrintToPageLayout</span><span class="p">(</span><span class="n">mxPrint</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pl</span><span class="o">.</span><span class="n">isNew</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pl</span><span class="o">.</span><span class="n">rightMargin</span> <span class="o">&gt;</span> <span class="mf">30.1</span> <span class="ow">and</span> <span class="n">pl</span><span class="o">.</span><span class="n">rightMargin</span> <span class="o">&lt;</span> <span class="mf">30.3</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pl</span><span class="o">.</span><span class="n">leftMargin</span>
+<span class="go">20.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pl</span><span class="o">.</span><span class="n">pageNumber</span>
+<span class="go">5</span>
+</pre></div>
+</div>
+<p>Alternatively, pass a music21 object into this routine.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">plAlt</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">PageLayout</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxPrintToPageLayout</span><span class="p">(</span><span class="n">mxPrint</span><span class="p">,</span> <span class="n">plAlt</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plAlt</span><span class="o">.</span><span class="n">pageNumber</span>
+<span class="go">5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plAlt</span><span class="o">.</span><span class="n">pageHeight</span>
+<span class="go">4000.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plAlt</span><span class="o">.</span><span class="n">isNew</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxPrintToStaffLayoutList">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxPrintToStaffLayoutList</code><span class="sig-paren">(</span><em>mxPrint</em>, <em>inputM21=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxPrintToStaffLayoutList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an mxPrint object, return a list of StaffLayout objects (may be empty)</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mxPrint</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Print</span><span class="p">()</span>
+</pre></div>
+</div>
+<p># this is a red-herring... does nothing here...
+&gt;&gt;&gt; mxPrint.set(&#8216;new-system&#8217;, &#8216;yes&#8217;)</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mxStaffLayout</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">StaffLayout</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxStaffLayout</span><span class="o">.</span><span class="n">staffDistance</span> <span class="o">=</span> <span class="mi">55</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxStaffLayout</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;number&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxPrint</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mxStaffLayout</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">slList</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxPrintToStaffLayoutList</span><span class="p">(</span><span class="n">mxPrint</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sl</span> <span class="o">=</span> <span class="n">slList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sl</span><span class="o">.</span><span class="n">distance</span>
+<span class="go">55.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sl</span><span class="o">.</span><span class="n">staffNumber</span>
+<span class="go">1</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxPrintToSystemLayout">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxPrintToSystemLayout</code><span class="sig-paren">(</span><em>mxPrint</em>, <em>inputM21=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxPrintToSystemLayout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an mxPrint object, set object data</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mxPrint</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Print</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxPrint</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;new-system&#39;</span><span class="p">,</span> <span class="s">&#39;yes&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxSystemLayout</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">SystemLayout</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxSystemLayout</span><span class="o">.</span><span class="n">systemDistance</span> <span class="o">=</span> <span class="mi">55</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxSystemMargins</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">SystemMargins</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxSystemMargins</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;leftMargin&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxSystemMargins</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;rightMargin&#39;</span><span class="p">,</span> <span class="mf">30.2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxSystemLayout</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mxSystemMargins</span><span class="p">)</span> 
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxPrint</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mxSystemLayout</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sl</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxPrintToSystemLayout</span><span class="p">(</span><span class="n">mxPrint</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sl</span><span class="o">.</span><span class="n">isNew</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sl</span><span class="o">.</span><span class="n">rightMargin</span> <span class="o">&gt;</span> <span class="mf">30.1</span> <span class="ow">and</span> <span class="n">sl</span><span class="o">.</span><span class="n">rightMargin</span> <span class="o">&lt;=</span> <span class="mf">30.2</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sl</span><span class="o">.</span><span class="n">leftMargin</span>
+<span class="go">20.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sl</span><span class="o">.</span><span class="n">distance</span>
+<span class="go">55.0</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxScoreToMetadata">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxScoreToMetadata</code><span class="sig-paren">(</span><em>mxScore</em>, <em>inputM21=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxScoreToMetadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use an mxScore, to fill in parameters of a 
+<a class="reference internal" href="moduleMetadata.html#music21.metadata.Metadata" title="music21.metadata.Metadata"><code class="xref py py-class docutils literal"><span class="pre">Metadata</span></code></a> object.</p>
+<p>if <cite>inputM21</cite> is None, a new <cite>Metadata</cite> object
+is created and returned at the end.</p>
+<p>Otherwise, the parameters of this Metadata object
+are changed and nothing is returned.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxStaffLayoutToStaffLayout">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxStaffLayoutToStaffLayout</code><span class="sig-paren">(</span><em>mxStaffLayout</em>, <em>inputM21=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxStaffLayoutToStaffLayout" title="Permalink to this definition">¶</a></dt>
+<dd><p>get a StaffLayout object from an mxStaffLayout</p>
+<p>Called out from mxPrintToStaffLayoutList because it
+is also used in the &lt;defaults&gt; tag</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxSystemLayoutToSystemLayout">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxSystemLayoutToSystemLayout</code><span class="sig-paren">(</span><em>mxSystemLayout</em>, <em>inputM21=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxSystemLayoutToSystemLayout" title="Permalink to this definition">¶</a></dt>
+<dd><p>get a SystemLayout object from an mxSystemLayout</p>
+<p>Called out from mxPrintToSystemLayout because it
+is also used in the &lt;defaults&gt; tag</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxTechnicalToArticulation">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxTechnicalToArticulation</code><span class="sig-paren">(</span><em>mxTechnicalMark</em>, <em>inputM21=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxTechnicalToArticulation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert an mxTechnicalMark to a music21.articulations.TechnicalIndication object or one
+of its subclasses.</p>
+<p>Example: Provided an musicxml.mxObjects.TechnicalMark object (not an mxTechnical object)
+configure the music21 object.</p>
+<p>Create both a musicxml.mxObjects.ArticulationMark object and a conflicting music21 object:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mxTechnicalMark</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">TechnicalMark</span><span class="p">(</span><span class="s">&#39;up-bow&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxTechnicalMark</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;placement&#39;</span><span class="p">,</span> <span class="s">&#39;below&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">articulations</span><span class="o">.</span><span class="n">DownBow</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">placement</span> <span class="o">=</span> <span class="s">&#39;above&#39;</span>
+</pre></div>
+</div>
+<p>Now override the music21 object with the mxArticulationMark object&#8217;s characteristics</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxTechnicalToArticulation</span><span class="p">(</span><span class="n">mxTechnicalMark</span><span class="p">,</span> <span class="n">inputM21</span> <span class="o">=</span> <span class="n">a</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s">&#39;DownBow&#39;</span> <span class="ow">in</span> <span class="n">a</span><span class="o">.</span><span class="n">classes</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s">&#39;UpBow&#39;</span> <span class="ow">in</span> <span class="n">a</span><span class="o">.</span><span class="n">classes</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">placement</span>
+<span class="go">&#39;below&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxToAccidental">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxToAccidental</code><span class="sig-paren">(</span><em>mxAccidental</em>, <em>inputM21Object=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxToAccidental" title="Permalink to this definition">¶</a></dt>
+<dd><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Accidental</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;content&#39;</span><span class="p">,</span> <span class="s">&#39;half-flat&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;content&#39;</span><span class="p">)</span>
+<span class="go">&#39;half-flat&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">pitch</span><span class="o">.</span><span class="n">Accidental</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bReference</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxToAccidental</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="ow">is</span> <span class="n">bReference</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">name</span>
+<span class="go">&#39;half-flat&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">alter</span>
+<span class="go">-0.5</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxToBarline">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxToBarline</code><span class="sig-paren">(</span><em>mxBarline</em>, <em>inputM21=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxToBarline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an mxBarline, fill the necessary parameters</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mxBarline</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Barline</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxBarline</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;barStyle&#39;</span><span class="p">,</span> <span class="s">&#39;light-light&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxBarline</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;location&#39;</span><span class="p">,</span> <span class="s">&#39;right&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxToBarline</span><span class="p">(</span><span class="n">mxBarline</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">style</span>  <span class="c"># different in music21 than musicxml</span>
+<span class="go">&#39;double&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">location</span>
+<span class="go">&#39;right&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxToBeam">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxToBeam</code><span class="sig-paren">(</span><em>mxBeam</em>, <em>inputM21=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxToBeam" title="Permalink to this definition">¶</a></dt>
+<dd><p>given an mxBeam object return a <a class="reference internal" href="moduleBeam.html#music21.beam.Beam" title="music21.beam.Beam"><code class="xref py py-class docutils literal"><span class="pre">Beam</span></code></a> object</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mxBeam</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Beam</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxBeam</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;charData&#39;</span><span class="p">,</span> <span class="s">&#39;begin&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxToBeam</span><span class="p">(</span><span class="n">mxBeam</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">type</span>
+<span class="go">&#39;start&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mxBeam</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;charData&#39;</span><span class="p">,</span> <span class="s">&#39;continue&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxToBeam</span><span class="p">(</span><span class="n">mxBeam</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">type</span>
+<span class="go">&#39;continue&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mxBeam</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;charData&#39;</span><span class="p">,</span> <span class="s">&#39;end&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxToBeam</span><span class="p">(</span><span class="n">mxBeam</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">type</span>
+<span class="go">&#39;stop&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mxBeam</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;charData&#39;</span><span class="p">,</span> <span class="s">&#39;forward hook&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxToBeam</span><span class="p">(</span><span class="n">mxBeam</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">type</span>
+<span class="go">&#39;partial&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">direction</span>
+<span class="go">&#39;right&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mxBeam</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;charData&#39;</span><span class="p">,</span> <span class="s">&#39;backward hook&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxToBeam</span><span class="p">(</span><span class="n">mxBeam</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">type</span>
+<span class="go">&#39;partial&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">direction</span>
+<span class="go">&#39;left&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mxBeam</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;charData&#39;</span><span class="p">,</span> <span class="s">&#39;crazy&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxToBeam</span><span class="p">(</span><span class="n">mxBeam</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="gr">FromMxObjectsException</span>: <span class="n">unexpected beam type encountered (crazy)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxToBeams">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxToBeams</code><span class="sig-paren">(</span><em>mxBeamList</em>, <em>inputM21=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxToBeams" title="Permalink to this definition">¶</a></dt>
+<dd><p>given a list of mxBeam objects, sets the beamsList</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">beam</span><span class="o">.</span><span class="n">Beams</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s">&#39;start&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxBeamList</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">toMxObjects</span><span class="o">.</span><span class="n">beamsToMx</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxToBeams</span><span class="p">(</span><span class="n">mxBeamList</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span>
+<span class="go">&lt;music21.beam.Beams &lt;music21.beam.Beam 1/start&gt;/&lt;music21.beam.Beam 2/start&gt;&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxToChord">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxToChord</code><span class="sig-paren">(</span><em>mxNoteList</em>, <em>inputM21=None</em>, <em>spannerBundle=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxToChord" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an a list of mxNotes, fill the necessary parameters</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Note</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Pitch</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;step&#39;</span><span class="p">,</span> <span class="s">&#39;A&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;octave&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">setDefaults</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;pitch&#39;</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Note</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">setDefaults</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;chord&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Measure</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">setDefaults</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">external</span><span class="p">[</span><span class="s">&#39;measure&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">m</span> <span class="c"># assign measure for divisions ref</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">external</span><span class="p">[</span><span class="s">&#39;divisions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">external</span><span class="p">[</span><span class="s">&#39;divisions&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">external</span><span class="p">[</span><span class="s">&#39;measure&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">m</span> <span class="c"># assign measure for divisions ref</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">external</span><span class="p">[</span><span class="s">&#39;divisions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">external</span><span class="p">[</span><span class="s">&#39;divisions&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxToChord</span><span class="p">([</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">pitches</span><span class="p">)</span>
+<span class="go">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">pitches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">&lt;music21.pitch.Pitch A3&gt;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Note</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">setDefaults</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nh1</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Notehead</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nh1</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;charData&#39;</span><span class="p">,</span> <span class="s">&#39;diamond&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">noteheadObj</span> <span class="o">=</span> <span class="n">nh1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Note</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">setDefaults</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;chord&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Measure</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">setDefaults</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">external</span><span class="p">[</span><span class="s">&#39;measure&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">m</span> <span class="c"># assign measure for divisions ref</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">external</span><span class="p">[</span><span class="s">&#39;divisions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">external</span><span class="p">[</span><span class="s">&#39;divisions&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">external</span><span class="p">[</span><span class="s">&#39;measure&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">m</span> <span class="c"># assign measure for divisions ref</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">external</span><span class="p">[</span><span class="s">&#39;divisions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">external</span><span class="p">[</span><span class="s">&#39;divisions&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxToChord</span><span class="p">([</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">getNotehead</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">pitches</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="go">&#39;diamond&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxToChordSymbol">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxToChordSymbol</code><span class="sig-paren">(</span><em>mxHarmony</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxToChordSymbol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a musicxml.mxObjects.Harmony() object to a harmony.ChordSymbol object:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mxHarmony</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Harmony</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxKind</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Kind</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxKind</span><span class="o">.</span><span class="n">charData</span> <span class="o">=</span> <span class="s">&#39;major-seventh&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxHarmony</span><span class="o">.</span><span class="n">kindObj</span> <span class="o">=</span> <span class="n">mxKind</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxRoot</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Root</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxRoot</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;root-step&#39;</span><span class="p">,</span> <span class="s">&#39;D&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxRoot</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;root-alter&#39;</span><span class="p">,</span> <span class="s">&#39;-1&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxHarmony</span><span class="o">.</span><span class="n">rootObj</span> <span class="o">=</span> <span class="n">mxRoot</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cs</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxToChordSymbol</span><span class="p">(</span><span class="n">mxHarmony</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cs</span>
+<span class="go">&lt;music21.harmony.ChordSymbol D-maj7&gt;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">cs</span><span class="o">.</span><span class="n">figure</span>
+<span class="go">&#39;D-maj7&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">cs</span><span class="o">.</span><span class="n">pitches</span>
+<span class="go">(&lt;music21.pitch.Pitch D-3&gt;, &lt;music21.pitch.Pitch F3&gt;, &lt;music21.pitch.Pitch A-3&gt;, &lt;music21.pitch.Pitch C4&gt;)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">cs</span><span class="o">.</span><span class="n">root</span><span class="p">()</span>
+<span class="go">&lt;music21.pitch.Pitch D-3&gt;</span>
+</pre></div>
+</div>
+<p>TODO: this is very classically-oriented.  Make more Jazz/Rock like possible/default?.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mxKind</span><span class="o">.</span><span class="n">charData</span> <span class="o">=</span> <span class="s">&#39;major-sixth&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cs</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxToChordSymbol</span><span class="p">(</span><span class="n">mxHarmony</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cs</span>
+<span class="go">&lt;music21.harmony.ChordSymbol D-6&gt;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">cs</span><span class="o">.</span><span class="n">figure</span>
+<span class="go">&#39;D-6&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">cs</span><span class="o">.</span><span class="n">pitches</span>
+<span class="go">(&lt;music21.pitch.Pitch D-3&gt;, &lt;music21.pitch.Pitch F3&gt;, &lt;music21.pitch.Pitch A-3&gt;, &lt;music21.pitch.Pitch B-3&gt;)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">cs</span><span class="o">.</span><span class="n">root</span><span class="p">()</span>
+<span class="go">&lt;music21.pitch.Pitch D-3&gt;  </span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxToCoda">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxToCoda</code><span class="sig-paren">(</span><em>mxCoda</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxToCoda" title="Permalink to this definition">¶</a></dt>
+<dd><p>Translate a MusicXML <a class="reference internal" href="moduleMusicxmlMxObjects.html#music21.musicxml.mxObjects.Coda" title="music21.musicxml.mxObjects.Coda"><code class="xref py py-class docutils literal"><span class="pre">Coda</span></code></a> object 
+to a music21 <a class="reference internal" href="moduleRepeat.html#music21.repeat.Coda" title="music21.repeat.Coda"><code class="xref py py-class docutils literal"><span class="pre">Coda</span></code></a> object.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxToDuration">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxToDuration</code><span class="sig-paren">(</span><em>mxNote</em>, <em>inputM21=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxToDuration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Translate a <cite>MusicXML</cite> <a class="reference internal" href="moduleMusicxmlMxObjects.html#music21.musicxml.mxObjects.Note" title="music21.musicxml.mxObjects.Note"><code class="xref py py-class docutils literal"><span class="pre">Note</span></code></a> object 
+to a music21 <a class="reference internal" href="moduleDuration.html#music21.duration.Duration" title="music21.duration.Duration"><code class="xref py py-class docutils literal"><span class="pre">Duration</span></code></a> object.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Note</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">setDefaults</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Measure</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">setDefaults</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">external</span><span class="p">[</span><span class="s">&#39;measure&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">m</span> <span class="c"># assign measure for divisions ref</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">external</span><span class="p">[</span><span class="s">&#39;divisions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">external</span><span class="p">[</span><span class="s">&#39;divisions&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">duration</span><span class="o">.</span><span class="n">Duration</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxToDuration</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+<span class="go">&lt;music21.duration.Duration 1.0&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">quarterLength</span>
+<span class="go">1.0</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxToDynamicList">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxToDynamicList</code><span class="sig-paren">(</span><em>mxDirection</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxToDynamicList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an mxDirection, load instance</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mxDirection</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Direction</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxDirectionType</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">DirectionType</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxDynamicMark</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">DynamicMark</span><span class="p">(</span><span class="s">&#39;ff&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxDynamics</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Dynamics</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxDynamics</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;default-y&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">20</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxDynamics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mxDynamicMark</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxDirectionType</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mxDynamics</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxDirection</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mxDirectionType</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">dynamics</span><span class="o">.</span><span class="n">Dynamic</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxToDynamicList</span><span class="p">(</span><span class="n">mxDirection</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">value</span>
+<span class="go">&#39;ff&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">englishName</span>
+<span class="go">&#39;very loud&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">_positionDefaultY</span>
+<span class="go">-20</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxToInstrument">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxToInstrument</code><span class="sig-paren">(</span><em>mxScorePart</em>, <em>inputM21=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxToInstrument" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a generic instrument.Instrument object from this mxScorePart</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxToLyric">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxToLyric</code><span class="sig-paren">(</span><em>mxLyric</em>, <em>inputM21=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxToLyric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Translate a MusicXML <a class="reference internal" href="moduleMusicxmlMxObjects.html#music21.musicxml.mxObjects.Lyric" title="music21.musicxml.mxObjects.Lyric"><code class="xref py py-class docutils literal"><span class="pre">Lyric</span></code></a> object to a 
+music21 <a class="reference internal" href="moduleNote.html#music21.note.Lyric" title="music21.note.Lyric"><code class="xref py py-class docutils literal"><span class="pre">Lyric</span></code></a> object.</p>
+<p>If inputM21 is a <a class="reference internal" href="moduleNote.html#music21.note.Lyric" title="music21.note.Lyric"><code class="xref py py-class docutils literal"><span class="pre">Lyric</span></code></a> object, then the values of the 
+mxLyric are transfered there and nothing returned.</p>
+<p>Otherwise, a new <cite>Lyric</cite> object is created and returned.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mxLyric</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Lyric</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxLyric</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;text&#39;</span><span class="p">,</span> <span class="s">&#39;word&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxLyric</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;number&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxLyric</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;syllabic&#39;</span><span class="p">,</span> <span class="s">&#39;single&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lyricObj</span> <span class="o">=</span> <span class="n">note</span><span class="o">.</span><span class="n">Lyric</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxToLyric</span><span class="p">(</span><span class="n">mxLyric</span><span class="p">,</span> <span class="n">lyricObj</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lyricObj</span>
+<span class="go">&lt;music21.note.Lyric number=4 syllabic=single text=&quot;word&quot;&gt;</span>
+</pre></div>
+</div>
+<p>Non-numeric MusicXML lyric &#8220;number&#8221;s are converted to identifiers:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mxLyric</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;number&#39;</span><span class="p">,</span> <span class="s">&#39;part2verse1&#39;</span><span class="p">)</span>    
+<span class="gp">&gt;&gt;&gt; </span><span class="n">l2</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxToLyric</span><span class="p">(</span><span class="n">mxLyric</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">l2</span>
+<span class="go">&lt;music21.note.Lyric number=0 identifier=&quot;part2verse1&quot; syllabic=single text=&quot;word&quot;&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxToMeasure">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxToMeasure</code><span class="sig-paren">(</span><em>mxMeasure</em>, <em>spannerBundle=None</em>, <em>inputM21=None</em>, <em>lastMeasureInfo=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxToMeasure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Translate an mxMeasure (a MusicXML <a class="reference internal" href="moduleMusicxmlMxObjects.html#music21.musicxml.mxObjects.Measure" title="music21.musicxml.mxObjects.Measure"><code class="xref py py-class docutils literal"><span class="pre">Measure</span></code></a> object)
+into a music21 <a class="reference internal" href="moduleStream.html#music21.stream.Measure" title="music21.stream.Measure"><code class="xref py py-class docutils literal"><span class="pre">Measure</span></code></a>.</p>
+<p>If an <cite>inputM21</cite> object reference is provided, this object will be
+configured and returned; otherwise, a new <a class="reference internal" href="moduleStream.html#music21.stream.Measure" title="music21.stream.Measure"><code class="xref py py-class docutils literal"><span class="pre">Measure</span></code></a> object is created.</p>
+<p>The <cite>spannerBundle</cite> that is passed in is used to accumulate any created Spanners.
+This Spanners are not inserted into the Stream here.</p>
+<p>Returns a tuple of (music21.stream.Measure object, staffReference (a dictionary for partStaffs of
+elements that only belong to a single staff), and a transposition)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxToNote">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxToNote</code><span class="sig-paren">(</span><em>mxNote</em>, <em>spannerBundle=None</em>, <em>inputM21=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxToNote" title="Permalink to this definition">¶</a></dt>
+<dd><p>Translate a MusicXML <a class="reference internal" href="moduleMusicxmlMxObjects.html#music21.musicxml.mxObjects.Note" title="music21.musicxml.mxObjects.Note"><code class="xref py py-class docutils literal"><span class="pre">Note</span></code></a> 
+to a <a class="reference internal" href="moduleNote.html#music21.note.Note" title="music21.note.Note"><code class="xref py py-class docutils literal"><span class="pre">Note</span></code></a>.</p>
+<p>The <cite>spannerBundle</cite> parameter can be a list or a Stream 
+for storing and processing Spanner objects.</p>
+<p>If inputM21 is not <cite>None</cite> then that object is used
+for translating. Otherwise a new Note is created.</p>
+<p>Returns a <cite>note.Note</cite> object.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mxNote</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Note</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxNote</span><span class="o">.</span><span class="n">setDefaults</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxMeasure</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Measure</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxMeasure</span><span class="o">.</span><span class="n">setDefaults</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxMeasure</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mxNote</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxNote</span><span class="o">.</span><span class="n">external</span><span class="p">[</span><span class="s">&#39;measure&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mxMeasure</span> <span class="c"># manually create ref</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxNote</span><span class="o">.</span><span class="n">external</span><span class="p">[</span><span class="s">&#39;divisions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mxMeasure</span><span class="o">.</span><span class="n">external</span><span class="p">[</span><span class="s">&#39;divisions&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxToNote</span><span class="p">(</span><span class="n">mxNote</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n</span>
+<span class="go">&lt;music21.note.Note C&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxToOffset">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxToOffset</code><span class="sig-paren">(</span><em>mxDirection</em>, <em>mxDivisions</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxToOffset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Translate a MusicXML <a class="reference internal" href="moduleMusicxmlMxObjects.html#music21.musicxml.mxObjects.Direction" title="music21.musicxml.mxObjects.Direction"><code class="xref py py-class docutils literal"><span class="pre">Direction</span></code></a> 
+with an offset value to an offset in music21.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxToPitch">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxToPitch</code><span class="sig-paren">(</span><em>mxNote</em>, <em>inputM21=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxToPitch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a MusicXML Note object, set this Pitch object to its values.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Pitch</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;octave&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;step&#39;</span><span class="p">,</span> <span class="s">&#39;E&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;alter&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Note</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;pitch&#39;</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">pitch</span><span class="o">.</span><span class="n">Pitch</span><span class="p">(</span><span class="s">&#39;g#4&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxToPitch</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="go">E-3</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxToRepeat">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxToRepeat</code><span class="sig-paren">(</span><em>mxBarline</em>, <em>inputM21=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxToRepeat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an mxBarline (not an mxRepeat object) with repeatObj as a parameter, 
+file the necessary parameters and return a bar.Repeat() object</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mxRepeat</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Repeat</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxRepeat</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;direction&#39;</span><span class="p">,</span> <span class="s">&#39;backward&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxRepeat</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;times&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="bp">None</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxBarline</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Barline</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxBarline</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;barStyle&#39;</span><span class="p">,</span> <span class="s">&#39;light-heavy&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxBarline</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;repeatObj&#39;</span><span class="p">,</span> <span class="n">mxRepeat</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxToRepeat</span><span class="p">(</span><span class="n">mxBarline</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span>
+<span class="go">&lt;music21.bar.Repeat direction=end&gt;</span>
+</pre></div>
+</div>
+<p>Test that the music21 style for a backwards repeat is called &#8220;final&#8221;
+(because it resembles a final barline) but that the musicxml style
+is called light-heavy.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">style</span>
+<span class="go">&#39;final&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">direction</span>
+<span class="go">&#39;end&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxBarline2</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">toMxObjects</span><span class="o">.</span><span class="n">repeatToMx</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxBarline2</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;barStyle&#39;</span><span class="p">)</span>
+<span class="go">&#39;light-heavy&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxToRepeatExpression">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxToRepeatExpression</code><span class="sig-paren">(</span><em>mxDirection</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxToRepeatExpression" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an mxDirection that may define a coda, segno, or other repeat 
+expression statement, realize the appropriate music21 object.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxToRest">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxToRest</code><span class="sig-paren">(</span><em>mxNote</em>, <em>inputM21=None</em>, <em>spannerBundle=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxToRest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Translate a MusicXML <a class="reference internal" href="moduleMusicxmlMxObjects.html#music21.musicxml.mxObjects.Note" title="music21.musicxml.mxObjects.Note"><code class="xref py py-class docutils literal"><span class="pre">Note</span></code></a> object to a <a class="reference internal" href="moduleNote.html#music21.note.Rest" title="music21.note.Rest"><code class="xref py py-class docutils literal"><span class="pre">Rest</span></code></a>.</p>
+<p>If an <cite>inputM21</cite> object reference is provided, this object will be configured; otherwise, a new <a class="reference internal" href="moduleNote.html#music21.note.Rest" title="music21.note.Rest"><code class="xref py py-class docutils literal"><span class="pre">Rest</span></code></a> object is created and returned.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxToSegno">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxToSegno</code><span class="sig-paren">(</span><em>mxCoda</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxToSegno" title="Permalink to this definition">¶</a></dt>
+<dd><p>Translate a MusicXML <a class="reference internal" href="moduleMusicxmlMxObjects.html#music21.musicxml.mxObjects.Coda" title="music21.musicxml.mxObjects.Coda"><code class="xref py py-class docutils literal"><span class="pre">Coda</span></code></a> object 
+to a music21 <a class="reference internal" href="moduleRepeat.html#music21.repeat.Coda" title="music21.repeat.Coda"><code class="xref py py-class docutils literal"><span class="pre">Coda</span></code></a> object.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxToStreamPart">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxToStreamPart</code><span class="sig-paren">(</span><em>mxScore</em>, <em>partId</em>, <em>spannerBundle=None</em>, <em>inputM21=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxToStreamPart" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a part into a new Stream or one provided by 
+<cite>inputM21</cite> given an mxScore and a part name.</p>
+<p>The <cite>spannerBundle</cite> reference, when passed in, 
+is used to accumulate Spanners. These are not inserted here.</p>
+<p>Though it is incorrect MusicXML, PDFtoMusic creates 
+empty measures when it should create full
+measures of rests (possibly hidden).  This routine 
+fixes that bug.  See <a class="reference external" href="http://musescore.org/en/node/15129">http://musescore.org/en/node/15129</a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxToTempoIndication">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxToTempoIndication</code><span class="sig-paren">(</span><em>mxMetronome</em>, <em>mxWords=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxToTempoIndication" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an mxMetronome, convert to either a TempoIndication subclass, 
+either a tempo.MetronomeMark or tempo.MetricModulation.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Metronome</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bu</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">BeatUnit</span><span class="p">(</span><span class="s">&#39;half&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pm</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">PerMinute</span><span class="p">(</span><span class="mi">125</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bu</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pm</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxToTempoIndication</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<span class="go">&lt;music21.tempo.MetronomeMark Half=125.0&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxToTextExpression">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxToTextExpression</code><span class="sig-paren">(</span><em>mxDirection</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxToTextExpression" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an mxDirection, create one or more TextExpressions</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxToTie">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxToTie</code><span class="sig-paren">(</span><em>mxNote</em>, <em>inputM21=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxToTie" title="Permalink to this definition">¶</a></dt>
+<dd><p>Translate a MusicXML <a class="reference internal" href="moduleMusicxmlMxObjects.html#music21.musicxml.mxObjects.Note" title="music21.musicxml.mxObjects.Note"><code class="xref py py-class docutils literal"><span class="pre">Note</span></code></a> (sic!) to a music21 
+<a class="reference internal" href="moduleTie.html#music21.tie.Tie" title="music21.tie.Tie"><code class="xref py py-class docutils literal"><span class="pre">Tie</span></code></a> object according to its &lt;tieList&gt; parameter.</p>
+<p>Only called if the mxObjects.Note has a tieList that is not blank, so as not to
+create additional ties.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxToTimeSignature">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxToTimeSignature</code><span class="sig-paren">(</span><em>mxTimeList</em>, <em>inputM21=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxToTimeSignature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an mxTimeList, load this object</p>
+<p>if inputM21 is None, create a new TimeSignature
+and return it.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mxTime</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Time</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxTime</span><span class="o">.</span><span class="n">setDefaults</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxAttributes</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Attributes</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mxAttributes</span><span class="o">.</span><span class="n">timeList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mxTime</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ts</span> <span class="o">=</span> <span class="n">meter</span><span class="o">.</span><span class="n">TimeSignature</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxToTimeSignature</span><span class="p">(</span><span class="n">mxAttributes</span><span class="o">.</span><span class="n">timeList</span><span class="p">,</span> <span class="n">ts</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ts</span><span class="o">.</span><span class="n">numerator</span>
+<span class="go">4</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxToTuplet">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxToTuplet</code><span class="sig-paren">(</span><em>mxNote</em>, <em>inputM21Object=None</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxToTuplet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an mxNote, based on mxTimeModification 
+and mxTuplet objects, return a Tuplet object
+(or alter the input object and then return it)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.mxTransposeToInterval">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">mxTransposeToInterval</code><span class="sig-paren">(</span><em>mxTranspose</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.mxTransposeToInterval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a MusicXML Transpose object to a music21 Interval object.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Transpose</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="o">.</span><span class="n">diatonic</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="o">.</span><span class="n">chromatic</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxTransposeToInterval</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+<span class="go">&lt;music21.interval.Interval M-2&gt;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Transpose</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="o">.</span><span class="n">diatonic</span> <span class="o">=</span> <span class="o">-</span><span class="mi">5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="o">.</span><span class="n">chromatic</span> <span class="o">=</span> <span class="o">-</span><span class="mi">9</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxTransposeToInterval</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+<span class="go">&lt;music21.interval.Interval M-6&gt;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">musicxml</span><span class="o">.</span><span class="n">mxObjects</span><span class="o">.</span><span class="n">Transpose</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="o">.</span><span class="n">diatonic</span> <span class="o">=</span> <span class="mi">3</span> <span class="c"># a type of 4th</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="o">.</span><span class="n">chromatic</span> <span class="o">=</span> <span class="mi">6</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">musicxml</span><span class="o">.</span><span class="n">fromMxObjects</span><span class="o">.</span><span class="n">mxTransposeToInterval</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+<span class="go">&lt;music21.interval.Interval A4&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.musicxml.fromMxObjects.separateOutPartStaffs">
+<code class="descclassname">music21.musicxml.fromMxObjects.</code><code class="descname">separateOutPartStaffs</code><span class="sig-paren">(</span><em>mxPart</em>, <em>streamPart</em>, <em>spannerBundle</em>, <em>s</em>, <em>staffReferenceList</em>, <em>partId</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.musicxml.fromMxObjects.separateOutPartStaffs" title="Permalink to this definition">¶</a></dt>
+<dd><p>given an mxPart and other necessary information, insert into the score (s) multiple
+PartStaff objects separating the information for one part from the other</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="moduleMusicxmlM21ToString.html" title="music21.musicxml.m21ToString"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="moduleMusedataTranslate.html" title="music21.musedata.translate"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">music21</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2006-2015, Michael Scott Cuthbert and cuthbertLab.
+      Last updated on Sep 28, 2015.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

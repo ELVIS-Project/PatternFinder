@@ -1,0 +1,37 @@
+Metadata-Version: 1.1
+Name: vis-framework
+Version: 2.4.1
+Summary: The VIS Framework for Music Analysis
+Home-page: http://elvisproject.ca/api/
+Author: Christopher Antila, Jamie Klassen, Alexander Morgan, Ryan Bannon
+Author-email: christopher@antila.ca
+License: AGPLv3+
+Download-URL: https://pypi.python.org/packages/source/v/vis-framework/vis-framework-2.4.1.tar.bz2
+Description: The VIS Framework for Music Analysis
+        ------------------------------------
+        
+        VIS is a Python package that uses the music21 and pandas libraries to build a ridiculously flexible and preposterously easy system for writing computer music analysis programs.
+        
+Keywords: music,music analysis,music theory,counterpoint
+Platform: any
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3.3
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Natural Language :: English
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Console
+Classifier: Environment :: Web Environment
+Classifier: Intended Audience :: End Users/Desktop
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Education
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Software Development :: Libraries :: Application Frameworks
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Artistic Software
+Classifier: Topic :: Multimedia :: Sound/Audio
+Classifier: Topic :: Multimedia :: Sound/Audio :: Analysis
+Classifier: Topic :: Scientific/Engineering :: Information Analysis
+Requires: music21 (== 2.1.2)
+Requires: pandas (>= 0.14.1, < 0.17)

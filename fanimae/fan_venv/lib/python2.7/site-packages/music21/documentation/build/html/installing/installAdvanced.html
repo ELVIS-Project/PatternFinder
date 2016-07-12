@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Installing Music21 with SVN, setuptools, and PIP &mdash; music21 Documentation</title>
+    
+    <link rel="stylesheet" href="../_static/m21.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.0.11',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/copybutton.js"></script>
+    <link rel="top" title="music21 Documentation" href="../index.html" />
+    <link rel="up" title="Installation" href="index.html" />
+    <link rel="next" title="Extending Music21 with Additional Software" href="installAdditional.html" />
+    <link rel="prev" title="Installing Music21 on GNU/Linux" href="installLinux.html" /><link href='http://fonts.googleapis.com/css?family=Source+Code+Pro|Open+Sans:300italic,400italic,700italic,400,300,700' rel='stylesheet' type='text/css'>
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="installAdditional.html" title="Extending Music21 with Additional Software"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="installLinux.html" title="Installing Music21 on GNU/Linux"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">music21</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Installation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="installLinux.html"
+                        title="previous chapter">Installing Music21 on GNU/Linux</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="installAdditional.html"
+                        title="next chapter">Extending Music21 with Additional Software</a></p>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Installing Music21 with SVN, setuptools, and PIP</a><ul>
+<li><a class="reference internal" href="#installing-music21-with-svn">Installing Music21 with SVN</a></li>
+<li><a class="reference internal" href="#downloading-and-installing-music21-with-setuptools-or-pip">Downloading and Installing Music21 with setuptools or pip</a><ul>
+<li><a class="reference internal" href="#automated-installation-with-setuptools">Automated Installation with setuptools</a></li>
+<li><a class="reference internal" href="#automated-installation-with-pip">Automated Installation with pip</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#the-installation-destination">The Installation Destination</a></li>
+<li><a class="reference internal" href="#installation-help">Installation Help</a></li>
+</ul>
+</li>
+</ul>
+
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about/index.html">About Music21</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../usersGuide/index.html">Users Guide</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../moduleReference/index.html">Module Reference</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Installation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="install.html">Installing Music21</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installMac.html">Installing Music21 on Mac</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installWindows.html">Installing Music21 in Windows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installLinux.html">Installing Music21 on GNU/Linux</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Installing Music21 with SVN, setuptools, and PIP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installAdditional.html">Extending Music21 with Additional Software</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview/index.html">Music21 Concepts Overview</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../systemReference/index.html">System Reference</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../developerReference/index.html">Developer Reference</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/installing/installAdvanced.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="installing-music21-with-svn-setuptools-and-pip">
+<span id="installadvanced"></span><h1>Installing Music21 with SVN, setuptools, and PIP<a class="headerlink" href="#installing-music21-with-svn-setuptools-and-pip" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="installing-music21-with-svn">
+<h2>Installing Music21 with SVN<a class="headerlink" href="#installing-music21-with-svn" title="Permalink to this headline">¶</a></h2>
+<p>For developers and advanced users, anonymous SVN access is available from
+Google Code. Enter the following command line argument or SVN commands:</p>
+<div class="highlight-python"><div class="highlight"><pre>svn checkout http://music21.googlecode.com/svn/trunk/ music21-read-only
+</pre></div>
+</div>
+</div>
+<div class="section" id="downloading-and-installing-music21-with-setuptools-or-pip">
+<h2>Downloading and Installing Music21 with setuptools or pip<a class="headerlink" href="#downloading-and-installing-music21-with-setuptools-or-pip" title="Permalink to this headline">¶</a></h2>
+<p>The easiest way to download and install <cite>music21</cite> is with one of the powerful automated
+Python package installers available. These tools can also be used to update an existing
+<cite>music21</cite> installation to the most-recent version.</p>
+<div class="section" id="automated-installation-with-setuptools">
+<h3>Automated Installation with setuptools<a class="headerlink" href="#automated-installation-with-setuptools" title="Permalink to this headline">¶</a></h3>
+<p>First, install setuptools:</p>
+<p><a class="reference external" href="http://pypi.python.org/pypi/setuptools">http://pypi.python.org/pypi/setuptools</a></p>
+<p>Second, install and/or update music21 with the following command-line argument:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ sudo easy_install music21
+</pre></div>
+</div>
+</div>
+<div class="section" id="automated-installation-with-pip">
+<h3>Automated Installation with pip<a class="headerlink" href="#automated-installation-with-pip" title="Permalink to this headline">¶</a></h3>
+<p>First, install pip:</p>
+<p><a class="reference external" href="http://pypi.python.org/pypi/pip">http://pypi.python.org/pypi/pip</a></p>
+<p>Second, install and/or update music21 with the following command-line argument:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ pip install music21
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="the-installation-destination">
+<h2>The Installation Destination<a class="headerlink" href="#the-installation-destination" title="Permalink to this headline">¶</a></h2>
+<p>After downloading the music21 toolkit, the package is installed like any other Python extension library. Python stores extension libraries in a directory called &#8216;site-packages&#8217;. The site-packages directory is located in different places depending on your platform. To find where your site-packages directory is located, you can enter the following command in the Python interpreter:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">distutils.sysconfig</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">distutils</span><span class="o">.</span><span class="n">sysconfig</span><span class="o">.</span><span class="n">get_python_lib</span><span class="p">())</span>  
+</pre></div>
+</div>
+<p>In Terminal, this looks like this:</p>
+<a class="reference internal image-reference" href="../_images/macScreenSitePackages.png"><img alt="../_images/macScreenSitePackages.png" src="../_images/macScreenSitePackages.png" style="width: 650px;" /></a>
+</div>
+<div class="section" id="installation-help">
+<h2>Installation Help<a class="headerlink" href="#installation-help" title="Permalink to this headline">¶</a></h2>
+<p>If you have followed all the instructions and encounter problems, first make sure that you can
+install <cite>music21</cite> successfully using the non-advanced techniques.  If all else fails,
+contact the music21 group and someone there may be able to help:</p>
+<p><a class="reference external" href="http://groups.google.com/group/music21list">http://groups.google.com/group/music21list</a></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="installAdditional.html" title="Extending Music21 with Additional Software"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="installLinux.html" title="Installing Music21 on GNU/Linux"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">music21</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Installation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2006-2015, Michael Scott Cuthbert and cuthbertLab.
+      Last updated on Sep 12, 2015.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>
