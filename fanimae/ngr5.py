@@ -24,19 +24,19 @@ def compare(ngrams, ngrams2):
     return number
 
 
-query = 'example.xml'
-directory = 'midifiles'
+def run(query, directory):
 
-q_info = midiparser.process_file(query)
-q_info = q_info[1][0]
-q_n = get_ngrams(q_info)
+    q_info = midiparser.process_file(query)
+    q_info = q_info[1][0]
+    q_n = get_ngrams(q_info)
 
-d_num = {}
-for file in os.listdir(directory):
-    if file != '.DS_Store':
-        d_info = midiparser.process_file(directory + '/' + file)
-        d_n = []
-        for part in d_info[1]:
-            d_n.extend(get_ngrams(part))
-        d_num[file] = compare(q_n, d_n)
-        os.system('say ' + file + ' has a score of ' + str(d_num[file]))
+    d_num = {}
+    for file in os.listdir(directory):
+        if file != '.DS_Store':
+            d_info = midiparser.process_file(directory + '/' + file)
+            d_n = []
+            for part in d_info[1]:
+                d_n.extend(get_ngrams(part))
+            d_num[file] = compare(q_n, d_n)
+
+    return d_num
