@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Quick Start: Getting Started with music21 &mdash; music21 Documentation</title>
+    
+    <link rel="stylesheet" href="../_static/m21.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.0.11',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/copybutton.js"></script>
+    <link rel="top" title="music21 Documentation" href="../index.html" /><link href='http://fonts.googleapis.com/css?family=Source+Code+Pro|Open+Sans:300italic,400italic,700italic,400,300,700' rel='stylesheet' type='text/css'>
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">music21</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Quick Start: Getting Started with music21</a><ul>
+<li><a class="reference internal" href="#download-and-install">Download and Install</a></li>
+<li><a class="reference internal" href="#starting-python-and-importing-modules">Starting Python and Importing Modules</a></li>
+<li><a class="reference internal" href="#examining-a-score">Examining a Score</a></li>
+<li><a class="reference internal" href="#examining-a-score-by-part-id">Examining a Score by Part Id</a></li>
+<li><a class="reference internal" href="#creating-notes-measures-parts-and-scores">Creating Notes, Measures, Parts, and Scores</a></li>
+<li><a class="reference internal" href="#next-steps">Next Steps</a></li>
+</ul>
+</li>
+</ul>
+
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">About Music21</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../usersGuide/index.html">Users Guide</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../moduleReference/index.html">Module Reference</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installing/index.html">Installation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview/index.html">Music21 Concepts Overview</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../developerReference/index.html">Developer Reference</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/about/quickStart.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="quick-start-getting-started-with-music21">
+<span id="quickstart"></span><h1>Quick Start: Getting Started with music21<a class="headerlink" href="#quick-start-getting-started-with-music21" title="Permalink to this headline">¶</a></h1>
+<p>Here are some quick steps to get up and running quickly with music21.</p>
+<div class="section" id="download-and-install">
+<h2>Download and Install<a class="headerlink" href="#download-and-install" title="Permalink to this headline">¶</a></h2>
+<p>First, download and install music21. Read the full instructions at: <span class="xref std std-ref">install</span>.</p>
+</div>
+<div class="section" id="starting-python-and-importing-modules">
+<h2>Starting Python and Importing Modules<a class="headerlink" href="#starting-python-and-importing-modules" title="Permalink to this headline">¶</a></h2>
+<p>Like all Python functionality, music21 can be run from a Python
+script (a .py file) or interactively from the Python interpreter. The
+Python interpreter is designated with the command prompt <cite>&gt;&gt;&gt;</cite>.</p>
+<p>On UNIX-based operating systems with a command line prompt
+(Terminal.app on Mac OS X), entering <cite>python</cite> will start the
+Python interpreter.</p>
+<p>On Windows, starting IDLE from the start menu will provide an
+interactive Python session.</p>
+<p>Once you start Python, you can check to see if your music21
+installation is correctly configured by trying to import a music21 module.
+A module is a Python file that offers reusable resources.
+These are all found inside the music21 package, so often we will
+import a module (or all of them) from music21. To import the
+<a class="reference internal" href="../moduleReference/moduleCorpus.html#module-music21.corpus" title="music21.corpus"><code class="xref py py-mod docutils literal"><span class="pre">music21.corpus</span></code></a> module
+from music21, enter the following command.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">music21</span> <span class="kn">import</span> <span class="n">corpus</span>
+<span class="go">&gt;&gt;&gt;</span>
+</pre></div>
+</div>
+<p>Assuming this works, your music21 installation is complete and you can move on. However, you may get the following error:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">music21</span> <span class="kn">import</span> <span class="n">corpus</span>   
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;stdin&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+<span class="gr">ImportError</span>: <span class="n">No module named music21</span>
+<span class="go">&gt;&gt;&gt;</span>
+</pre></div>
+</div>
+<p>If this happens, Python is not able to find the music21 package.
+Return and review the instructions in <span class="xref std std-ref">install</span> or contact
+the music21 group for help:</p>
+<p><a class="reference external" href="http://groups.google.com/group/music21list">http://groups.google.com/group/music21list</a></p>
+</div>
+<div class="section" id="examining-a-score">
+<h2>Examining a Score<a class="headerlink" href="#examining-a-score" title="Permalink to this headline">¶</a></h2>
+<p>Once music21 is installed, opening and examining a score and it elements is a good first step. Music21 comes with a corpus, a large collection freely distributable music stored in the MusicXML and humdrum formats. These files can be found in the music21/corpus directory. However, tools are provided for easy, direct access.</p>
+<p>To import, or parse, a score stored in the corpus, use the <a class="reference internal" href="../moduleReference/moduleCorpus.html#module-music21.corpus" title="music21.corpus"><code class="xref py py-mod docutils literal"><span class="pre">music21.corpus</span></code></a> module. (To see a complete listing of works in the corpus, see <a class="reference internal" href="referenceCorpus.html#referencecorpus"><span>List of Works Found in the music21 Corpus</span></a>.) We imported this module above, but here, lets import all music21 modules with the catch-all import statement <cite>from music21 import *</cite>. We will often use this import statement to quickly import all modules for easy access.</p>
+<p>We will the use the <a class="reference internal" href="../moduleReference/moduleCorpus.html#music21.corpus.parseWork" title="music21.corpus.parseWork"><code class="xref py py-func docutils literal"><span class="pre">parseWork()</span></code></a> method to translate the file (a MusicXML or humdrum file) into music21 objects.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">music21</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sBach</span> <span class="o">=</span> <span class="n">corpus</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s">&#39;bach/bwv7.7&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The score is returned as a music21 <a class="reference internal" href="../moduleReference/moduleStream.html#music21.stream.Score" title="music21.stream.Score"><code class="xref py py-class docutils literal"><span class="pre">Score</span></code></a>, which is a type (subclass) of a music21 <a class="reference internal" href="../moduleReference/moduleStream.html#music21.stream.Stream" title="music21.stream.Stream"><code class="xref py py-class docutils literal"><span class="pre">Stream</span></code></a>.</p>
+<p>Once the score is parsed, we can view, transform, and manipulate its
+components in a variety of ways. If we want to output and view the
+entire score, we can use the <code class="xref py py-meth docutils literal"><span class="pre">show()</span></code> method.</p>
+<p>Without any arguments, this method does two things. First, it
+writes a MusicXML file (the default output format) of the current Stream as a temporary file or in the user-specified scratch directory. (This directory can be defined as part of the user&#8217;s Environment settings. See <a class="reference internal" href="../tutorials/environment.html#environment"><span>Configuring Environment Settings</span></a> for complete details.) Second, it attempts to open this file with a
+user-specified helper application.</p>
+<p>For a MusicXML file, an application that can load and display a MusicXML file as notation, or a MusicXML reader, is very useful. See <span class="xref std std-ref">install</span> for information on &#8220;Additional Software Components,&#8221; or download and install MuseScore or Finale Reader immediately:</p>
+<p><a class="reference external" href="http://www.musescore.org">http://www.musescore.org</a></p>
+<p><a class="reference external" href="http://www.finalemusic.com/Reader">http://www.finalemusic.com/Reader</a></p>
+<p>After installing an appropriate MusicXML reader, the generated file can be examined and opened. For music21 to automatically open MusicXML files, you may need to set a music21 <cite>musicxmlPath</cite> preference in Environment (see <a class="reference internal" href="../tutorials/environment.html#environment"><span>Configuring Environment Settings</span></a>). Once the MusicXML file has been opened, the following output (excerpted) will be displayed.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sBach</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>   
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="../_images/quickStart-01.png"><img alt="../_images/quickStart-01.png" src="../_images/quickStart-01.png" style="width: 600px;" /></a>
+<p>If we do not have a MusicXML reader handy, we can always show
+the components of a Stream in a text format, with the optional
+&#8216;text&#8217; argument passed to the show method. Here is an excerpt of the output.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sBach</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="s">&#39;text&#39;</span><span class="p">)</span>      
+<span class="go">{0.0} &lt;music21.stream.Part object at 0x2a85d70&gt;</span>
+<span class="go">    {0.0} &lt;music21.instrument.Instrument P1: Soprano: Instrument 1&gt;</span>
+<span class="go">    {0.0} &lt;music21.stream.Measure 0 offset=0.0&gt;</span>
+<span class="go">        {0.0} &lt;music21.meter.TimeSignature 4/4&gt;</span>
+<span class="go">        {0.0} &lt;music21.clef.TrebleClef object at 0x2ca7e50&gt;</span>
+<span class="go">        {0.0} &lt;music21.key.KeySignature of 2 sharps&gt;</span>
+<span class="go">        {0.0} &lt;music21.note.Note E&gt;</span>
+<span class="go">        {0.5} &lt;music21.note.Note F#&gt;</span>
+<span class="go">    {1.0} &lt;music21.stream.Measure 1 offset=1.0&gt;</span>
+<span class="gp">...</span>
+</pre></div>
+</div>
+<p>Once the score has been parsed, we can access its components, as with all Streams, in multiple ways. A Score often, but not always, includes <a class="reference internal" href="../moduleReference/moduleStream.html#music21.stream.Part" title="music21.stream.Part"><code class="xref py py-class docutils literal"><span class="pre">Part</span></code></a> objects (specialized Streams that contain Measures) and a <a class="reference internal" href="../moduleReference/moduleMetadata.html#music21.metadata.Metadata" title="music21.metadata.Metadata"><code class="xref py py-class docutils literal"><span class="pre">Metadata</span></code></a> object.</p>
+<p>The components of a Stream can be accessed as a list of elements accessed by index values. Index values in Python, as common in many programming languages, count from zero. Using the Python len() method, We can see that the Score as six components, index numbers 0 through 4.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">sBach</span><span class="p">)</span>
+<span class="go">6</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sBach</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">&lt;music21.metadata.Metadata object at ...&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sBach</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="go">&lt;music21.stream.Part Soprano&gt;</span>
+</pre></div>
+</div>
+<p>Components of a Stream subclass, filtered by class type, are made available through property names. For example, all of the Part objects of this Score can be accessed with the <a class="reference internal" href="../moduleReference/moduleStream.html#music21.stream.Score.parts" title="music21.stream.Score.parts"><code class="xref py py-attr docutils literal"><span class="pre">parts</span></code></a> property.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">sBach</span><span class="o">.</span><span class="n">parts</span><span class="p">)</span>
+<span class="go">4</span>
+</pre></div>
+</div>
+<p>We can view one of these Parts by accessing the appropriate component and calling the show() method.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sBach</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>  
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="../_images/quickStart-02.png"><img alt="../_images/quickStart-02.png" src="../_images/quickStart-02.png" style="width: 600px;" /></a>
+<p>Again, we can view the components of the Part with the &#8216;text&#8217; option for the show() method:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sBach</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="s">&#39;text&#39;</span><span class="p">)</span>  
+<span class="go">{0.0} &lt;music21.instrument.Instrument P1: Soprano: Instrument 1&gt;</span>
+<span class="go">{0.0} &lt;music21.stream.Measure 0 offset=0.0&gt;</span>
+<span class="go">    {0.0} &lt;music21.meter.TimeSignature 4/4&gt;</span>
+<span class="go">    {0.0} &lt;music21.clef.TrebleClef object at 0x18e9310&gt;</span>
+<span class="go">    {0.0} &lt;music21.key.KeySignature of 2 sharps&gt;</span>
+<span class="go">    {0.0} &lt;music21.note.Note E&gt;</span>
+<span class="go">    {0.5} &lt;music21.note.Note F#&gt;</span>
+<span class="go">{4.0} &lt;music21.stream.Measure 1 offset=4.0&gt;</span>
+<span class="gp">...</span>
+</pre></div>
+</div>
+<p>Parts contain numerous components, including <a class="reference internal" href="../moduleReference/moduleInstrument.html#music21.instrument.Instrument" title="music21.instrument.Instrument"><code class="xref py py-class docutils literal"><span class="pre">Instrument</span></code></a> objects. We can access the components of a Part by index, or directly access Measures from within a Part by using the <a class="reference internal" href="../moduleReference/moduleStream.html#music21.stream.Stream.measures" title="music21.stream.Stream.measures"><code class="xref py py-meth docutils literal"><span class="pre">measures()</span></code></a> method. In the following example, measures 2 through 4 are extracted from the Part as a new Stream (called select) and displayed with the show() method.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">select</span> <span class="o">=</span> <span class="n">sBach</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">measures</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">select</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>  
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="../_images/quickStart-03.png"><img alt="../_images/quickStart-03.png" src="../_images/quickStart-03.png" style="width: 600px;" /></a>
+<p>Measures contain numerous components, including <a class="reference internal" href="../moduleReference/moduleClef.html#music21.clef.Clef" title="music21.clef.Clef"><code class="xref py py-class docutils literal"><span class="pre">Clef</span></code></a>,
+<a class="reference internal" href="../moduleReference/moduleKey.html#music21.key.KeySignature" title="music21.key.KeySignature"><code class="xref py py-class docutils literal"><span class="pre">KeySignature</span></code></a>, <a class="reference internal" href="../moduleReference/moduleMeter.html#music21.meter.TimeSignature" title="music21.meter.TimeSignature"><code class="xref py py-class docutils literal"><span class="pre">TimeSignature</span></code></a>,
+<a class="reference internal" href="../moduleReference/moduleNote.html#music21.note.Note" title="music21.note.Note"><code class="xref py py-class docutils literal"><span class="pre">Note</span></code></a>, and other objects.
+We can access the Notes of a Measure directly with the
+<a class="reference internal" href="../moduleReference/moduleStream.html#music21.stream.Stream.notes" title="music21.stream.Stream.notes"><code class="xref py py-attr docutils literal"><span class="pre">notes</span></code></a> property. This property returns a Stream
+of all Notes and Chords found in a given Measure (but not Rests). Like all
+Streams, the components can be accessed by index values starting from zero.
+To view the first note of the second measure (stored in the Stream select),
+we can do the following.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">select</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">notes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>  
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="../_images/quickStart-04.png"><img alt="../_images/quickStart-04.png" src="../_images/quickStart-04.png" style="width: 600px;" /></a>
+</div>
+<div class="section" id="examining-a-score-by-part-id">
+<h2>Examining a Score by Part Id<a class="headerlink" href="#examining-a-score-by-part-id" title="Permalink to this headline">¶</a></h2>
+<p>Alternatively, we can access components of a Stream by <cite>id</cite>, or string identifiers. Streams can get components by <cite>id</cite> by using the <a class="reference internal" href="../moduleReference/moduleStream.html#music21.stream.Stream.getElementById" title="music21.stream.Stream.getElementById"><code class="xref py py-meth docutils literal"><span class="pre">getElementById()</span></code></a> method. For example, we can first look at all <cite>id</cite> attributes of all Score elements, and then select one.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">part</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">sBach</span><span class="o">.</span><span class="n">parts</span><span class="p">]</span>
+<span class="go">[&#39;Soprano&#39;, &#39;Alto&#39;, &#39;Tenor&#39;, &#39;Bass&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sBach</span><span class="o">.</span><span class="n">getElementById</span><span class="p">(</span><span class="s">&#39;Soprano&#39;</span><span class="p">)</span>
+<span class="go">&lt;music21.stream.Part Soprano&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="creating-notes-measures-parts-and-scores">
+<h2>Creating Notes, Measures, Parts, and Scores<a class="headerlink" href="#creating-notes-measures-parts-and-scores" title="Permalink to this headline">¶</a></h2>
+<p>We can create notes and measures from scratch using music21. Nearly every common music component has a Class that does what you expect (and a lot more).</p>
+<p>If we wanted to re-create a few measures form a popular counterpoint text, we can create Notes and add them to Measures. We can then add Measures to Parts, and then Parts to Scores. At each step along, we can call the show() method to check our progress. In the first stage, we will create the bottom Part, and do this explicitly, one object at a time.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">music21</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n1</span> <span class="o">=</span> <span class="n">note</span><span class="o">.</span><span class="n">Note</span><span class="p">(</span><span class="s">&#39;e4&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n1</span><span class="o">.</span><span class="n">duration</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s">&#39;whole&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n2</span> <span class="o">=</span> <span class="n">note</span><span class="o">.</span><span class="n">Note</span><span class="p">(</span><span class="s">&#39;d4&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n2</span><span class="o">.</span><span class="n">duration</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s">&#39;whole&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m1</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">Measure</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m2</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">Measure</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">partLower</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">Part</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">partLower</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">partLower</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">partLower</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>  
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="../_images/quickStart-05.png"><img alt="../_images/quickStart-05.png" src="../_images/quickStart-05.png" style="width: 600px;" /></a>
+<p>We might automate this procedure by using Python&#8217;s loop control structure and nested data structure of lists within lists. We can store the desired pitches and duration in a list, grouped by measure, and then iterate through them to create Measures and Notes.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">data1</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&#39;g4&#39;</span><span class="p">,</span> <span class="s">&#39;quarter&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;a4&#39;</span><span class="p">,</span> <span class="s">&#39;quarter&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;b4&#39;</span><span class="p">,</span> <span class="s">&#39;quarter&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;c#5&#39;</span><span class="p">,</span> <span class="s">&#39;quarter&#39;</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data2</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&#39;d5&#39;</span><span class="p">,</span> <span class="s">&#39;whole&#39;</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">data1</span><span class="p">,</span> <span class="n">data2</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">partUpper</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">Part</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">mData</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">m</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">Measure</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="k">for</span> <span class="n">pitchName</span><span class="p">,</span> <span class="n">durType</span> <span class="ow">in</span> <span class="n">mData</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="n">n</span> <span class="o">=</span> <span class="n">note</span><span class="o">.</span><span class="n">Note</span><span class="p">(</span><span class="n">pitchName</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="n">n</span><span class="o">.</span><span class="n">duration</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">durType</span>
+<span class="gp">... </span>        <span class="n">m</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">partUpper</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">partUpper</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>  
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="../_images/quickStart-06.png"><img alt="../_images/quickStart-06.png" src="../_images/quickStart-06.png" style="width: 600px;" /></a>
+<p>Finally, we can add both Part objects to a Score object. To display both parts simultaneously, we need to use the <a class="reference internal" href="../moduleReference/moduleStream.html#music21.stream.Stream.insert" title="music21.stream.Stream.insert"><code class="xref py py-meth docutils literal"><span class="pre">insert()</span></code></a> method, adding each Part at the 0 position of the Score.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sCadence</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">Score</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sCadence</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">partUpper</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sCadence</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">partLower</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sCadence</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>  
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="../_images/quickStart-07.png"><img alt="../_images/quickStart-07.png" src="../_images/quickStart-07.png" style="width: 600px;" /></a>
+</div>
+<div class="section" id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Permalink to this headline">¶</a></h2>
+<p>The following chapters provide introductions to key components of music21. Proceeding through <span class="xref std std-ref">usersGuide_02_notes</span>, <a class="reference internal" href="../overview/overviewStreams.html#overviewstreams"><span>Overview: Streams, Scores, Parts, and Measures</span></a>, <a class="reference internal" href="../overview/overviewFormats.html#overviewformats"><span>Overview: Importing File and Data Formats</span></a>, and <a class="reference internal" href="../overview/overviewPostTonal.html#overviewposttonal"><span>Overview: Post-Tonal Tools</span></a> provide an excellent introduction to the music21 toolkit.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">music21</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2006-2015, Michael Scott Cuthbert and cuthbertLab.
+      Last updated on Sep 13, 2015.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

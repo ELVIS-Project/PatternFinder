@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Examples and Demonstrations &mdash; music21 Documentation</title>
+    
+    <link rel="stylesheet" href="../_static/m21.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.0.11',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/copybutton.js"></script>
+    <link rel="top" title="music21 Documentation" href="../index.html" /><link href='http://fonts.googleapis.com/css?family=Source+Code+Pro|Open+Sans:300italic,400italic,700italic,400,300,700' rel='stylesheet' type='text/css'>
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">music21</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Examples and Demonstrations</a><ul>
+<li><a class="reference internal" href="#creating-a-reduction-and-labeling-intervals">Creating a Reduction and Labeling Intervals</a></li>
+<li><a class="reference internal" href="#searching-a-large-collection-of-works-for-ultimate-chord-quality">Searching a Large Collection of Works for Ultimate Chord Quality</a></li>
+<li><a class="reference internal" href="#searching-the-corpus-by-locale">Searching the Corpus by Locale</a></li>
+<li><a class="reference internal" href="#finding-chords-by-root-and-collecting-their-successors">Finding Chords by Root and Collecting their Successors</a></li>
+<li><a class="reference internal" href="#pitch-and-duration-transformations">Pitch and Duration Transformations</a></li>
+<li><a class="reference internal" href="#basic-counting-of-and-searching-for-musical-elements">Basic Counting of and Searching for Musical Elements</a></li>
+</ul>
+</li>
+</ul>
+
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">About Music21</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../usersGuide/index.html">Users Guide</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../moduleReference/index.html">Module Reference</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installing/index.html">Installation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview/index.html">Music21 Concepts Overview</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../developerReference/index.html">Developer Reference</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/about/examples.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="examples-and-demonstrations">
+<span id="examples"></span><h1>Examples and Demonstrations<a class="headerlink" href="#examples-and-demonstrations" title="Permalink to this headline">¶</a></h1>
+<p>The following examples provide a few samples of
+some of the possibilities available when working with music21.</p>
+<div class="section" id="creating-a-reduction-and-labeling-intervals">
+<h2>Creating a Reduction and Labeling Intervals<a class="headerlink" href="#creating-a-reduction-and-labeling-intervals" title="Permalink to this headline">¶</a></h2>
+<p>This example, after parsing a polyphonic work stored as an Opus and creating a
+Score, presents and labels the intervals of the resultant chords of all
+distinct harmonies.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">music21</span> <span class="kn">import</span> <span class="n">corpus</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Parse an Opus, a collection of Scores</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">o</span> <span class="o">=</span> <span class="n">corpus</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s">&#39;josquin/laDeplorationDeLaMorteDeJohannesOckeghem&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Create a Score from a Measure range</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sExcerpt</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">mergeScores</span><span class="p">()</span><span class="o">.</span><span class="n">measures</span><span class="p">(</span><span class="mi">126</span><span class="p">,</span> <span class="mi">134</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Create a reduction of Chords</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reduction</span> <span class="o">=</span> <span class="n">sExcerpt</span><span class="o">.</span><span class="n">chordify</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Iterate over the Chords and prepare presentation</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">reduction</span><span class="o">.</span><span class="n">flat</span><span class="o">.</span><span class="n">getElementsByClass</span><span class="p">(</span><span class="s">&#39;Chord&#39;</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">c</span><span class="o">.</span><span class="n">closedPosition</span><span class="p">(</span><span class="n">forceOctave</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">inPlace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">c</span><span class="o">.</span><span class="n">annotateIntervals</span><span class="p">()</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Add the reduction and display the results</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sExcerpt</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">reduction</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sExcerpt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>   
+</pre></div>
+</div>
+<p>(Note that this example shows some octaves retained...this has been fixed in
+newer releases) <cite>TODO: Fix example</cite></p>
+<a class="reference internal image-reference" href="../_images/examples-04.png"><img alt="../_images/examples-04.png" src="../_images/examples-04.png" style="width: 600px;" /></a>
+</div>
+<div class="section" id="searching-a-large-collection-of-works-for-ultimate-chord-quality">
+<h2>Searching a Large Collection of Works for Ultimate Chord Quality<a class="headerlink" href="#searching-a-large-collection-of-works-for-ultimate-chord-quality" title="Permalink to this headline">¶</a></h2>
+<p>This example search the entire collection of Bach Chorales stored in the corpus
+for works that, while in a minor key, end on a minor triad (as opposed to with
+the more common raised Picardy third).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">music21</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Create storage for the results</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">results</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">Stream</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Get file paths to all Chorales</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">chorale</span> <span class="ow">in</span> <span class="n">corpus</span><span class="o">.</span><span class="n">chorales</span><span class="o">.</span><span class="n">Iterator</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="n">keyObj</span> <span class="o">=</span> <span class="n">chorale</span><span class="o">.</span><span class="n">analyze</span><span class="p">(</span><span class="s">&#39;key&#39;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="c"># Select minor-mode chorales</span>
+<span class="gp">... </span>    <span class="k">if</span> <span class="n">keyObj</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s">&#39;minor&#39;</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="c"># Gather last pitches from all parts into a Chord</span>
+<span class="gp">... </span>        <span class="n">lastChordPitches</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="gp">... </span>        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">chorale</span><span class="o">.</span><span class="n">parts</span><span class="p">:</span>
+<span class="gp">... </span>            <span class="n">lastChordPitches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">flat</span><span class="o">.</span><span class="n">pitches</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="gp">... </span>        <span class="n">cLast</span> <span class="o">=</span> <span class="n">chord</span><span class="o">.</span><span class="n">Chord</span><span class="p">(</span><span class="n">lastChordPitches</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="n">cLast</span><span class="o">.</span><span class="n">duration</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s">&quot;whole&quot;</span>
+<span class="gp">... </span>        <span class="n">cLast</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="s">&quot;P8&quot;</span><span class="p">,</span> <span class="n">inPlace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="c"># If a minor triad, append to results with annotations</span>
+<span class="gp">... </span>        <span class="k">if</span> <span class="n">cLast</span><span class="o">.</span><span class="n">isMinorTriad</span><span class="p">()</span> <span class="ow">or</span> <span class="n">cLast</span><span class="o">.</span><span class="n">isIncompleteMinorTriad</span><span class="p">():</span>
+<span class="gp">... </span>            <span class="n">cLast</span><span class="o">.</span><span class="n">lyric</span> <span class="o">=</span> <span class="n">chorale</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">title</span>
+<span class="gp">... </span>            <span class="n">m</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">Measure</span><span class="p">()</span>
+<span class="gp">... </span>            <span class="n">m</span><span class="o">.</span><span class="n">keySignature</span> <span class="o">=</span> <span class="n">chorale</span><span class="o">.</span><span class="n">flat</span><span class="o">.</span><span class="n">getElementsByClass</span><span class="p">(</span>
+<span class="gp">... </span>              <span class="s">&#39;KeySignature&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">... </span>            <span class="n">m</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cLast</span><span class="p">)</span>
+<span class="gp">... </span>            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">makeAccidentals</span><span class="p">(</span><span class="n">inPlace</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">results</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>  
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="../_images/examples-05.png"><img alt="../_images/examples-05.png" src="../_images/examples-05.png" style="width: 600px;" /></a>
+</div>
+<div class="section" id="searching-the-corpus-by-locale">
+<h2>Searching the Corpus by Locale<a class="headerlink" href="#searching-the-corpus-by-locale" title="Permalink to this headline">¶</a></h2>
+<p>This example searches all works in the corpus from two regions in China for the
+count and percentage of melodic sevenths. These works come from the Essen
+Folksong database, indexed and stored in the music21 corpus.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">music21</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Get an analysis tool</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mid</span> <span class="o">=</span> <span class="n">analysis</span><span class="o">.</span><span class="n">discrete</span><span class="o">.</span><span class="n">MelodicIntervalDiversity</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Iterate over two regions</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;shanxi&#39;</span><span class="p">,</span> <span class="s">&#39;fujian&#39;</span><span class="p">]:</span>
+<span class="gp">... </span>    <span class="c"># Create storage units</span>
+<span class="gp">... </span>    <span class="n">intervalDict</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="gp">... </span>    <span class="n">workCount</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="gp">... </span>    <span class="n">intervalCount</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="gp">... </span>    <span class="n">seventhCount</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="gp">... </span>    <span class="c"># Perform a location search on the corpus and iterate over</span>
+<span class="gp">... </span>    <span class="c"># resulting file name and work number</span>
+<span class="gp">... </span>    <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">corpus</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">region</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="s">&#39;locale&#39;</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="n">workCount</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="gp">... </span>        <span class="c"># Parse the work and create a dictionary of intervals</span>
+<span class="gp">... </span>        <span class="n">s</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">parse</span><span class="p">()</span>
+<span class="gp">... </span>        <span class="n">intervalDict</span> <span class="o">=</span> <span class="n">mid</span><span class="o">.</span><span class="n">countMelodicIntervals</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">found</span><span class="o">=</span><span class="n">intervalDict</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="c"># Iterate through all intervals, and count totals and sevenths</span>
+<span class="gp">... </span>    <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">intervalDict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+<span class="gp">... </span>        <span class="n">intervalCount</span> <span class="o">+=</span> <span class="n">intervalDict</span><span class="p">[</span><span class="n">label</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">... </span>        <span class="k">if</span> <span class="n">label</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;m7&#39;</span><span class="p">,</span> <span class="s">&#39;M7&#39;</span><span class="p">]:</span>
+<span class="gp">... </span>            <span class="n">seventhCount</span> <span class="o">+=</span> <span class="n">intervalDict</span><span class="p">[</span><span class="n">label</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">... </span>    <span class="c"># Calculate a percentage and store results</span>
+<span class="gp">... </span>    <span class="n">pcentSevenths</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">seventhCount</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">intervalCount</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">region</span><span class="p">,</span> <span class="n">pcentSevenths</span><span class="p">,</span> <span class="n">intervalCount</span><span class="p">,</span> <span class="n">workCount</span><span class="p">))</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Print results</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">region</span><span class="p">,</span> <span class="n">pcentSevenths</span><span class="p">,</span> <span class="n">intervalCount</span><span class="p">,</span> <span class="n">workCount</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">print</span><span class="p">(</span><span class="s">&#39;locale: {}: found {} percent melodic sevenths, &#39;</span>
+<span class="gp">... </span>        <span class="s">&#39;out of {} intervals in {} works&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">region</span><span class="p">,</span> <span class="n">pcentSevenths</span><span class="p">,</span> <span class="n">intervalCount</span><span class="p">,</span> <span class="n">workCount</span><span class="p">))</span>
+<span class="gp">...</span>
+<span class="go">locale: shanxi: found 3.1994 percent melodic sevenths, out of 4282 intervals in 77 works</span>
+<span class="go">locale: fujian: found 0.7654 percent melodic sevenths, out of 2613 intervals in 53 works</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="finding-chords-by-root-and-collecting-their-successors">
+<h2>Finding Chords by Root and Collecting their Successors<a class="headerlink" href="#finding-chords-by-root-and-collecting-their-successors" title="Permalink to this headline">¶</a></h2>
+<p>This example creates a chordal reduction of a polyphonic work and then searches
+for all Chords that have a specific root. This chord, along with its successor,
+is then collected and displayed.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">music21</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Parse a work from the corpus</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">corpus</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s">&#39;bwv66.6&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Reduce the work to a series of simultaneities, then extract only</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># the resultant Chords</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">chords</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">chordify</span><span class="p">()</span><span class="o">.</span><span class="n">flat</span><span class="o">.</span><span class="n">getElementsByClass</span><span class="p">(</span><span class="s">&#39;Chord&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Create a Stream for display</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">Stream</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Iterate through the chords by index and a Chord</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c1</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">chords</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="c"># Get the next Chord, or a Rest</span>
+<span class="gp">... </span>    <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">chords</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="n">c2</span> <span class="o">=</span> <span class="n">chords</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">... </span>    <span class="k">else</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="n">c2</span> <span class="o">=</span> <span class="n">note</span><span class="o">.</span><span class="n">Rest</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="c"># If the root of the Chord is A, collect and display this Chord</span>
+<span class="gp">... </span>    <span class="c"># and the next Chord (the last bit eliminates some passing 9th chords that can</span>
+<span class="gp">... </span>    <span class="c"># be analyzed as having an A root)</span>
+<span class="gp">... </span>    <span class="k">if</span> <span class="n">c1</span><span class="o">.</span><span class="n">findRoot</span><span class="p">()</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&#39;A&#39;</span> <span class="ow">and</span> <span class="p">(</span><span class="n">c1</span><span class="o">.</span><span class="n">isTriad</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">True</span> <span class="ow">or</span> <span class="n">c1</span><span class="o">.</span><span class="n">isSeventh</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="n">m</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">Measure</span><span class="p">()</span>
+<span class="gp">... </span>        <span class="n">m</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c1</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="n">m</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c2</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="n">display</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>  
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="../_images/examples-03.png"><img alt="../_images/examples-03.png" src="../_images/examples-03.png" style="width: 600px;" /></a>
+</div>
+<div class="section" id="pitch-and-duration-transformations">
+<h2>Pitch and Duration Transformations<a class="headerlink" href="#pitch-and-duration-transformations" title="Permalink to this headline">¶</a></h2>
+<p>This example creates a mensural canon from the Soprano part of a Bach chorale.
+The procedure extracts the <a class="reference internal" href="../moduleReference/moduleNote.html#music21.note.Note" title="music21.note.Note"><code class="xref py py-class docutils literal"><span class="pre">Note</span></code></a> objects from the parsed
+<a class="reference internal" href="../moduleReference/moduleStream.html#music21.stream.Score" title="music21.stream.Score"><code class="xref py py-class docutils literal"><span class="pre">Score</span></code></a> object, using the <a class="reference internal" href="../moduleReference/moduleCorpus.html#music21.corpus.parse" title="music21.corpus.parse"><code class="xref py py-func docutils literal"><span class="pre">parse()</span></code></a>
+function and the <a class="reference internal" href="../moduleReference/moduleStream.html#music21.stream.Stream.getElementById" title="music21.stream.Stream.getElementById"><code class="xref py py-meth docutils literal"><span class="pre">getElementById()</span></code></a> method. Then, a
+new part Stream is created by first scaling the timing and duration of events
+with the <a class="reference internal" href="../moduleReference/moduleStream.html#music21.stream.Stream.augmentOrDiminish" title="music21.stream.Stream.augmentOrDiminish"><code class="xref py py-meth docutils literal"><span class="pre">augmentOrDiminish()</span></code></a> method and then
+transposing the pitches with the <a class="reference internal" href="../moduleReference/moduleStream.html#music21.stream.Stream.transpose" title="music21.stream.Stream.transpose"><code class="xref py py-meth docutils literal"><span class="pre">transpose()</span></code></a>
+method. The modified Stream is then inserted into another Stream and displayed
+with the <a class="reference internal" href="../moduleReference/moduleBase.html#music21.base.Music21Object.show" title="music21.base.Music21Object.show"><code class="xref py py-meth docutils literal"><span class="pre">show()</span></code></a> method.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">music21</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">src</span> <span class="o">=</span> <span class="n">corpus</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s">&#39;bach/bwv323.xml&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ex</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">getElementById</span><span class="p">(</span><span class="s">&#39;Soprano&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">flat</span><span class="o">.</span><span class="n">notesAndRests</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">Score</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">scalar</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;p1&#39;</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s">&#39;p-5&#39;</span><span class="p">),</span> <span class="p">(</span><span class="o">.</span><span class="mi">5</span><span class="p">,</span> <span class="s">&#39;p-11&#39;</span><span class="p">),</span> <span class="p">(</span><span class="mf">1.5</span><span class="p">,</span> <span class="o">-</span><span class="mi">24</span><span class="p">)]:</span>
+<span class="gp">... </span>    <span class="n">part</span> <span class="o">=</span> <span class="n">ex</span><span class="o">.</span><span class="n">augmentOrDiminish</span><span class="p">(</span><span class="n">scalar</span><span class="p">,</span> <span class="n">inPlace</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">part</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">inPlace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">s</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">part</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>  
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="../_images/examples-02.png"><img alt="../_images/examples-02.png" src="../_images/examples-02.png" style="width: 600px;" /></a>
+</div>
+<div class="section" id="basic-counting-of-and-searching-for-musical-elements">
+<h2>Basic Counting of and Searching for Musical Elements<a class="headerlink" href="#basic-counting-of-and-searching-for-musical-elements" title="Permalink to this headline">¶</a></h2>
+<p>Here, we load a file and count the number of G#&#8217;s in it.</p>
+<ol class="arabic simple">
+<li>Here, we load a file and count the number of G#&#8217;s in it.</li>
+</ol>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">music21</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">corpus</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s">&quot;bach/bwv30.6&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># The `pitches` property will get all Pitch objects from all contained</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Streams and Stream subclasses recursively</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">pitches</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&#39;G#&#39;</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="n">total</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">total</span><span class="p">)</span>
+<span class="go">28</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li>This example searches a Part for a particular chord formation, a dominant
+seventh, expressed melodically.</li>
+</ol>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">music21</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># First, we parse the score and get just the Violin part</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">op133</span> <span class="o">=</span> <span class="n">corpus</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s">&#39;beethoven/opus133.xml&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">violin2</span> <span class="o">=</span> <span class="n">op133</span><span class="o">.</span><span class="n">getElementById</span><span class="p">(</span><span class="s">&#39;2nd Violin&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># An empty container is created for later display</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">Stream</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># We iterate over each measure</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">violin2</span><span class="o">.</span><span class="n">getElementsByClass</span><span class="p">(</span><span class="s">&#39;Measure&#39;</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="c"># We get a list of consecutive notes, skipping unisons, octaves,</span>
+<span class="gp">... </span>    <span class="c"># and rests</span>
+<span class="gp">... </span>    <span class="n">notes</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">findConsecutiveNotes</span><span class="p">(</span><span class="n">skipUnisons</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">skipOctaves</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">skipRests</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">noNone</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="c"># From this collection of Notes we gather all Pitches</span>
+<span class="gp">... </span>    <span class="n">pitches</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">Stream</span><span class="p">(</span><span class="n">notes</span><span class="p">)</span><span class="o">.</span><span class="n">pitches</span>
+<span class="gp">... </span>    <span class="c"># Taking four Pitches at a time, we create Chords</span>
+<span class="gp">... </span>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pitches</span><span class="p">)</span> <span class="o">-</span> <span class="mi">3</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="n">c</span> <span class="o">=</span> <span class="n">chord</span><span class="o">.</span><span class="n">Chord</span><span class="p">(</span><span class="n">pitches</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">4</span><span class="p">])</span>
+<span class="gp">... </span>        <span class="n">c</span><span class="o">.</span><span class="n">duration</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s">&quot;whole&quot;</span>
+<span class="gp">... </span>        <span class="c"># We test to see if this Chord is a Dominant seventh</span>
+<span class="gp">... </span>        <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">isDominantSeventh</span><span class="p">():</span>
+<span class="gp">... </span>            <span class="c"># We label the Chord and the first Note of the Measure</span>
+<span class="gp">... </span>            <span class="n">c</span><span class="o">.</span><span class="n">lyric</span> <span class="o">=</span> <span class="s">&quot;m. &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">number</span><span class="p">)</span>
+<span class="gp">... </span>            <span class="n">primeForm</span> <span class="o">=</span> <span class="n">chord</span><span class="o">.</span><span class="n">Chord</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">pitches</span><span class="p">)</span><span class="o">.</span><span class="n">primeFormString</span>
+<span class="gp">... </span>            <span class="n">firstNote</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">notesAndRests</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">... </span>            <span class="n">firstNote</span><span class="o">.</span><span class="n">lyric</span> <span class="o">=</span> <span class="n">primeForm</span>
+<span class="gp">... </span>            <span class="c"># The chord (in closed position) and the Measures are</span>
+<span class="gp">... </span>            <span class="c"># appended for display</span>
+<span class="gp">... </span>            <span class="n">mChord</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">Measure</span><span class="p">()</span>
+<span class="gp">... </span>            <span class="n">mChord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">closedPosition</span><span class="p">())</span>
+<span class="gp">... </span>            <span class="n">display</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mChord</span><span class="p">)</span>
+<span class="gp">... </span>            <span class="n">display</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">show</span><span class="p">()</span> 
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="../_images/examples-01.png"><img alt="../_images/examples-01.png" src="../_images/examples-01.png" style="width: 600px;" /></a>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">music21</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2006-2015, Michael Scott Cuthbert and cuthbertLab.
+      Last updated on Sep 13, 2015.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

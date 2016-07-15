@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>&lt;no title&gt; &mdash; music21 Documentation</title>
+    
+    <link rel="stylesheet" href="../_static/m21.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.0.11',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/copybutton.js"></script>
+    <link rel="top" title="music21 Documentation" href="../index.html" /><link href='http://fonts.googleapis.com/css?family=Source+Code+Pro|Open+Sans:300italic,400italic,700italic,400,300,700' rel='stylesheet' type='text/css'>
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">music21</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about/index.html">About Music21</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Users Guide</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../moduleReference/index.html">Module Reference</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installing/index.html">Installation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview/index.html">Music21 Concepts Overview</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../systemReference/index.html">System Reference</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../developerReference/index.html">Developer Reference</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/usersGuide/Untitled.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <span class="target" id="untitled"></span><div class="code python highlight-python"><div class="highlight"><pre>%load_ext music21.ipython21
+</pre></div>
+</div>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">music21</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="n">n</span> <span class="o">=</span> <span class="n">note</span><span class="o">.</span><span class="n">Note</span><span class="p">(</span><span class="s">&quot;C#6&quot;</span><span class="p">)</span>
+<span class="n">n</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="../_images/Untitled_1_0.png" src="../_images/Untitled_1_0.png" />
+<div class="code python highlight-python"><div class="highlight"><pre><span class="n">bach</span> <span class="o">=</span> <span class="n">corpus</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s">&#39;bwv66.6&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="n">bach</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="../_images/Untitled_3_0.png" src="../_images/Untitled_3_0.png" />
+<div class="code python highlight-python"><div class="highlight"><pre><span class="n">k</span> <span class="o">=</span> <span class="n">bach</span><span class="o">.</span><span class="n">analyze</span><span class="p">(</span><span class="s">&#39;key&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="n">k</span>
+</pre></div>
+</div>
+<div class="ipython-result highlight-python"><div class="highlight"><pre> &lt;music21.key.Key of f# minor&gt;
+</pre></div>
+</div>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="n">k</span><span class="o">.</span><span class="n">alternateInterpretations</span>
+</pre></div>
+</div>
+<div class="ipython-result highlight-python"><div class="highlight"><pre> [&lt;music21.key.Key of A major&gt;,
+  &lt;music21.key.Key of b minor&gt;,
+  &lt;music21.key.Key of E major&gt;,
+  &lt;music21.key.Key of c# minor&gt;,
+  &lt;music21.key.Key of B major&gt;,
+  &lt;music21.key.Key of F# major&gt;,
+  &lt;music21.key.Key of D major&gt;,
+  &lt;music21.key.Key of e minor&gt;,
+  &lt;music21.key.Key of g# minor&gt;,
+  &lt;music21.key.Key of C# major&gt;,
+  &lt;music21.key.Key of a minor&gt;,
+  &lt;music21.key.Key of G major&gt;,
+  &lt;music21.key.Key of e- minor&gt;,
+  &lt;music21.key.Key of b- minor&gt;,
+  &lt;music21.key.Key of d minor&gt;,
+  &lt;music21.key.Key of C major&gt;,
+  &lt;music21.key.Key of A- major&gt;,
+  &lt;music21.key.Key of F major&gt;,
+  &lt;music21.key.Key of g minor&gt;,
+  &lt;music21.key.Key of f minor&gt;,
+  &lt;music21.key.Key of B- major&gt;,
+  &lt;music21.key.Key of E- major&gt;,
+  &lt;music21.key.Key of c minor&gt;]
+</pre></div>
+</div>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="n">n</span> <span class="o">=</span> <span class="n">note</span><span class="o">.</span><span class="n">Note</span><span class="p">(</span><span class="s">&#39;C&#39;</span><span class="p">)</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">Stream</span><span class="p">()</span>
+<span class="n">s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="n">s</span><span class="o">.</span><span class="n">analyze</span><span class="p">(</span><span class="s">&#39;key&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="ipython-result highlight-python"><div class="highlight"><pre> &lt;music21.key.Key of F major&gt;
+</pre></div>
+</div>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="n">s</span><span class="o">.</span><span class="n">analyze</span><span class="p">(</span><span class="s">&#39;key&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">alternateInterpretations</span>
+</pre></div>
+</div>
+<div class="ipython-result highlight-python"><div class="highlight"><pre> [&lt;music21.key.Key of f minor&gt;,
+  &lt;music21.key.Key of A- major&gt;,
+  &lt;music21.key.Key of c minor&gt;,
+  &lt;music21.key.Key of a minor&gt;,
+  &lt;music21.key.Key of C major&gt;,
+  &lt;music21.key.Key of g minor&gt;,
+  &lt;music21.key.Key of B- major&gt;,
+  &lt;music21.key.Key of b- minor&gt;,
+  &lt;music21.key.Key of G major&gt;,
+  &lt;music21.key.Key of E- major&gt;,
+  &lt;music21.key.Key of d minor&gt;,
+  &lt;music21.key.Key of C# major&gt;,
+  &lt;music21.key.Key of e minor&gt;,
+  &lt;music21.key.Key of e- minor&gt;,
+  &lt;music21.key.Key of c# minor&gt;,
+  &lt;music21.key.Key of F# major&gt;,
+  &lt;music21.key.Key of D major&gt;,
+  &lt;music21.key.Key of A major&gt;,
+  &lt;music21.key.Key of E major&gt;,
+  &lt;music21.key.Key of E major&gt;,
+  &lt;music21.key.Key of b minor&gt;,
+  &lt;music21.key.Key of f# minor&gt;,
+  &lt;music21.key.Key of f# minor&gt;]
+</pre></div>
+</div>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">random</span>
+</pre></div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">music21</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2006-2015, Michael Scott Cuthbert and cuthbertLab.
+      Last updated on Sep 12, 2015.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>
