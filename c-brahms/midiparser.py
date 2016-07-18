@@ -3,7 +3,7 @@ import music21
 
 
 def to_midi(name):
-    '''Translate note names into midi pitches.'''
+    """Translate note names into midi pitches."""
 
     if name == 'Rest':
         return name
@@ -13,6 +13,7 @@ def to_midi(name):
 
 
 def parse_part(part, meters):
+    """Parses each part and finds the onsets, offsets and pitches of each note."""
     part = part.dropna().map(to_midi)
     meters = meters.dropna()
 
@@ -40,6 +41,7 @@ def parse_part(part, meters):
 
 
 def run(piece):
+    """Given a file name, finds the notes with onsets and offsets for each part."""
 
     score = music21.converter.parse(piece)
     notes = noterest.NoteRestIndexer(score).run()
