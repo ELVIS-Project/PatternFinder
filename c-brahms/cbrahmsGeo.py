@@ -33,7 +33,3 @@ def cmpSegments(ralph, larry):
 P = []
 
 
-
-
-
-
