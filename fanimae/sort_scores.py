@@ -1,24 +1,20 @@
+import sys
 import ngr5
-# import pioi
+import pioi
 
-query = 'example.xml'
-directory = 'midifiles'
-n = 5
+algorithms = {'ngr5': ngr5, 'pioi': pioi}
 
-ngr5_scores = ngr5.run(query, directory)
-# pioi_scores = pioi.run(query, directory)
+query = sys.argv[1]
+directory = sys.argv[2]
+algorithm = algorithms[sys.argv[3]]
+n = int(sys.argv[4])
 
-ngr5_sort = sorted(ngr5_scores, key=ngr5_scores.get)
-ngr5_sort.reverse()
-# pioi_sort = sorted(pioi_scores, key=pioi_scores.get)
-# pioi_sort.reverse()
+scores = algorithm.run(query, directory)
 
-if len(ngr5_sort) > n:
-    print(ngr5_sort[0:n - 1])
+sort = sorted(scores, key=scores.get)
+sort.reverse()
+
+if len(sort) > n:
+    print(sort[0:n])
 else:
-    print(ngr5_sort)
-
-# if len(pioi_sort) > n:
-#     print(pioi_sort[0:n - 1])
-# else:
-#     print(pioi_sort)
+    print(sort)
