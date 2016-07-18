@@ -20,8 +20,7 @@ Then, the ioi is calculated, but finding the intervals between pitches, and then
 
 Then, the two scores are run through this function:
 
-Inline-style: 
-![math](https://github.com/ELVIS-Project/VIS-Ohrwurm/tree/marina-develop/fanimae/math.png)
+![math](https://github.com/ELVIS-Project/VIS-Ohrwurm/blob/marina-develop/fanimae/math.png)
 
 This algorithm was also submitted for the MIREX 2010 competition and placed 8th.
 
