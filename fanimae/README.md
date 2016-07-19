@@ -14,9 +14,20 @@ This algorithm was entered in MIREX 2005 and MIREX 2010. In 2005, it placed 3rd 
 
 **pioi** stands for pitch and inter-offset-interval. It uses a combination of pitch material as well as interval information to computer a measure of similarity.
 
-It first turns both the query and the source into strings of pitches. These strings are compared using a genetic string-matching algorithm, called local alignment.
+It first turns both the query and the source into strings of pitches. These strings are compared using a genetic string-matching algorithm, called local alignment, using the following weightings:
 
-Then, the ioi is calculated, but finding the intervals between pitches, and then comparing intervals with each other to determine of an interval is smaller, larger or the same as the one before it. These are also turned into strings, which are compared with the same local alignment algorithm. This time, the algorithm has slightly different weightings though.
+* match: 1
+* mismatch: -1
+* insertion/deletion: -2
+
+Then, the ioi is calculated, by finding the intervals between pitches, and then comparing intervals with each other to determine if an interval is smaller, larger or the same as the one before it. These are also turned into strings, which are compared with the same local alignment algorithm. This time, the algorithm has slightly different weightings though:
+
+* R-R: 3
+* s-s and l-l: 2
+* S-S and L-L: 1
+* S-s and L-l: 0
+* R-s, R-l, R-L and R-S: -2
+* other: -3
 
 Then, the two scores are run through this function:
 
