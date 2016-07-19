@@ -40,7 +40,7 @@ This algorithm was also submitted for the MIREX 2010 competition and placed 8th.
 Both algorithms are run through the sort_scores file. In the command line, run the following command:
 
 ```
-python sort_score.py query directory algorithm n
+python sort_scores.py query directory algorithm n
 ```
 where:
 * query: is the symbolic music file containing the query melody you wish to search for
