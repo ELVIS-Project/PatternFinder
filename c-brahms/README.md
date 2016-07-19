@@ -1,7 +1,7 @@
 # C-Brahms
 
-## Documentation
+## The Algorithms
 
-### Virtual Environment Setup
+## Running Scripts
 
-### Running Scripts
+## References
