@@ -1,4 +1,6 @@
-import cbrahmsGeo, sys
+import cbrahmsGeo
+import midiparser
+import sys
 
 if len(sys.argv) > 3:
     query = sys.argv[1]
