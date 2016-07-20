@@ -11,27 +11,6 @@ In addition to Ukkonen's paper, we follow a ruby implementation by Mika Turkia, 
 
 import midiparser
 
-"""
-class horizontalLineSegments:
-    data_set = []
-
-    def __init__(self, segments):
-        self.data_set = segments
-"""
-
-"""
-A custom comparator to order horizontal line segments from left to right, and then bottom to top.
-def cmp2Dvectors(l1, l2):
-    Input: two horizontal line segments
-    Output: -1, 0, or 1 if l1 is less than, equal to, or greater than l2
-    if ((l1[0] < l2[0]) or (l1[0] == l2[0] and l1[1] < l2[1])):
-        return -1
-    elif ((l1[0] == l2[0]) and (l1[1] == l2[1])):
-        return 0
-    else:
-        return 1
-"""
-
 def sub_2D_vectors(l1, l2):
     """
     Input: two vectors in R^2
