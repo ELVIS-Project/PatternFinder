@@ -1,5 +1,3 @@
-#!/usr/local/bin/python3
-
 """
 Algorithms P1, P2 and P3 are described in the following publication:
 
@@ -11,6 +9,8 @@ https://tuhat.halvi.helsinki.fi/portal/services/downloadRegister/14287445/03ISMI
 In addition to Ukkonen's paper, we follow a ruby implementation by Mika Turkia, found at https://github.com/turkia/geometric-mir-algorithms/blob/master/lib/mir.rb
 """
 
+import midiparser
+
 """
 class horizontalLineSegments:
     data_set = []
@@ -19,7 +19,8 @@ class horizontalLineSegments:
         self.data_set = segments
 """
 
-""" A custom comparator to order horizontal line segments from left to right, and then bottom to top.
+"""
+A custom comparator to order horizontal line segments from left to right, and then bottom to top.
 def cmp2Dvectors(l1, l2):
     Input: two horizontal line segments
     Output: -1, 0, or 1 if l1 is less than, equal to, or greater than l2
@@ -31,7 +32,7 @@ def cmp2Dvectors(l1, l2):
         return 1
 """
 
-def sub2Dvectors(l1, l2):
+def sub_2D_vectors(l1, l2):
     """
     Input: two vectors in R^2
     Output: the difference between them. i.e., the vector f such that l1 + f = l2
@@ -40,7 +41,7 @@ def sub2Dvectors(l1, l2):
     y_diff = l2[1] - l1[0]
     return (x_diff, y_diff)
 
-def add2Dvectors(l1, f):
+def add_2D_vectors(l1, f):
     """
     Input: a horizontal line segment, and a 2-d function
     Output: a horizontal line segment shifted by the 2-d function
@@ -82,12 +83,6 @@ def P1(pattern, source):
                 break
             if p == len(pattern)+1:
                shift_matches.append(shift)
-
-
-# Sample input pattern: Over the Rainbow melody
-P = []
-T = []
-
 
 
 
