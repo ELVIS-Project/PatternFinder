@@ -1,3 +1,8 @@
+"""
+This file calls the other files to perform the different comparison
+algorithms. It then sorts the results into descending order and returns the
+top n results.
+"""
 import sys
 import ngr5
 import pioi
