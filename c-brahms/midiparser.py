@@ -31,11 +31,12 @@ def parse_part(part, meters):
     for pair in startlen:
         offsets.append(pair[0] + pair[1])
 
-    print(notes, onsets, offsets)
+    #print(notes, onsets, offsets)
 
     data = []
     for x in range(len(notes)):
-        data.append(((onsets[x], notes[x]), (offsets[x], notes[x])))
+#        data.append(((onsets[x], notes[x]), (offsets[x], notes[x])))
+        data.append([onsets[x], notes[x]])
 
     return data
 

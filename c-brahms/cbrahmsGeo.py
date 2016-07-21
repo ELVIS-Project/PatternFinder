@@ -17,7 +17,7 @@ def sub_2D_vectors(l1, l2):
     Output: the difference between them. i.e., the vector f such that l1 + f = l2
     """
     x_diff = l2[0] - l1[0]
-    y_diff = l2[1] - l1[0]
+    y_diff = l2[1] - l1[1]
     return (x_diff, y_diff)
 
 def add_2D_vectors(l1, f):
@@ -36,32 +36,39 @@ def P1(pattern, source):
     Output: all horizontal / vertical line segment shifts which shift the pattern into some exact match within the source
     """
     shift_matches = []
+    pattern.sort
+    source.sort
 
     # q_i pointers, one for each segment in the pattern 
-    ptrs = [(float("-inf"), float("-inf")) for i in range(len(pattern))]
-    prts.append((float("inf"), float("inf")))
+    ptrs = [[float("-inf"), float("-inf")] for i in range(len(pattern))]
+    ptrs.append([float("inf"), float("inf")])
 
     # there are n-m possible matches, one for each possible match of p_1
-    for t in range(len(source)-len(pattern)):
+    for t in range(len(source) - len(pattern)):
         # Compute the shift to match p_1 and t_j
-        shift = sub2Dvectors(query[0], source[t])
+        shift = sub_2D_vectors(list(pattern[0]), source[t])
 
         # For each pattern segment other than the first, look for an exact match in the source
-        for p in range(1, len(query)):
-            # p+t comes from Mika. It is the first possible match for p. This line implements next(q_i).
-            possible_match = p+t
+        for p in range(1, len(pattern)):
+            # q_i <- next(q_i) : start attempting to match p_i with the match of p_0; this implies that two notes in unison could match to the same single note in the source.
+            possible_match = p + t - 1
             ptrs[p] = max(ptrs[p], source[t])
 
             # look through the sorted source list for a match of this particular pattern segment
-            while ptrs[p] < add2Dvectors(pattern[p], shift):
+            while ptrs[p] < add_2D_vectors(list(pattern[p]), shift):
                 # q_i <- next(q_i)
                 possible_match += 1
+                if possible_match == len(source):
+                    break
                 ptrs[p] = source[possible_match]
-            # Check if there is no match for this p
-            if ptrs[p] == add2Dvectors(pattern[p], shift):
+            # Check if there is no match for this p_i
+            if ptrs[p] > add_2D_vectors(list(pattern[p]), shift):
                 break
-            if p == len(pattern)+1:
+            # Check if we have successfully matched all notes in the pattern
+            if p == len(pattern)-1:
                shift_matches.append(shift)
+
+    return shift_matches
 
 
 
