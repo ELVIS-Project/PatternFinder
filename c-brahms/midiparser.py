@@ -27,11 +27,7 @@ def parse_part(part, meters):
     onsets = meters.index.tolist()
 
     startlen = zip(*[onsets, lengths])
-    offsets = []
-    for pair in startlen:
-        offsets.append(pair[0] + pair[1])
-
-    #print(notes, onsets, offsets)
+    offsets = [(pair[0] + pair[1]) for pair in startlen]
 
     data = []
     for x in range(len(notes)):
