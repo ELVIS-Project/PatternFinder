@@ -18,7 +18,7 @@ def sub_2D_vectors(l1, l2):
     """
     x_diff = l2[0] - l1[0]
     y_diff = l2[1] - l1[1]
-    return (x_diff, y_diff)
+    return [x_diff, y_diff]
 
 def add_2D_vectors(l1, f):
     """
@@ -43,31 +43,32 @@ def P1(pattern, source):
     ptrs = [[float("-inf"), float("-inf")] for i in range(len(pattern))]
     ptrs.append([float("inf"), float("inf")])
 
-    # there are n-m possible matches, one for each possible match of p_1
-    for t in range(len(source) - len(pattern)):
+    # there are n-m+1 possible matches, one for each possible match of p_0
+    for t in range(len(source) - len(pattern) + 1):
         # Compute the shift to match p_1 and t_j
         shift = sub_2D_vectors(list(pattern[0]), source[t])
 
         # For each pattern segment other than the first, look for an exact match in the source
         for p in range(1, len(pattern)):
-            # q_i <- next(q_i) : start attempting to match p_i with the match of p_0; this implies that two notes in unison could match to the same single note in the source.
+            ### q_i <- next(q_i) : start attempting to match p_i with the match of p_0; this implies that two notes in unison could match to the same single note in the source.
             possible_match = p + t - 1
             ptrs[p] = max(ptrs[p], source[t])
 
             # look through the sorted source list for a match of this particular pattern segment
             while ptrs[p] < add_2D_vectors(list(pattern[p]), shift):
-                # q_i <- next(q_i)
                 possible_match += 1
+                # Avoid index out of bounds
                 if possible_match == len(source):
                     break
+                ### q_i <- next(q_i)
                 ptrs[p] = source[possible_match]
-            # Check if there is no match for this p_i
+            # Check if there is no match for this p_i. If so, there is no exact match for this t. Break, and try the next one.
             if ptrs[p] > add_2D_vectors(list(pattern[p]), shift):
                 break
             # Check if we have successfully matched all notes in the pattern
             if p == len(pattern)-1:
                shift_matches.append(shift)
-
+ 
     return shift_matches
 
 
