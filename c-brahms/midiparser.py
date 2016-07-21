@@ -18,11 +18,11 @@ def parse_part(part, meters):
     meters = meters.dropna()
 
     notes = part.values.tolist()
-    while 'Rest' in notes:
-        notes.remove('Rest')
-
-    condition = part != 'Rest'
-    meters = meters[condition]
+    if 'Rest' in notes: 
+        while 'Rest' in notes:
+            notes.remove('Rest')
+        condition = part != 'Rest'
+        meters = meters[condition]
     lengths = meters.values.tolist()
     onsets = meters.index.tolist()
 

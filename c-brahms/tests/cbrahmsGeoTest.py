@@ -1,4 +1,5 @@
 import cbrahmsGeo
+import midiparser
 from unittest import TestCase, TestLoader
 import pdb
 
@@ -18,6 +19,9 @@ class CBRAHMSTestP1(TestCase):
     def setUp(self):
         # Over the Rainbow query
         self.pattern = [[0,48],[4,60],[8,59],[10,55],[11,57],[12,59],[14,60]]
+        self.lemstrom_source = 'music_files/lemstrom2011_test/leiermann.mid'
+        # A function to return a query file name. Usage: self.lemstrom_query('a') --> 'query_a.mid'
+        self.lemstrom_query = lambda x: 'music_files/lemstrom2011_test/query_' + x + '.mid'
 
     def tearDown(self):
         pass
@@ -28,7 +32,7 @@ class CBRAHMSTestP1(TestCase):
         expected = [[1,49],[5,61],[9,60],[11,56],[12,58],[13,60],[15,61]]
         self.assertEqual(source, expected)
 
-    def test_P1_edgecase_same_size(self):
+    def test_P1_edgecase_same_size_transposed(self):
         """
         Checks if P1 can match a pattern to a source of the same size, but transposed.
         """
@@ -65,8 +69,26 @@ class CBRAHMSTestP1(TestCase):
         self.assertEqual(list_of_shifts, expected_matches)
 
 
-    def test_2d_sort(self):
-        pass
+    def test_P1_midiparser_lemstrom(self):
+        """
+        Parses the ground truth polyphonic music example provided in Lemstrom and Laitninen's 2011 paper. There should be only one exact occurrence found by P1. 
+        """
+        parsed_source = midiparser.run(self.lemstrom_source)
+        parsed_pattern = midiparser.run(self.lemstrom_query('a'))
+        list_of_shifts = cbrahmsGeo.P1(parsed_pattern, parsed_source)
+        self.assertEqual(list_of_shifts, [[3.0, 2]])
+
+    def test_P1_midiparser_chidori(self):
+        """
+        Parses the Chidori Meimei Japanese folk song and searches for all four occurrences of a common four-note motif
+        """
+        chidori_source = 'music_files/chidori_meimei.mid'
+        chidori_pattern = 'music_files/chidori_query.mid'
+        parsed_source = midiparser.run(chidori_source)
+        parsed_pattern = midiparser.run(chidori_pattern)
+        list_of_shifts = cbrahmsGeo.P1(parsed_pattern, parsed_source)
+        self.assertEqual(list_of_shifts, [[2.0, -10], [6.0, -10], [65.0, -10], [69.0, -10]])
+
 
 CBRAHMSTestP1_SUITE = TestLoader().loadTestsFromTestCase(CBRAHMSTestP1)
 

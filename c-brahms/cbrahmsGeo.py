@@ -36,8 +36,8 @@ def P1(pattern, source):
     Output: all horizontal / vertical line segment shifts which shift the pattern into some exact match within the source
     """
     shift_matches = []
-    pattern.sort
-    source.sort
+    pattern.sort()
+    source.sort()
 
     # q_i pointers, one for each segment in the pattern 
     ptrs = [[float("-inf"), float("-inf")] for i in range(len(pattern))]
