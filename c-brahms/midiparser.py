@@ -1,6 +1,6 @@
 from vis.analyzers.indexers import noterest, metre
 import music21
-
+import pdb
 
 def to_midi(name):
     """Translate note names into midi pitches."""
@@ -36,18 +36,20 @@ def parse_part(part, meters):
 
     return data
 
+def get_measure_and_beat_from_onset(onset, indexed_piece):
+    measure_number = indexed_piece[('metre.MeasureIndexer', '0')].loc[onset]
+    start_of_measure = min(indexed_piece[indexed_piece[('metre.MeasureIndexer', '0')] == measure_number].index.tolist())
+    relative_onset = onset - start_of_measure
 
-def run(piece):
+    return (measure_number, relative_onset)
+
+def run(indexed_piece):
     """Given a file name, finds the notes with onsets and offsets for each part."""
 
-    score = music21.converter.parse(piece)
-    notes = noterest.NoteRestIndexer(score).run()
-    md = metre.DurationIndexer(score).run()
-
     all_data = []
-    for p in notes['noterest.NoteRestIndexer']:
-        part = notes['noterest.NoteRestIndexer', p]
-        durations = md['metre.DurationIndexer', p]
+    for p in indexed_piece['noterest.NoteRestIndexer']:
+        part = indexed_piece['noterest.NoteRestIndexer', p]
+        durations = indexed_piece['metre.DurationIndexer', p]
         data = parse_part(part, durations)
         all_data.extend(data)
 
