@@ -63,7 +63,7 @@ def P1(pattern, source):
                 ### q_i <- next(q_i)
                 ptrs[p] = source[possible_match]
             # Check if there is no match for this p_i. If so, there is no exact match for this t. Break, and try the next one.
-            if ptrs[p] > add_2D_vectors(list(pattern[p]), shift):
+            if ptrs[p] != add_2D_vectors(list(pattern[p]), shift):
                 break
             # Check if we have successfully matched all notes in the pattern
             if p == len(pattern)-1:
