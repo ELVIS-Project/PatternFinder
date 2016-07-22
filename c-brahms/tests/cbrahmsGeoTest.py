@@ -105,7 +105,7 @@ class CBRAHMSTestP1(TestCase):
 
 
     def test_P1_midiparser_bwv2(self):
-        list_of_shifts = run_algorithm_with_midiparser(cbrahmsGeo.P1, 'music_files/V-i.mid', 'music_files/bach_BWV2_chorale.krn')
+        list_of_shifts = run_algorithm_with_midiparser(cbrahmsGeo.P1, 'music_files/query_V-i.mid', 'music_files/bach_BWV2_chorale.krn')
         self.assertEqual(list_of_shifts, [[30.0, 0]])
 
 CBRAHMSTestP1_SUITE = TestLoader().loadTestsFromTestCase(CBRAHMSTestP1)
