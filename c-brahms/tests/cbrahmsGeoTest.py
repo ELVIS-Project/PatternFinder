@@ -1,5 +1,8 @@
 import cbrahmsGeo
+from vis.analyzers.indexers import noterest, metre
 import midiparser
+import music21
+import pandas
 from unittest import TestCase, TestLoader
 import pdb
 
@@ -13,6 +16,23 @@ def shift_pattern(shift, pattern):
     """
     shifted_pattern = [list(a) for a in zip(map(lambda x: shift[0] + x, zip(*pattern)[0]), map(lambda y: shift[1] + y, zip(*pattern)[1]))]
     return shifted_pattern
+
+def run_algorithm_with_midiparser(algorithm, pattern, source):
+    q_score = music21.converter.parse(pattern)
+    indexed_pattern = pandas.concat([
+        noterest.NoteRestIndexer(q_score).run(),
+        metre.DurationIndexer(q_score).run()], axis = 1).ffill()
+
+    s_score = music21.converter.parse(source)
+    indexed_source = pandas.concat([
+        noterest.NoteRestIndexer(s_score).run(),
+        metre.DurationIndexer(s_score).run(),
+        metre.MeasureIndexer(s_score).run()], axis = 1).ffill()
+
+    parsed_pattern = midiparser.run(indexed_pattern)
+    parsed_source = midiparser.run(indexed_source)
+    list_of_shifts = algorithm(parsed_pattern, parsed_source)
+    return list_of_shifts
 
 class CBRAHMSTestP1(TestCase):
 
@@ -71,24 +91,22 @@ class CBRAHMSTestP1(TestCase):
 
     def test_P1_midiparser_lemstrom(self):
         """
-        Parses the ground truth polyphonic music example provided in Lemstrom and Laitninen's 2011 paper. There should be only one exact occurrence found by P1. 
+        Parses the ground truth polyphonic music example provided in Lemstrom and Laitninen's 2011 paper. There should be only one exact occurrence found by P1.
         """
-        parsed_source = midiparser.run(self.lemstrom_source)
-        parsed_pattern = midiparser.run(self.lemstrom_query('a'))
-        list_of_shifts = cbrahmsGeo.P1(parsed_pattern, parsed_source)
+        list_of_shifts = run_algorithm_with_midiparser(cbrahmsGeo.P1, self.lemstrom_query('a'), self.lemstrom_source)
         self.assertEqual(list_of_shifts, [[3.0, 2]])
 
     def test_P1_midiparser_chidori(self):
         """
         Parses the Chidori Meimei Japanese folk song and searches for all four occurrences of a common four-note motif
         """
-        chidori_source = 'music_files/chidori_meimei.mid'
-        chidori_pattern = 'music_files/chidori_query.mid'
-        parsed_source = midiparser.run(chidori_source)
-        parsed_pattern = midiparser.run(chidori_pattern)
-        list_of_shifts = cbrahmsGeo.P1(parsed_pattern, parsed_source)
+        list_of_shifts = run_algorithm_with_midiparser(cbrahmsGeo.P1, 'music_files/chidori_query.mid', 'music_files/chidori_meimei.mid')
         self.assertEqual(list_of_shifts, [[2.0, -10], [6.0, -10], [65.0, -10], [69.0, -10]])
 
+
+    def test_P1_midiparser_bwv2(self):
+        list_of_shifts = run_algorithm_with_midiparser(cbrahmsGeo.P1, 'music_files/V-i.mid', 'music_files/bach_BWV2_chorale.krn')
+        self.assertEqual(list_of_shifts, [[30.0, 0]])
 
 CBRAHMSTestP1_SUITE = TestLoader().loadTestsFromTestCase(CBRAHMSTestP1)
 
