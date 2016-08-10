@@ -67,7 +67,7 @@ def P1(pattern, source):
     return shift_matches
 
 # Largest Common Subset matching algorithm
-def P2(pattern, source):
+def P2(pattern, source, mismatch):
     """
     Input: two lists of horizontal line segments. One is the 'pattern', which we are looking for in the larger 'source'
     Output: all horizontal / vertical line segment shifts which shift the pattern so that it shares a subset with the source
@@ -104,6 +104,7 @@ def P2(pattern, source):
         q[p_i] += 1
 
         if q[p_i] < len(source):
+            #Optionally, here we can check for duration match as well
             shifts.put([sub_2D_vectors(pattern[p_i], source[q[p_i]]), p_i])
 
         ## Keep count
@@ -114,8 +115,8 @@ def P2(pattern, source):
             cur_shift = min_shift[0]
             c = 1
 
-    # This should filter P2 to exact matches only - then it should pass all of the P1 tests
-    return [shift_matches[i][0] for i in range(len(shift_matches)) if shift_matches[i][1] == len(pattern)]
-#    return shift_matches
+    # Return the shifts which result in the smallest number of mismatches
+    if mismatch == "min":
+        mismatch = max(zip(*shift_matches)[1])
+    return [shift_matches[i][0] for i in range(len(shift_matches)) if shift_matches[i][1] == len(pattern) - mismatch]
 
-#shift = [source[j][z] - query[0][z] for z in range(len(source[j]))]
