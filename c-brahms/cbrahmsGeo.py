@@ -80,6 +80,9 @@ def P2(pattern, source):
     c = 1
     # Results
     shift_matches = []
+    # Lexicographically sort the pattern and source
+    pattern.sort()
+    source.sort()
 
     source.append([float("inf"), float("inf")])
     # Pointers which refer to the source. q_i points to s_i, a potential match for p_i
@@ -91,8 +94,7 @@ def P2(pattern, source):
         #   1) f_i = q_i - p_i ;;; the shift which brings ith pattern to the q_ith source 
         #   2) i ;;; the index of this pattern element
         shifts.put([sub_2D_vectors(pattern[i], source[q[i]]), i])
- 
-    pdb.set_trace()
+
     while(cur_shift < [float("inf"), float("inf")]):
         ## min(F)
         min_shift = shifts.get()
@@ -105,14 +107,13 @@ def P2(pattern, source):
             shifts.put([sub_2D_vectors(pattern[p_i], source[q[p_i]]), p_i])
 
         ## Keep count
-        if cur_shift == min_shift:
+        if cur_shift == min_shift[0]:
             c += 1
         else:
-            cur_shift = min_shift
             shift_matches.append([cur_shift, c])
+            cur_shift = min_shift[0]
             c = 1
 
-    print shift_matches
     # This should filter P2 to exact matches only - then it should pass all of the P1 tests
     return [shift_matches[i][0] for i in range(len(shift_matches)) if shift_matches[i][1] == len(pattern)]
 #    return shift_matches
