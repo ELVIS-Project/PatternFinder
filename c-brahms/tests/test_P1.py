@@ -13,9 +13,6 @@ class CBRAHMSTestP1(TestCase):
     def setUp(self):
         # Over the Rainbow query
         self.pattern = [[0,48],[4,60],[8,59],[10,55],[11,57],[12,59],[14,60]]
-        self.lemstrom_source = 'music_files/lemstrom2011_test/leiermann.mid'
-        # A function to return a query file name. Usage: self.lemstrom_query('a') --> 'query_a.mid'
-        self.lemstrom_query = lambda x: 'music_files/lemstrom2011_test/query_' + x + '.mid'
 
     def tearDown(self):
         pass
@@ -70,13 +67,6 @@ class CBRAHMSTestP1(TestCase):
         source = list(self.pattern)[0:4]
         list_of_shifts = cbrahmsGeo.P1(self.pattern, source)
         self.assertEqual(list_of_shifts, [])
-
-    def test_P1_midiparser_lemstrom(self):
-        """
-        Parses the ground truth polyphonic music example provided in Lemstrom and Laitninen's 2011 paper. There should be only one exact occurrence found by P1.
-        """
-        list_of_shifts = tools.run_algorithm_with_midiparser(cbrahmsGeo.P1, self.lemstrom_query('a'), self.lemstrom_source)
-        self.assertEqual(list_of_shifts, [[3.0, 2]])
 
     def test_P1_midiparser_chidori(self):
         """
