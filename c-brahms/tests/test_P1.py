@@ -59,7 +59,7 @@ class CBRAHMSTestP1(TestCase):
         list_of_shifts = cbrahmsGeo.P1(self.pattern, source)
         self.assertEqual(list_of_shifts, expected_matches)
 
-    def test_P1_pattern_larger_than_source(self):
+    def test_P1_edgecase_pattern_larger_than_source(self):
         """
         Tests P1 with a pattern that is larger than the source. It should return an empty list.
         """
