@@ -17,12 +17,6 @@ class CBRAHMSTestP1(TestCase):
     def tearDown(self):
         pass
 
-    def test_shift_pattern(self):
-        shift = [1,1]
-        source = tools.shift_pattern(shift, self.pattern)
-        expected = [[1,49],[5,61],[9,60],[11,56],[12,58],[13,60],[15,61]]
-        self.assertEqual(source, expected)
-
     def test_P1_edgecase_same_size_transposed(self):
         """
         Checks if P1 can match a pattern to a source of the same size, but transposed.

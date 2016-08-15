@@ -8,31 +8,30 @@ import music21
 import pandas
 import pdb
 
+import copy
 
 class CBRAHMSTestP2(TestCase):
 
     def setUp(self):
         # Over the Rainbow query
         self.pattern = [[0,48],[4,60],[8,59],[10,55],[11,57],[12,59],[14,60]]
-        self.P2_exact = partial(cbrahmsGeo.P2, mismatch = 0)
 
-    def tearDown(self):
-        pass
+    def test_edgecase_one_mismatch_same_size(self):
+        source = copy.deepcopy(self.pattern[:])
 
-    def test_automatic_shift_pattern(self):
-        shift = [1,1]
-        source = tools.shift_pattern(shift, self.pattern)
-        expected = [[1,49],[5,61],[9,60],[11,56],[12,58],[13,60],[15,61]]
-        self.assertEqual(source, expected)
+        self.pattern[0][1] += 1 #fails because this modifies the source list?!
+        list_of_shifts = cbrahmsGeo.P2(self.pattern, source, 1)
+        self.assertEqual(list_of_shifts, [[0,0]])
 
-    def test_P2_pattern_larger_than_source(self):
-        """
-        Tests P2 with a pattern that is larger than the source. It should return a shift which results in len(pattern) - len(source) mismatches.
-        """
-        pattern = list(self.pattern)
-        source = list(self.pattern)[0:4]
-        list_of_shifts = self.P2_exact(self.pattern, source)
-        self.assertEqual(list_of_shifts, [])
-        pass
+        # Same test with the pattern transposed
+        source = tools.shift_pattern([0,5], source)
+        list_of_shifts = cbrahmsGeo.P2(self.pattern, source, 1)
+        self.assertEqual(list_of_shifts, [[0,5]])
+
+    def test_edgecase_all_no_similarity(self):
+        source = [[i, j * (i + 100)] for i,j in self.pattern] # Assumes no interval is greater than 100 semitones
+        list_of_shifts = cbrahmsGeo.P2(self.pattern, source, "all")
+        self.assertEqual(len(list_of_shifts), len(self.pattern) * len(source))
+
 
 P2_SUITE = TestLoader().loadTestsFromTestCase(CBRAHMSTestP2)

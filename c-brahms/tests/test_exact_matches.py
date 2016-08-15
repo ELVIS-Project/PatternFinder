@@ -22,6 +22,20 @@ class CBRAHMSTestExactMatches(TestCase):
         pass
 
     """
+    Tests P1 with a pattern that is larger than the source. It should return an empty list.
+    """
+    def test_P1_edgecase_pattern_larger_than_source(self):
+        pattern = list(self.pattern)
+        source = list(self.pattern)[0:4]
+        list_of_shifts = cbrahmsGeo.P1(self.pattern, source)
+        self.assertEqual(list_of_shifts, [])
+    def test_P2_edgecase_pattern_larger_than_source(self):
+        pattern = list(self.pattern)
+        source = list(self.pattern)[0:4]
+        list_of_shifts = self.P2(self.pattern, source)
+        self.assertEqual(list_of_shifts, [])
+
+    """
     IDENTIAL SOURCE:
     Checks if algorithm can match a pattern with an identical source
     """
