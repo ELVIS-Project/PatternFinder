@@ -11,7 +11,7 @@ In addition to Ukkonen's paper, we follow a ruby implementation by Mika Turkia, 
 
 import midiparser
 import Queue
-import pdb
+import copy
 
 def sub_2D_vectors(l1, l2):
     """
@@ -33,7 +33,11 @@ def P1(pattern, source):
     Input: two lists of horizontal line segments. One is the 'pattern', which we are looking for in the larger 'source'
     Output: all horizontal / vertical line segment shifts which shift the pattern into some exact match within the source
     """
-    shift_matches = []
+    # Avoid modifying input
+    pattern = copy.deepcopy(pattern)
+    source = copy.deepcopy(source)
+
+    shift_matches = [] # results
     pattern.sort() # of size m
     source.sort() # of size n
 
@@ -72,12 +76,15 @@ def P2(pattern, source, mismatch):
     Input: two lists of horizontal line segments. One is the 'pattern', which we are looking for in the larger 'source'
     Output: all horizontal / vertical line segment shifts which shift the pattern so that it shares a subset with the source
     """
+    # Avoid modifying input
+    pattern = copy.deepcopy(pattern)
+    source = copy.deepcopy(source)
     # Priority queue of shifts
     shifts = Queue.PriorityQueue(len(pattern) * len(source))
     # Current minimum shift
     cur_shift = [float("-inf"), float("-inf")]
     # Multiplicity counter for each distinct shift
-    c = 1
+    c = 0
     # Results
     shift_matches = []
     # Lexicographically sort the pattern and source
@@ -111,12 +118,20 @@ def P2(pattern, source, mismatch):
         if cur_shift == min_shift[0]:
             c += 1
         else:
-            shift_matches.append([cur_shift, c])
+            if cur_shift != [float("-inf"), float("-inf")]:
+                # Saved shifts are lists of cur_shift (2-d translation) and c (multiplicity)
+                shift_matches.append([cur_shift, c])
             cur_shift = min_shift[0]
             c = 1
 
-    # Return the shifts which result in the smallest number of mismatches
-    if mismatch == "min":
-        mismatch = max(zip(*shift_matches)[1])
-    return [shift_matches[i][0] for i in range(len(shift_matches)) if shift_matches[i][1] == len(pattern) - mismatch]
+    # Return all possible shifts and their multiplicities
+    if mismatch == "all":
+        return shift_matches
+    # Filter shifts by minimizing the resulting mismatches
+    elif mismatch == "min":
+        mismatch = len(pattern) - max(zip(*shift_matches)[1])
+
+    # Return shifts with the given mismatch
+    return [shift[0] for shift in shift_matches if shift[1] == len(pattern) - mismatch]
+
 
