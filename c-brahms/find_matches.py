@@ -1,4 +1,5 @@
 from vis.analyzers.indexers import noterest, metre
+from tests import tools
 import music21
 import pandas # to concatenate dataframes
 import cbrahmsGeo
@@ -22,20 +23,21 @@ def is_supported(music_file):
     supported_formats = ['.krn', '.abc', '.mei', '.mscz', '.mid', '.midi'] # bach_BWV2_chorale.xml was not working yesterday. will investigate further
     return reduce(lambda x, y: x or y, map(lambda x: music_file.endswith(x), supported_formats))
 
-sources = []
+algorithm = args[0]
+option = args[1]
+query = args[3]
 # Add all source files to search through
+sources = []
 if options.directory is not None:
-    query = args[0]
     for f in os.listdir(options.directory):
         if is_supported(f):
             sources.append(options.directory + '/' + f)
 else:
-    query = args[1]
-    sources.append(args[0])
+    sources.append(args[2])
 
 
 print("\n\n***** VIS-Ohrwurm *****\n")
-print("Searching for " + query + " in: " + str(sources))
+print("Algorithm " + algorithm + " is searching for " + query + " in: " + str(sources))
 for source in sources:
     print("\nFILE: " + source)
 
@@ -56,19 +58,19 @@ for source in sources:
     parsed_piece = midiparser.run(indexed_source)
 
     # Search for query in score
-    exact_matches = cbrahmsGeo.P1(parsed_query, parsed_piece)
+    matches = tools.run_algorithm_with_midiparser(getattr(cbrahmsGeo, algorithm), query, source, option)
 
     # Skip this score if no matches were found
-    if not exact_matches:
+    if not matches:
         print("No matches found.")
         continue
 
     # Look for measure information
     if math.isnan(indexed_source[('metre.MeasureIndexer', '0')].loc[0]):
-            print('No measure information. Here are a list of all exact matches (absolute offset, transposition):')
-            pprint.pprint(exact_matches)
+            print('No measure information. Here are a list of all matches (absolute offset, transposition):')
+            pprint.pprint(matches)
     else:
-        for match in exact_matches:
+        for match in matches:
                 mb = midiparser.get_measure_and_beat_from_onset(match[0], indexed_source)
                 print('Pattern found at offset ' + str(mb[1]) + ' of measure ' + str(mb[0]) + ' (absolute offset: ' + str(match[0]) + ' transposed by ' + str(match[1]) + ' semitones).')
 

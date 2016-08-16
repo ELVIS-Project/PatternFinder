@@ -34,4 +34,5 @@ class CBRAHMSTestP2(TestCase):
         self.assertEqual(len(list_of_shifts), len(self.pattern) * len(source))
 
 
+
 P2_SUITE = TestLoader().loadTestsFromTestCase(CBRAHMSTestP2)

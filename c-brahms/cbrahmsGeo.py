@@ -28,7 +28,7 @@ def add_2D_vectors(l1, f):
     return [l1[0] + f[0], l1[1] + f[1]]
 
 # An exact matching algorithm 
-def P1(pattern, source):
+def P1(pattern, source, option):
     """
     Input: two lists of horizontal line segments. One is the 'pattern', which we are looking for in the larger 'source'
     Output: all horizontal / vertical line segment shifts which shift the pattern into some exact match within the source
@@ -130,6 +130,8 @@ def P2(pattern, source, mismatch):
     # Filter shifts by minimizing the resulting mismatches
     elif mismatch == "min":
         mismatch = len(pattern) - max(zip(*shift_matches)[1])
+    else:
+        mismatch = int(mismatch)
 
     # Return shifts with the given mismatch
     return [shift[0] for shift in shift_matches if shift[1] == len(pattern) - mismatch]
