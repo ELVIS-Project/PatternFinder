@@ -12,6 +12,8 @@ In addition to Ukkonen's paper, we follow a ruby implementation by Mika Turkia, 
 import midiparser
 import Queue
 import copy
+from LineSegment import LineSegment, TurningPoint
+import pdb
 
 def sub_2D_vectors(l1, l2):
     """
@@ -136,3 +138,65 @@ def P2(pattern, source, mismatch):
     return [shift[0] for shift in shift_matches if shift[1] == len(pattern) - mismatch]
 
 
+def P3(pattern, source, option):
+    """
+    Input: two lists of horizontal line segments. One is the 'pattern', which we are looking for in the larger 'source'
+    Output: all shifts which result in the largest intersection (measured in length) between the two sets of line segments
+    """
+    pdb.set_trace()
+    # Currently, midi parser outputs a list of [onset, note, offset] so that P1, P2 keep working
+    # Eventually the algorithms should take line segment set objects as input, but for now..
+    pattern = [LineSegment(p[0], p[2], p[2] - p[0], p[1]) for p in pattern]
+    source = [LineSegment(s[0], s[2], s[2] - s[0], s[1]) for s in source]
+    """
+    pattern_onsets = [[p[0], p[1]] for p in pattern].sort()
+    pattern_offsets = [[p[2], p[1]] for p in pattern].sort()
+
+    source_onsets = [[p[0], p[2]] for p in source].sort()
+    source_offsets = [[p[2], p[1]] for p in source].sort()
+    """
+
+    # Keep track of C_h for each y-coordinate in 256 buckets, which corresponds to every possible MIDI value
+    vertical_translations = [{'value' : 0, 'slope' : 0, 'prev_turning_point' : 0} for i in range(256)]
+    # Store 4 * m * n turning points in a priority queue
+    pq_size = 4 * len(pattern) * len(source)
+    translations = Queue.PriorityQueue(pq_size)
+    # Keep track of the highest score
+    best = 0
+
+    # Populate the priority queue with all 4 types of pointers
+    for p in pattern
+        translations.put(TurningPoint(p, source[0], 0, 1)
+        translations.put(TurningPoint(p, source[0], 0, 2)
+        translations.put(TurningPoint(p, source[0], 0, 3)
+        translations.put(TurningPoint(p, source[0], 0, 4)
+
+        """
+        translations.put([source[0].onset - p.offset, 1])
+        translations.put([source[0].onset - p.onset, 2])
+        translations.put([source[0].offset - p.offset, 3])
+        translations.put([source[0].offset - p.onset, 4])
+"""
+
+    for i in range(pq_size):
+        min_translation = translations.get()
+
+        # Increment line segment intersection for this y-coordinate translation
+        vertical_translations[min_translation.y]['value'] +=
+            (vertical_translations[min_translation.y]['slope']
+            * (min_translation.x - vertical_translations[min_translation.y]['prev_turning_point']))
+        vertical_translations[min_translation.y]['prev_turning_point'] = min_translation.x
+
+        # Keep track of best matches
+        if vertical_translations[min_translation.y]['value'] > best:
+            best = vertical_translations[min_translation.y]['value']
+
+        # Update slope
+        if min_translation.type in [1, 4]:
+            vertical_translations[min_translation.y]['slope'] += 1
+        else
+            vertical_translations[min_translation.y]['slope'] -= 1
+
+        # Update pointer
+        if min_translation.source_index < len(source) - 1:
+           min_translation.next()
