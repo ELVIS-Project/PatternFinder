@@ -18,7 +18,7 @@ def parse_part(part, meters):
     meters = meters.dropna()
 
     notes = part.values.tolist()
-    if 'Rest' in notes: 
+    if 'Rest' in notes:
         while 'Rest' in notes:
             notes.remove('Rest')
         condition = part != 'Rest'
@@ -32,7 +32,8 @@ def parse_part(part, meters):
     data = []
     for x in range(len(notes)):
 #        data.append(((onsets[x], notes[x]), (offsets[x], notes[x])))
-        data.append([onsets[x], notes[x]])
+#        data.append([onsets[x], notes[x]])
+        data.append([onsets[x], notes[x], offsets[x]])
 
     return data
 

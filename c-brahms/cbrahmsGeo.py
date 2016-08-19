@@ -33,9 +33,8 @@ def P1(pattern, source, option):
     Input: two lists of horizontal line segments. One is the 'pattern', which we are looking for in the larger 'source'
     Output: all horizontal / vertical line segment shifts which shift the pattern into some exact match within the source
     """
-    # Avoid modifying input
-    pattern = copy.deepcopy(pattern)
-    source = copy.deepcopy(source)
+    pattern = [[d[0], d[1]] for d in pattern]
+    source = [[d[0], d[1]] for d in source]
 
     shift_matches = [] # results
     pattern.sort() # of size m
@@ -76,9 +75,9 @@ def P2(pattern, source, mismatch):
     Input: two lists of horizontal line segments. One is the 'pattern', which we are looking for in the larger 'source'
     Output: all horizontal / vertical line segment shifts which shift the pattern so that it shares a subset with the source
     """
-    # Avoid modifying input
-    pattern = copy.deepcopy(pattern)
-    source = copy.deepcopy(source)
+    pattern = [[d[0], d[1]] for d in pattern]
+    source = [[d[0], d[1]] for d in source]
+
     # Priority queue of shifts
     shifts = Queue.PriorityQueue(len(pattern) * len(source))
     # Current minimum shift
