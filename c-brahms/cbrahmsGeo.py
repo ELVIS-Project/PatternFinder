@@ -143,60 +143,60 @@ def P3(pattern, source, option):
     Input: two lists of horizontal line segments. One is the 'pattern', which we are looking for in the larger 'source'
     Output: all shifts which result in the largest intersection (measured in length) between the two sets of line segments
     """
-    pdb.set_trace()
+    #curiosities: Not sure a negative (leftwards) match is possible with this algorithm (i.e., just a suffix of the pattern matches the beginning of the source). think about it?
+
     # Currently, midi parser outputs a list of [onset, note, offset] so that P1, P2 keep working
     # Eventually the algorithms should take line segment set objects as input, but for now..
     pattern = [LineSegment(p[0], p[2], p[2] - p[0], p[1]) for p in pattern]
     source = [LineSegment(s[0], s[2], s[2] - s[0], s[1]) for s in source]
-    """
-    pattern_onsets = [[p[0], p[1]] for p in pattern].sort()
-    pattern_offsets = [[p[2], p[1]] for p in pattern].sort()
-
-    source_onsets = [[p[0], p[2]] for p in source].sort()
-    source_offsets = [[p[2], p[1]] for p in source].sort()
-    """
 
     # Keep track of C_h for each y-coordinate in 256 buckets, which corresponds to every possible MIDI value
+    # Negative indices will wrap around; we assume all vertical translations are between -128 and 128
     vertical_translations = [{'value' : 0, 'slope' : 0, 'prev_turning_point' : 0} for i in range(256)]
-    # Store 4 * m * n turning points in a priority queue
-    pq_size = 4 * len(pattern) * len(source)
+    # Store 4 * m turning points in a priority queue
+    pq_size = 4 * len(pattern)
     translations = Queue.PriorityQueue(pq_size)
-    # Keep track of the highest score
+    # Keep track of the longest intersection
     best = 0
+    list_of_shifts = []
 
     # Populate the priority queue with all 4 types of pointers
-    for p in pattern
-        translations.put(TurningPoint(p, source[0], 0, 1)
-        translations.put(TurningPoint(p, source[0], 0, 2)
-        translations.put(TurningPoint(p, source[0], 0, 3)
-        translations.put(TurningPoint(p, source[0], 0, 4)
+    for p in pattern:
+        for t in range(4):
+            ralph = TurningPoint(p, source[0], 0, t)
+            translations.put(ralph)
 
-        """
-        translations.put([source[0].onset - p.offset, 1])
-        translations.put([source[0].onset - p.onset, 2])
-        translations.put([source[0].offset - p.offset, 3])
-        translations.put([source[0].offset - p.onset, 4])
-"""
-
-    for i in range(pq_size):
+    # All 4 * m turning points now traverse the source
+    for i in range(pq_size * len(source)):
         min_translation = translations.get()
 
-        # Increment line segment intersection for this y-coordinate translation
-        vertical_translations[min_translation.y]['value'] +=
-            (vertical_translations[min_translation.y]['slope']
-            * (min_translation.x - vertical_translations[min_translation.y]['prev_turning_point']))
-        vertical_translations[min_translation.y]['prev_turning_point'] = min_translation.x
+        # Increment the cumulative intersection value for this y-coordinate translation
+        # min_translation.y is a MIDI pitch: it should be a whole number, and can be casted to int
+        vertical_translations[int(min_translation.y)]['value'] += \
+            (vertical_translations[int(min_translation.y)]['slope']
+            * (min_translation.value - vertical_translations[int(min_translation.y)]['prev_turning_point']))
+        # save the TURNING POINT value, not the segment translation distance.
+        vertical_translations[int(min_translation.y)]['prev_turning_point'] = min_translation.value
+        # TODO store prev_turning_point as a turning point object, not as just the x coord?
 
         # Keep track of best matches
-        if vertical_translations[min_translation.y]['value'] > best:
-            best = vertical_translations[min_translation.y]['value']
+        if vertical_translations[int(min_translation.y)]['value'] > best:
+            list_of_shifts = []
+            best = vertical_translations[int(min_translation.y)]['value']
+        # Append a translation if it hasn't been added already
+        if vertical_translations[int(min_translation.y)]['value'] >= best and min_translation.vector not in list_of_shifts:
+            # Append the distance between the two segments, measured from their onset times.
+            # TODO you don't want to append the dsitance measured by onset times; you want to append the distances based on the turning point values. we are measuring total INTERSECTION, it can be only at the 4 turning points that the intersection is the highest!
+            list_of_shifts.append(min_translation.vector)
 
         # Update slope
-        if min_translation.type in [1, 4]:
-            vertical_translations[min_translation.y]['slope'] += 1
-        else
-            vertical_translations[min_translation.y]['slope'] -= 1
+        if min_translation.type in [0, 3]:
+            vertical_translations[int(min_translation.y)]['slope'] += 1
+        else:
+            vertical_translations[int(min_translation.y)]['slope'] -= 1
 
         # Update pointer
         if min_translation.source_index < len(source) - 1:
-           min_translation.next()
+           translations.put(TurningPoint(min_translation.pattern_segment, source[min_translation.source_index + 1], min_translation.source_index + 1, min_translation.type))
+
+    return list_of_shifts
