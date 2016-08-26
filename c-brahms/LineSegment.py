@@ -11,6 +11,11 @@ class TwoDVector(object):
             return 1
         return 0
 
+    def __str__(self):
+        return "{0}".format(str(self.vector()))
+    def __repr__(self):
+        return "TwoDVector(x={0}, y={1})".format(str(self.x), str(self.y))
+
 
 class Translation(TwoDVector):
     def __init__(self, line_seg, other_line_seg):
@@ -44,7 +49,7 @@ class TurningPoint(TwoDVector):
         return super(TurningPoint, self).__cmp__(other_turning_point)
 
     def __repr__(self):
-        return "TurningPoint(pattern_segment={0}, source_segment={1}, source_index={2}, tp_type={3})".format(str(self.pattern_segment), str(self.source_segment), self.source_index, self.type)
+        return "TurningPoint(pattern_segment={0}, source_segment={1}, source_index={2}, tp_type={3}): vector={4}".format(str(self.pattern_segment), str(self.source_segment), self.source_index, self.type, self.vector())
 
 class LineSegment(TwoDVector):
 
@@ -53,6 +58,7 @@ class LineSegment(TwoDVector):
         self.data = data
         self.onset, self.duration, self.pitch = data
         self.offset = self.onset + self.duration
+        self.turning_point = []
         super(LineSegment, self).__init__(self.onset, self.pitch)
 #        self.onset = onset
 #        self.pitch = pitch

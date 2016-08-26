@@ -30,7 +30,7 @@ def add_2D_vectors(l1, f):
     return [l1[0] + f[0], l1[1] + f[1]]
 
 # An exact matching algorithm 
-def P1(pattern, source, option):
+def P1(pattern, source, option = None):
     """
     Input: two lists of horizontal line segments. One is the 'pattern', which we are looking for in the larger 'source'
     Output: all horizontal / vertical line segment shifts which shift the pattern into some exact match within the source
@@ -78,7 +78,7 @@ def P1(pattern, source, option):
     return shift_matches
 
 # Largest Common Subset matching algorithm
-def P2(pattern, source, mismatch):
+def P2(pattern, source, option = None):
     """
     Input: two lists of horizontal line segments. One is the 'pattern', which we are looking for in the larger 'source'
     Output: all horizontal / vertical line segment shifts which shift the pattern so that it shares a subset with the source
@@ -132,16 +132,18 @@ def P2(pattern, source, mismatch):
             c = 1
 
     # Return all possible shifts and their multiplicities
-    if mismatch == "all":
+    if option == "all":
         return shift_matches
-    # Filter shifts by minimizing the resulting mismatches
-    elif mismatch == "min":
-        mismatch = len(pattern) - max(zip(*shift_matches)[1])
     else:
-        mismatch = int(mismatch)
+        # Return shifts only with 'option' number of mismatches
+        try:
+            option = int(option)
+        # Default: minimize the mismatches
+        except TypeError:
+            option = len(pattern) - max(zip(*shift_matches)[1])
 
     # Return shifts with the given mismatch
-    return [shift[0] for shift in shift_matches if shift[1] == len(pattern) - mismatch]
+    return [shift[0] for shift in shift_matches if shift[1] == len(pattern) - option]
 
 
 def P3(pattern, source, option):
