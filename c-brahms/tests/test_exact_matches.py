@@ -16,7 +16,7 @@ import nose
 class CBRAHMSTestExactMatches(TestCase):
 
     P1 = partial(cbrahmsGeo.P1, option='onset')
-    P2 = partial(cbrahmsGeo.P2, mismatch=0)
+    P2 = partial(cbrahmsGeo.P2, option=0)
     P3 = partial(cbrahmsGeo.P3, option=0)
     algorithms=[
         ("P1", P1),
