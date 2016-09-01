@@ -28,9 +28,6 @@ class CBRAHMSTestExactMatches(TestCase):
         # Over the Rainbow query
         self.pattern = [LineSegment(d) for d in [[0,4,48],[4,4,60],[8,2,59],[10,1,55],[11,1,57],[12,2,59],[14,2,60]]]
         self.source = copy.deepcopy(self.pattern)
-        self.P1 = cbrahmsGeo.P1
-        self.P2 = cbrahmsGeo.P2
-        self.P3 = cbrahmsGeo.P3
 
     def tearDown(self):
         pass
@@ -68,7 +65,7 @@ class CBRAHMSTestExactMatches(TestCase):
     """
     @parameterized.expand(algorithms)
     def test_repeated_pattern_in_source(self, _, algorithm):
-        num_repetitions = 1000
+        num_repetitions = 300
         expected_matches = [TwoDVector(0, 0)]
 
         # Repeat the pattern by adding a new occurrence on to the end
