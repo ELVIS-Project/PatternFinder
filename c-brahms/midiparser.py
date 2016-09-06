@@ -1,4 +1,5 @@
 from vis.analyzers.indexers import noterest, metre
+from LineSegment import LineSegment
 import music21
 import pdb
 
@@ -33,9 +34,9 @@ def parse_part(part, meters):
     for x in range(len(notes)):
 #        data.append(((onsets[x], notes[x]), (offsets[x], notes[x])))
 #        data.append([onsets[x], notes[x]])
-        data.append([onsets[x], notes[x], offsets[x]])
+        data.append([onsets[x], lengths[x], notes[x]])
 
-    return data
+    return [LineSegment(d) for d in data]
 
 def get_measure_and_beat_from_onset(onset, indexed_piece):
     measure_number = indexed_piece[('metre.MeasureIndexer', '0')].loc[onset]

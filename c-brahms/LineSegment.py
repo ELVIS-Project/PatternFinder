@@ -2,14 +2,19 @@ class TwoDVector(object):
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.vector = [x, y]
+        self.vector = lambda: [self.x, self.y]
 
     def __cmp__(self, other_vector):
-        if self.vector < other_vector.vector:
+        if self.vector() < other_vector.vector():
             return -1
-        elif self.vector > other_vector.vector:
+        elif self.vector() > other_vector.vector():
             return 1
         return 0
+
+    def __str__(self):
+        return "{0}".format(str(self.vector()))
+    def __repr__(self):
+        return "TwoDVector(x={0}, y={1})".format(str(self.x), str(self.y))
 
 
 class Translation(TwoDVector):
@@ -44,16 +49,21 @@ class TurningPoint(TwoDVector):
         return super(TurningPoint, self).__cmp__(other_turning_point)
 
     def __repr__(self):
-        return "TurningPoint(pattern_segment={0}, source_segment={1}, source_index={2}, tp_type={3})".format(str(self.pattern_segment), str(self.source_segment), self.source_index, self.type)
+        return "TurningPoint(pattern_segment={0}, source_segment={1}, source_index={2}, tp_type={3}): vector={4}".format(str(self.pattern_segment), str(self.source_segment), self.source_index, self.type, self.vector())
 
 class LineSegment(TwoDVector):
 
-    def __init__(self, onset, offset, duration, pitch):
-        super(LineSegment, self).__init__(onset, pitch)
-        self.onset = onset
-        self.offset = offset
-        self.duration = duration
-        self.pitch = pitch
+#    def __init__(self, onset, pitch, offset = None, duration = None):
+    def __init__(self, data):
+        self.data = data
+        self.onset, self.duration, self.pitch = data
+        self.offset = self.onset + self.duration
+        self.turning_point = []
+        super(LineSegment, self).__init__(self.onset, self.pitch)
+#        self.onset = onset
+#        self.pitch = pitch
+#        self.offset = offset
+#        self.duration = duration
 
     def __add__(self, translation):
         """
@@ -61,7 +71,13 @@ class LineSegment(TwoDVector):
         Input is :type: Translation
         Output is :type: LineSegment, having been shfited in two dimensions by Translation
         """
-        return LineSegment(self.onset + translation.x, self.offset + translation.x, self.duration, self.pitch + self.y)
+        new_segment = LineSegment(self.data)
+        new_segment.onset += translation.x
+        new_segment.x += translation.x
+        new_segment.offset += translation.x
+        new_segment.pitch += translation.y
+        new_segment.y += translation.y
+        return new_segment
 
     def __sub__(self, other_line_segment):
         """
@@ -69,7 +85,9 @@ class LineSegment(TwoDVector):
         Input is :type: LineSegment
         Output is :type: Translation, such that self + Translation = LineSegment
         """
-        return Translation(self, other_line_segment)
+        #return Translation(self, other_line_segment)
+        return TwoDVector(self.onset - other_line_segment.onset, self.pitch - other_line_segment.pitch)
+
 
     def __cmp__(self, other_line_segment):
         return super(LineSegment, self).__cmp__(other_line_segment)
@@ -80,7 +98,6 @@ class LineSegment(TwoDVector):
         return "LineSegment(onset={0}, offset={1}, duration={2}, pitch={3})".format(self.onset, self.offset, self.duration, self.pitch)
 
 
-"""
 class LineSegmentSet():
 
     def __init__(self, data):
@@ -91,4 +108,3 @@ class LineSegmentSet():
         return zip(self.onsets, self.notes)
     def offsets_with_notes(self):
         return zip(self.offsets, self.notes)
-"""
