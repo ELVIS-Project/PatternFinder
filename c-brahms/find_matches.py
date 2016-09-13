@@ -76,7 +76,7 @@ for source in sources:
             pprint.pprint([str(m) for m in matches])
     else:
         for match in matches:
-                mb = midiparser.get_measure_and_beat_from_onset(match[0], indexed_source)
-                print('Pattern found at offset ' + str(mb[1]) + ' of measure ' + str(mb[0]) + ' (absolute offset: ' + str(match[0]) + ' transposed by ' + str(match[1]) + ' semitones).')
+                mb = midiparser.get_measure_and_beat_from_onset(match.x, indexed_source)
+                print('Pattern found at offset ' + str(mb[1]) + ' of measure ' + str(mb[0]) + ' (absolute offset: ' + str(match.x) + ' transposed by ' + str(match.y) + ' semitones).')
 
 
