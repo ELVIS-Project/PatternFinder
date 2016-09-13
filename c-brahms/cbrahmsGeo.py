@@ -32,8 +32,10 @@ def add_2D_vectors(l1, f):
 # An exact matching algorithm 
 def P1(pattern, source, option = None):
     """
-    Input: two lists of horizontal line segments. One is the 'pattern', which we are looking for in the larger 'source'
-    Output: all horizontal / vertical line segment shifts which shift the pattern into some exact match within the source
+    Input: two lists of horizontal line segments. One is the 'pattern', which we are looking for in the 'source'
+    Output: all 2-D line segment shifts which shift the pattern into some exact match within the source. If the pattern is larger than the source, P1 should return an empty list.
+
+    Note: triple-pound comments (###) reference Ukkonen's pseudocode.
     """
     # Make copies of pattern, source to avoid altering the data
     pattern = copy.deepcopy(pattern) # of size m
@@ -46,30 +48,32 @@ def P1(pattern, source, option = None):
     # Store Results
     shift_matches = []
 
-    # q_i pointers, one for each segment in the pattern 
-    # A list of pointers referred to as "q_i". There is one for each pattern line segment. q_i pointers refer to a possible match between p_i and a segment in the source.
-    ptrs = [LineSegment([float("-inf"), 0, float("-inf")]) for i in range(len(pattern))]
-    ptrs.append(LineSegment([float("-inf"), 0, float("-inf")]))
+    # A list of pointers referred to as "q_i". There is one for each pattern line segment p_i. q_i pointers refer to a possible match between p_i and a segment in the source called s_j.
+    ptrs = [0 for p in pattern]
 
-    # Any solution must at least match p_0 with a segment in source. So we loop through all possible matches for p_0, and ascertain whether any of these cases result in a total match for the whole pattern. There are n - m + 1 of these possible matches.
+    ### (1) for j <- 1, ..., n-m do
+    # Any solution to the P1 specification must at least match p_0 with a segment in source. So we loop through all possible matches for p_0, and ascertain whether any of the resulting shifts also induce a total match for the whole pattern. There are n - m + 1 possible matches (the pseudocode appears to have missed the + 1).
     for t in range(len(source) - len(pattern) + 1):
-        # Compute the shift to match p_0 and s_j
+        # Compute the shift to match p_0 and s_j.
         shift = source[t] - pattern[0]
 
+        ### (3) for j <- 1, ..., n - m do
         # Find exact matches for p_1, ..., p_m
         for p in range(1, len(pattern)):
-            # start attempting to match p_i with t_j (the match of p_0); this implies that two voices in unison could match to a single voice in the source.
-            # TODO why possible_match = p + t? doesn't this imply unison can't match to a single voice? That 'shift' must result in a bijective map?
-            ptrs[p] = max(ptrs[p], source[t])
+            ### (8) q_i <- max(q_i, t_j)
+            # The first value for q_i is either its offset from the match of p_0 (s_j), or its previous value from the last iteration. We take the maximum because q_i is non-decreasing.
+            # p + t will never be greater than len(source).
+            # the choice of p + t as a minimum possible match for p_i implies that two unison voices in the pattern cannot match to a single voice in the source. Every note in the pattern must have a unique matching note in the source.
+            ptrs[p] = max(ptrs[p], p + t)
 
-            possible_match = p + t
-            while ptrs[p] < pattern[p] + shift and possible_match < len(source):
-                # q_i <- next(q_i)
-                ptrs[p] = source[possible_match]
-                possible_match += 1
+            ### (9) while q_i < p_i + f
+            while source[ptrs[p]] < pattern[p] + shift and ptrs[p] + 1 < len(source):
+                ### (9) q_i <- next(q_i)
+                ptrs[p] += 1
 
+            ### (10) until q_i > p_i + f
             # Check if there is no match for this p_i. If so, there is no exact match for this t_j. Break, and try the next one.
-            if ptrs[p] != pattern[p] + shift:
+            if source[ptrs[p]] != pattern[p] + shift:
                 break
             # Check if we have successfully matched all notes in the pattern
             elif p == len(pattern)-1:
@@ -82,6 +86,8 @@ def P2(pattern, source, option = None):
     """
     Input: two lists of horizontal line segments. One is the 'pattern', which we are looking for in the larger 'source'
     Output: all horizontal / vertical line segment shifts which shift the pattern so that it shares a subset with the source
+
+    The # of mismatches between source and pattern is defined as len(pattern) - # of matches between pattern and source.
     """
     pattern = copy.deepcopy(pattern)
     source = copy.deepcopy(source)
@@ -143,7 +149,7 @@ def P2(pattern, source, option = None):
             option = len(pattern) - max(zip(*shift_matches)[1])
 
     # Return shifts with the given mismatch
-    return [shift[0] for shift in shift_matches if shift[1] == len(pattern) - option]
+    return [shift[0] for shift in shift_matches if shift[1] == len(pattern) - option] # number of mismatches is relative to the length of the pattern (not the length of the source).
 
 
 def P3(pattern, source, option):
