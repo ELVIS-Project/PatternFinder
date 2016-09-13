@@ -35,19 +35,25 @@ def num_mismatches(pattern, source, shift):
         return min(mismatches)
 """
 
-def run_algorithm_with_midiparser(algorithm, pattern, source):
-    q_score = music21.converter.parse(pattern)
-    indexed_pattern = pandas.concat([
-        noterest.NoteRestIndexer(q_score).run(),
-        metre.DurationIndexer(q_score).run()], axis = 1).ffill()
-
+def index_source_from_score(source):
     s_score = music21.converter.parse(source)
-    indexed_source = pandas.concat([
+    return pandas.concat([
         noterest.NoteRestIndexer(s_score).run(),
         metre.DurationIndexer(s_score).run(),
         metre.MeasureIndexer(s_score).run()], axis = 1).ffill()
 
+def index_pattern_from_score(pattern):
+    q_score = music21.converter.parse(pattern)
+    return pandas.concat([
+        noterest.NoteRestIndexer(q_score).run(),
+        metre.DurationIndexer(q_score).run()], axis = 1).ffill()
+
+def run_algorithm_with_indexed_pieces(algorithm, indexed_pattern, indexed_source):
     parsed_pattern = midiparser.run(indexed_pattern)
     parsed_source = midiparser.run(indexed_source)
-    list_of_shifts = algorithm(parsed_pattern, parsed_source)
-    return list_of_shifts
+    return algorithm(parsed_pattern, parsed_source)
+
+def run_algorithm_with_midiparser(algorithm, pattern, source):
+    parsed_pattern = midiparser.run(index_pattern_from_score(pattern))
+    parsed_source = midiparser.run(index_source_from_score(source))
+    return algorithm(parsed_pattern, parsed_source)
