@@ -24,7 +24,7 @@ class CBRAHMSTestLemstromExample(TestCase):
     """
     @parameterized.expand([
         ("P1", partial(cbrahmsGeo.P1, option = 'onset')),
-        ("P2", partial(cbrahmsGeo.P2, mismatch = 0))
+        ("P2", partial(cbrahmsGeo.P2, option = 0))
     ])
     def test_P1_midiparser_lemstrom_example(self, _, algorithm):
         list_of_shifts = tools.run_algorithm_with_midiparser(algorithm, self.lemstrom_query('a'), self.lemstrom_source)
@@ -35,7 +35,7 @@ class CBRAHMSTestLemstromExample(TestCase):
     Parses the ground truth polyphonic music example provided in Lemstrom and Laitninen's 2011 paper. Depending on its error tolerance, P2 should be able to find query A (i.e., P2 with mismatch = 0 should behave identically to P1). Additionally, it should be able to find query B, which has 1 mismatch.
     """
     def test_P2_midiparser_lemstrom_example(self):
-        algorithm = partial(cbrahmsGeo.P2, mismatch = 1)
+        algorithm = partial(cbrahmsGeo.P2, option = 1)
         one_mismatch = tools.run_algorithm_with_midiparser(algorithm, self.lemstrom_query('b'), self.lemstrom_source)
         self.assertEqual(one_mismatch, [TwoDVector(3.0, 2)])
 
