@@ -15,13 +15,15 @@ import nose
 
 class CBRAHMSTestExactMatches(TestCase):
 
-    P1 = partial(cbrahmsGeo.P1, option='onset')
+    P1_onset = partial(cbrahmsGeo.P1, option='onset')
+    P1_segment = partial(cbrahmsGeo.P1, option='segment')
     P2 = partial(cbrahmsGeo.P2, option=0)
     P3 = partial(cbrahmsGeo.P3, option=0)
     algorithms=[
-        ("P1", P1),
-        ("P2", P2),
-        ("P3", P3)
+        ("P1_onset", P1_onset),
+        ("P1_segment", P1_segment),
+        ("P2", P2)
+        #("P3", P3)
     ]
 
     def setUp(self):
@@ -60,6 +62,15 @@ class CBRAHMSTestExactMatches(TestCase):
         list_of_shifts = algorithm(self.pattern, self.source)
         self.assertEqual(list_of_shifts, [shift])
 
+    @parameterized.expand(algorithms)
+    def test_edgecase_duplicate_melody(self, _, algorithm):
+        source = copy.deepcopy(self.pattern)
+        source.extend(source)
+        expected_matches = [TwoDVector(0,0), TwoDVector(0,0)]
+
+        list_of_shifts = algorithm(self.pattern, source)
+        self.assertEqual(list_of_shifts, expected_matches)
+
     """
     Translates a pattern automatically to confirm algorithm can find all of the translations
     """
@@ -95,5 +106,6 @@ class CBRAHMSTestExactMatches(TestCase):
     def test_midiparser_bwv2(self, _, algorithm):
         list_of_shifts = tools.run_algorithm_with_midiparser(algorithm, 'music_files/query_V-i.mid', 'music_files/bach_BWV2_chorale.krn')
         self.assertEqual(list_of_shifts, [TwoDVector(30.0, 0)])
+
 
 EXACT_MATCHES_SUITE = TestLoader().loadTestsFromTestCase(CBRAHMSTestExactMatches)
