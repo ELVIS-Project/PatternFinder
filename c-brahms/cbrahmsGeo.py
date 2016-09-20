@@ -9,10 +9,11 @@ https://tuhat.halvi.helsinki.fi/portal/services/downloadRegister/14287445/03ISMI
 In addition to Ukkonen's paper, we follow a ruby implementation by Mika Turkia, found at https://github.com/turkia/geometric-mir-algorithms/blob/master/lib/mir.rb
 """
 
+from LineSegment import LineSegment, TurningPoint, TwoDVector
+import itertools
 import midiparser
 import Queue
 import copy
-from LineSegment import LineSegment, TurningPoint, TwoDVector
 import pdb
 
 def sub_2D_vectors(l1, l2):
@@ -73,10 +74,14 @@ def P1(pattern, source, option = None):
 
             ### (10) until q_i > p_i + f
             # Check if there is no match for this p_i. If so, there is no exact match for this t_j. Break, and try the next one.
-            if source[ptrs[p]] != pattern[p] + shift:
-                break
+            if option == 'onset':
+                if source[ptrs[p]] != pattern[p] + shift: break
+            elif option == 'segment':
+                if source[ptrs[p]] != pattern[p] + shift or source[ptrs[p]].duration != pattern[p].duration: break
+
+            ### (11) if i = m + 1 then output(f)
             # Check if we have successfully matched all notes in the pattern
-            elif p == len(pattern)-1:
+            if p == len(pattern)-1:
                 shift_matches.append(shift)
 
     return shift_matches
