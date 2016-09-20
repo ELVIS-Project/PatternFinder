@@ -104,7 +104,7 @@ def P2(pattern, source, option = None):
     # Priority queue of shifts
     shifts = Queue.PriorityQueue(len(pattern) * len(source))
     # Current minimum shift
-    cur_shift = TwoDVector(float("-inf"), float("-inf"))
+    shift_candidate = TwoDVector(float("-inf"), float("-inf"))
     # Multiplicity counter for each distinct shift
     c = 0
     # Results
@@ -116,11 +116,11 @@ def P2(pattern, source, option = None):
     # Fill the priority queue 
     for i in range(len(pattern)):
         # priority queue members are tuples:
-        #   1) f_i = q_i - p_i ;;; the shift which brings ith pattern to the q_ith source 
+        #   1) f_i = s_{q_i} - p_i ;;; the shift which brings ith pattern to the q_ith source 
         #   2) i ;;; the index of this pattern element
         shifts.put([source[q[i]] - pattern[i], i])
 
-    while(cur_shift < TwoDVector(float("inf"), float("inf"))):
+    while(shift_candidate < TwoDVector(float("inf"), float("inf"))):
         ## min(F)
         min_shift = shifts.get()
         # index of the pattern p_i which corresponds to this minimum shift
@@ -133,13 +133,13 @@ def P2(pattern, source, option = None):
             shifts.put([source[q[p_i]] - pattern[p_i], p_i])
 
         ## Keep count
-        if cur_shift == min_shift[0]:
+        if shift_candidate == min_shift[0]:
             c += 1
         else:
-            if cur_shift != TwoDVector(float("-inf"), float("-inf")):
-                # Saved shifts are lists of cur_shift (2-d translation) and c (multiplicity)
-                shift_matches.append([cur_shift, c])
-            cur_shift = min_shift[0]
+            if shift_candidate != TwoDVector(float("-inf"), float("-inf")):
+                # Save shift candidates with their multiplicity
+                shift_matches.append([shift_candidate, c])
+            shift_candidate = min_shift[0]
             c = 1
 
     # Return all possible shifts and their multiplicities
