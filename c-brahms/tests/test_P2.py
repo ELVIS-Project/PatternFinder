@@ -51,7 +51,7 @@ class CBRAHMSTestP2(TestCase):
 
     def test_edgecase_duplicate_melody_random_mismatch(self):
         num_mismatches = random.randrange(1, 2)
-        source = copy.deepcopy(pattern)
+        source = copy.deepcopy(self.pattern)
 
         modified_source = create_random_mismatches(source, 1)
         modified_source.extend(source)
