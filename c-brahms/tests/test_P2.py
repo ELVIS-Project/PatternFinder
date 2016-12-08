@@ -11,22 +11,48 @@ import pandas
 import pdb
 import copy
 
+def count_mismatches(pattern, source):
+    """
+    For internal use by class CBRAHMSTestP2
+    Counts the number of note mismatches between pattern and source.
+    """
+    return len([p for p in pattern if p not in source])
 
 def create_random_mismatches(pattern, num_mismatches):
     """
-    For internal use by class CBRAHMSTestP2
+    For internal use by class CBRAHMSTestP2.
+    Selects a random subset of notes in the pattern and transposes them. (the desired transposition is separately generated for each note)
+    Returns a new list; leaves the argument unchanged.
     """
-    def generate_random_shift():
-        return TwoDVector(0, random.randint(100, 1000))
+    counted_notes = list(enumerate(pattern))
 
-    modified_note_indices = random.sample(xrange(len(pattern)), num_mismatches)
-    return [p + generate_random_shift() if i in modified_note_indices else p for i, p in enumerate(pattern)]
+    def random_shift(low, high):
+        return TwoDVector(0, random.randint(low, high))
+
+    # Get a random sample without replacement of size #num_mismatch
+    modified_notes = random.sample(counted_notes, num_mismatches)
+    # Transpose notes that are in the sample. Enumeration is required, otherwise we might transpose duplicate notes more times than their multiplicity in the sample.
+    return [n + random_shift(-24, 24) if (i, n) in modified_notes else n for i, n in counted_notes]
 
 class CBRAHMSTestP2(TestCase):
+    #TODO bug: P2 stalls infinitely if given an empty pattern.
 
     def setUp(self):
         # Over the Rainbow query
         self.pattern = [LineSegment(d) for d in [[0,4,48],[4,4,60],[8,2,59],[10,1,55],[11,1,57],[12,2,59],[14,2,60]]]
+        # Identical source
+        self.source = copy.deepcopy(self.pattern)
+
+    def test_create_random_mismatches(self):
+        """
+        Tests an internally used function create_random_mismatches
+        Creates a random number of mismatches in a pattern, then compares the original and the modified lists to ensure there is the expected number of mismatches.
+        """
+        num_mismatches = random.randint(1,len(self.pattern))
+        modified_pattern = create_random_mismatches(self.pattern, num_mismatches)
+
+        actual_mismatches = count_mismatches(modified_pattern, self.source)
+        self.assertEqual(actual_mismatches, num_mismatches)
 
     def test_edgecase_one_random_mismatch_same_size(self):
         source = copy.deepcopy(self.pattern)
