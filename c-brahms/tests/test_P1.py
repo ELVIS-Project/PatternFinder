@@ -17,6 +17,14 @@ class CBRAHMSTestP1(TestCase):
     def tearDown(self):
         pass
 
+    #TODO
+    def test_P1_settings_onset(self):
+        pass
+    def test_P1_settings_segment(self):
+        pass
+    def test_P1_settings_default(self):
+        pass
+
     def test_P1_edgecase_same_size_transposed(self):
         """
         Checks if P1 can match a pattern to a source of the same size, but transposed.
@@ -61,17 +69,5 @@ class CBRAHMSTestP1(TestCase):
         source = list(self.pattern)[0:4]
         list_of_shifts = cbrahmsGeo.P1(self.pattern, source)
         self.assertEqual(list_of_shifts, [])
-
-    def test_P1_midiparser_chidori(self):
-        """
-        Parses the Chidori Meimei Japanese folk song and searches for all four occurrences of a common four-note motif
-        """
-        list_of_shifts = tools.run_algorithm_with_midiparser(cbrahmsGeo.P1, 'music_files/chidori_query.mid', 'music_files/chidori_meimei.mid', 'onset')
-        self.assertEqual(list_of_shifts, [[2.0, -10], [6.0, -10], [65.0, -10], [69.0, -10]])
-
-
-    def test_P1_midiparser_bwv2(self):
-        list_of_shifts = tools.run_algorithm_with_midiparser(cbrahmsGeo.P1, 'music_files/query_V-i.mid', 'music_files/bach_BWV2_chorale.krn', 'onset')
-        self.assertEqual(list_of_shifts, [[30.0, 0]])
 
 P1_SUITE = TestLoader().loadTestsFromTestCase(CBRAHMSTestP1)
