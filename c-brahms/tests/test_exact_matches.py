@@ -82,11 +82,23 @@ class CBRAHMSTestExactMatches(TestCase):
     @parameterized.expand(algorithms)
     def test_edgecase_source_is_two_superimposed_patterns(self, _, algorithm):
         """
-        Similar test to above, with the entire pattern duplicated
+        Similar test to above, with the entire pattern duplicated instead of just one note
         """
         self.source.extend(self.source)
         expected_matches = [TwoDVector(0,0), TwoDVector(0,0)]
 
+        list_of_shifts = algorithm(self.pattern, self.source)
+        self.assertEqual(list_of_shifts, expected_matches)
+
+    @parameterized.expand(algorithms)
+    # TODO P2 fails this test, but again is a result of its behaviour. This would make sense, since the translation multiplicity will be double what is expected.
+    def test_edgecase_pattern_is_duplicated_source_is_pattern(self, _, algorithm):
+        """
+        Given a source, identical to the pattern, this test tries to find an occurrence of a doubled pattern in the source. For example, if the clarinet and trumpet played in unison, can you find their combined part within the piano part, which also plays in unison?
+        The expected behaviour should be NO, the algorithm will not find this occurrence, since a doubled pattern should only match exactly with a doubled source.
+        """
+        self.pattern.extend(self.pattern)
+        expected_matches = []
         list_of_shifts = algorithm(self.pattern, self.source)
         self.assertEqual(list_of_shifts, expected_matches)
 
