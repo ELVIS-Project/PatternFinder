@@ -33,17 +33,30 @@ class Translation(TwoDVector):
 class TurningPoint(TwoDVector):
 
     def __init__(self, pattern_segment, source_segment, source_index, tp_type):
-        distance_types = \
-                [source_segment.onset - pattern_segment.offset, # type 0
-                source_segment.onset - pattern_segment.onset, # type 1
-                source_segment.offset - pattern_segment.offset, # type 2
-                source_segment.offset - pattern_segment.onset] # type 3
-        self.value = distance_types[tp_type]
+        v = -99999
+        if tp_type == 0:
+            v = source_segment.onset - pattern_segment.offset
+        elif tp_type == 1:
+            v = source_segment.onset - pattern_segment.onset
+        elif tp_type == 2:
+            v = source_segment.offset - pattern_segment.offset
+        elif tp_type == 3:
+            v = source_segment.offset - pattern_segment.onset
+
         self.type = tp_type
         self.source_index = source_index
         self.pattern_segment = pattern_segment
         self.source_segment = source_segment
-        super(TurningPoint, self).__init__(self.value, source_segment.pitch - pattern_segment.pitch)
+        super(TurningPoint, self).__init__(v, source_segment.pitch - pattern_segment.pitch)
+
+        # Update the TP pointer of the given pattern segment
+        pattern_segment.turning_points = self
+
+    def next(self, source_list):
+        if self.source_index < len(source_list) - 1:
+            self.source_segment = source_list[source_index + 1]
+            self.source_index += 1
+        return self
 
     def __cmp__(self, other_turning_point):
         return super(TurningPoint, self).__cmp__(other_turning_point)
@@ -51,7 +64,14 @@ class TurningPoint(TwoDVector):
     def __repr__(self):
         return "TurningPoint(pattern_segment={0}, source_segment={1}, source_index={2}, tp_type={3}): vector={4}".format(str(self.pattern_segment), str(self.source_segment), self.source_index, self.type, self.vector())
 
+class Bucket():
+    def __init__(self, value, slope, prev_tp):
+        self.value = value
+        self.slope = slope
+        self.prev_tp = prev_tp
+
 class LineSegment(TwoDVector):
+    #TODO should be able to just add 4 to .x or .onset and everything updates
 
 #    def __init__(self, onset, pitch, offset = None, duration = None):
     def __init__(self, data):
@@ -66,6 +86,7 @@ class LineSegment(TwoDVector):
 #        self.duration = duration
 
     def __add__(self, translation):
+        # TODO should be able to just add 2-tuples without making them TwoDVectors
         """
         Built-in add function to support translating line segments by a Translation object
         Input is :type: Translation
@@ -87,6 +108,15 @@ class LineSegment(TwoDVector):
         """
         #return Translation(self, other_line_segment)
         return TwoDVector(self.onset - other_line_segment.onset, self.pitch - other_line_segment.pitch)
+
+    def __mul__(self, factor):
+        """
+        Built-in multiplication function to stretch or shrink a LineSegment. Only affects the duration of a note.
+        Expects a LineSegment and a scalar value.
+        """
+        self.duration *= factor
+        self.offset = self.onset + duration
+        return self
 
     def __cmp__(self, other_line_segment):
         return super(LineSegment, self).__cmp__(other_line_segment)

@@ -40,13 +40,13 @@ def index_source_from_score(source):
     return pandas.concat([
         noterest.NoteRestIndexer(s_score).run(),
         metre.DurationIndexer(s_score).run(),
-        metre.MeasureIndexer(s_score).run()], axis = 1).ffill()
+        metre.MeasureIndexer(s_score).run()], axis = 1)
 
 def index_pattern_from_score(pattern):
     q_score = music21.converter.parse(pattern)
     return pandas.concat([
         noterest.NoteRestIndexer(q_score).run(),
-        metre.DurationIndexer(q_score).run()], axis = 1).ffill()
+        metre.DurationIndexer(q_score).run()], axis = 1)
 
 def run_algorithm_with_indexed_pieces(algorithm, indexed_pattern, indexed_source):
     parsed_pattern = midiparser.run(indexed_pattern)
