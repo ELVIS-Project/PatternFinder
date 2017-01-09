@@ -88,7 +88,6 @@ class LineSegment(TwoDVector):
         #return Translation(self, other_line_segment)
         return TwoDVector(self.onset - other_line_segment.onset, self.pitch - other_line_segment.pitch)
 
-
     def __cmp__(self, other_line_segment):
         return super(LineSegment, self).__cmp__(other_line_segment)
 
