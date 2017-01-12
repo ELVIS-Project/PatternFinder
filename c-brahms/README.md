@@ -25,16 +25,16 @@ Query and source files are passed in by file name, using relative file names fro
 
 1) with one source file
 
-    $ python find_matches.py algorithm option source query
+    $ python find_matches.py algorithm option query source
 
 2) with a directory of source files
 
-    $ python find_matches.py algorithm -d directory query
+    $ python find_matches.py algorithm query -d directory
 
 3) with optional algorithm settings
 
-    $ python find_matches.py algorithm -o [option] source query
-    $ python find_matches.py algorithm -o [option] -d directory query
+    $ python find_matches.py algorithm -o [option] query source
+    $ python find_matches.py algorithm -o [option] query -d directory
 
 Currently, the supported options for each algorithm are:
 
