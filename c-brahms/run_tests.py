@@ -8,6 +8,5 @@ tests = [
         #test_P1.P1_SUITE,
         test_P2.P2_SUITE]
 
-if __name__ == '__main__':
-    for test in tests:
-        result = TextTestRunner(verbosity=2).run(test)
+for test in tests:
+    result = TextTestRunner(verbosity=2).run(test)
