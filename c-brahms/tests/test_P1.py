@@ -8,7 +8,7 @@ import pandas
 import pdb
 
 
-class CBRAHMSTestP1(TestCase):
+class TestP1(TestCase):
 
     def setUp(self):
         # Over the Rainbow query
@@ -70,4 +70,4 @@ class CBRAHMSTestP1(TestCase):
         list_of_shifts = cbrahmsGeo.P1(self.pattern, source)
         self.assertEqual(list_of_shifts, [])
 
-P1_SUITE = TestLoader().loadTestsFromTestCase(CBRAHMSTestP1)
+P1_SUITE = TestLoader().loadTestsFromTestCase(TestP1)

@@ -36,7 +36,7 @@ def create_random_mismatches(pattern, num_mismatches):
     # Transpose notes that are in the sample. Enumeration is required, otherwise we might transpose duplicate notes more times than their multiplicity in the sample.
     return [n + random_shift(-24, 24) if (i, n) in modified_notes else n for i, n in counted_notes]
 
-class CBRAHMSTestP2(TestCase):
+class TestP2(TestCase):
     #TODO bug: P2 stalls infinitely if given an empty pattern.
     #TODO instead of testing random mismatches, test all possible ones
 
@@ -129,4 +129,4 @@ class CBRAHMSTestP2(TestCase):
         self.assertEqual(list_of_shifts, expected_matches)
 
 
-P2_SUITE = TestLoader().loadTestsFromTestCase(CBRAHMSTestP2)
+P2_SUITE = TestLoader().loadTestsFromTestCase(TestP2)
