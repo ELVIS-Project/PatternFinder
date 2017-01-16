@@ -1,0 +1,5 @@
+# These are the required packages for the fanimae algorithm
+
+biopython==1.67
+vis-framework==2.4.1
+pandas==0.17.1

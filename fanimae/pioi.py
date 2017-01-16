@@ -73,8 +73,6 @@ def run(query, directory):
                 ioi_score = compare_ioi(q_info[0], dinfo[part][0])
                 pitch_score = compare_pitch(q_info[1], dinfo[part][1])
                 d_num[file] = (pitch_score, ioi_score)
-                # compare_ioi('RlRRsLSsSslLL', dinfo[part][0])
-                # compare_pitch('abcdefgabdfc', dinfo[part][1])
 
     final_scores = vector_score(d_num)
     return final_scores
