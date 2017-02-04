@@ -9,7 +9,7 @@ https://tuhat.halvi.helsinki.fi/portal/services/downloadRegister/14287445/03ISMI
 In addition to Ukkonen's paper, we follow a ruby implementation by Mika Turkia, found at https://github.com/turkia/geometric-mir-algorithms/blob/master/lib/mir.rb
 """
 
-from LineSegment import LineSegment, TurningPoint, TwoDVector, Bucket
+from LineSegment import LineSegment, LineSegmentSet, TurningPoint, TwoDVector, Bucket
 import itertools
 import midiparser
 import Queue
@@ -146,7 +146,6 @@ def P2(pattern, source, option = None):
     # number of mismatches is relative to the length of the pattern (not the length of the source).
     return [shift[0] for shift in shift_matches if shift[1] == len(pattern) - option]
 
-
 def P3(pattern, source, option = None):
     """
     Input: two lists of horizontal line segments. One is the 'pattern', which we are looking for in the larger 'source'
@@ -159,9 +158,26 @@ def P3(pattern, source, option = None):
     # There are four turning points per pattern segment. Each pattern segment can influence the n tally (there are as many tallys as there are vertical translations) in four ways! We sort them all and go through it one at a time.
 
     # Sort pattern and source
+    #pattern = LineSegmentSet(pattern)
+    source = LineSegmentSet(source)
+    #pattern.onset_sort = sorted(pattern)
+
+    # Remove overlapping of segments
+    if option == "overlap":
+        pass
+    else:
+        # Merging overlaps depends on previously being sorted.
+        source.mergeOverlappingSegments()
+        source.mergeOverlappingSegments()
+
     pattern.sort()
     source_onset_sort = sorted(source, key = lambda x: (x.onset, x.pitch))
     source_offset_sort = sorted(source, key = lambda x: (x.offset, x.pitch))
+
+        #helper = source_onset_sort[1:]
+        #source_onset_sort.append(None)
+        #source_no_overlap = [mergeTwoSegments(elt[0], elt[1]) if elt[0].doesOverlapWith(elt[1]) else elt[0] for elt in zip(source_onset_sort, helper)]
+
 
     # All vertical translations are between -127 and 127 since there are 127 possible MIDI values.
     # So, we need a total of (127*2 + 1) = 255 buckets to keep track of each C_h.

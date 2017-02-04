@@ -1,3 +1,5 @@
+import itertools
+
 class TwoDVector(object):
     def __init__(self, x, y):
         self.x = x
@@ -115,6 +117,15 @@ class LineSegment(TwoDVector):
         Expects a LineSegment and a scalar value.
         """
         self.duration *= factor
+        self.offset = self.onset + self.duration
+        return self
+
+    def __div__(self, factor):
+        """
+        Built-in multiplication function to stretch or shrink a LineSegment. Only affects the duration of a note.
+        Expects a LineSegment and a scalar value.
+        """
+        self.duration /= factor
         self.offset = self.onset + duration
         return self
 
@@ -126,12 +137,60 @@ class LineSegment(TwoDVector):
     def __repr__(self):
         return "LineSegment(onset={0}, offset={1}, duration={2}, pitch={3})".format(self.onset, self.offset, self.duration, self.pitch)
 
+    def doesOverlapWith(self, other_line_segment):
+        """
+        Checks if two line segments overlap
+        'Overlap' between two segments is defined as a non-empty intersection in a 2-d plane
+        """
+        # Check for identical pitch
+        if self.pitch != other_line_segment.pitch:
+            return False
+        # Renumber line segments so that 'self' is the first occuring one
+        elif self.onset > other_line_segment.onset:
+            return other_line_segment.doesOverlapWith(self)
+        # Check if 'self' sustains over 'other'
+        else:
+            return self.offset > other_line_segment.onset
 
-class LineSegmentSet():
+    def mergeWith(self, other_line_segment):
+        """
+        Merges two overlapping line segments
+        Does not check if the line segments are overlapping nor does it raise an exception if this is not the case. Overlap should be confirmed before calling this function!
+        """
+        return LineSegment([self.onset, other_line_segment.offset - self.onset, self.pitch])
 
-    def __init__(self, data):
-        self.data = data
-        self.onsets, self.offsets, self.durations, self.notes = zip(*data)
+class LineSegmentSet(list):
+
+    def mergeOverlappingSegments(self):
+        """
+        Merges all overlapping Segments in the Set
+        Not strictly pythonic... Could improve by:
+            1) sorting the list by pitch and then onset
+            2) zip it with itself offset by 1, map .doesOverlapWith, use groupby() and fold .mergeWith on the partitions
+        """
+#        helper = zip(self, self[1:])
+#        map(lambda h: h[0].doesOverlapWith(h[1])
+#        then, partition the set with groupby() and use fold on the partitions
+#        new = [[la for x in la] for elt in self]
+
+#        for i in range(len(self[:-1])):
+#            while (i < len(self) - 1) and self[i].doesOverlapWith(self[i+1]):
+#                self[i] = self[i].mergeWith(self.pop(i+1))
+
+        m = len(self)
+        for i in range(m):
+            j = i + 1
+            while j < m:
+                if self[i].doesOverlapWith(self[j]):
+                    self[i] = self[i].mergeWith(self.pop(j))
+                    m -= 1
+                j += 1
+
+#    def mergeOverlappingSegmentsNew(self):
+#        self.sort(key = lambda x: (x.pitch, x.onset))
+#        overlaps = [(e[0], e[1], e[0].doesOverlapWith[1]) for e in zip(self, self[1:])]
+        # Doesn't work cause it appends groups with 'False' also
+#        return [reduce(lambda l, r: l[0].mergeWith(r[0]), g) for g in groupby(overlaps, lambda x: x[2])]
 
     def onsets_with_notes(self):
         return zip(self.onsets, self.notes)
