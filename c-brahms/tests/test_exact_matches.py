@@ -135,6 +135,13 @@ class TestExactMatches(TestCase):
         list_of_shifts = algorithm(self.pattern, self.source)
         self.assertEqual(list_of_shifts, expected_matches)
 
+    def test_source_is_fragmented_pattern(self):
+        source = [LineSegment(d) for d in ((0,2,48), (2,2,48), (4,2,60), (6,2,60), (8,1,59), (9,1,59), (10,0.5,55), (10.5,0.5,55), (11,0.5,57), (11.5,0.5,57), (12,1,59), (13, 1, 59), (14,1,60), (15,1,60))]
+        expected_matches = [TwoDVector(0,0)]
+        list_of_shifts = cbrahmsGeo.P3(self.pattern, self.source)
+        self.assertEqual(list_of_shifts, expected_matches)
+
+
     @parameterized.expand(algorithms.items())
     def test_midiparser_chidori(self, _, algorithm):
         """
