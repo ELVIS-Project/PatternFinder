@@ -1,4 +1,7 @@
 import itertools
+from collections import namedtuple
+
+Point = namedtuple('Point', ['x', 'y'])
 
 class TwoDVector(object):
     def __init__(self, x, y):
@@ -17,7 +20,6 @@ class TwoDVector(object):
         return "{0}".format(str(self.vector()))
     def __repr__(self):
         return "TwoDVector(x={0}, y={1})".format(str(self.x), str(self.y))
-
 
 class Translation(TwoDVector):
     def __init__(self, line_seg, other_line_seg):
@@ -75,17 +77,13 @@ class Bucket():
 class LineSegment(TwoDVector):
     #TODO should be able to just add 4 to .x or .onset and everything updates
 
-#    def __init__(self, onset, pitch, offset = None, duration = None):
-    def __init__(self, data):
-        self.data = data
-        self.onset, self.duration, self.pitch = data
-        self.offset = self.onset + self.duration
-        self.turning_point = []
-        super(LineSegment, self).__init__(self.onset, self.pitch)
-#        self.onset = onset
-#        self.pitch = pitch
-#        self.offset = offset
-#        self.duration = duration
+    def __init__(self, onset, pitch, duration = 0):
+#    def __init__(self, data):
+        self.onset = onset
+        self.pitch = pitch
+        self.duration = duration
+        self.update()
+#        self.turning_point = []
 
     def __add__(self, translation):
         # TODO should be able to just add 2-tuples without making them TwoDVectors
@@ -94,14 +92,11 @@ class LineSegment(TwoDVector):
         Input is :type: Translation
         Output is :type: LineSegment, having been shfited in two dimensions by Translation
         """
-        new_segment = LineSegment(self.data)
-        new_segment.onset += translation.x
-        new_segment.x += translation.x
-        new_segment.offset += translation.x
-        new_segment.pitch += translation.y
-        new_segment.y += translation.y
+        new_segment = LineSegment(self.onset + translation.x, self.pitch + translation.y, self.duration)
+        super(LineSegment, self).__init__(self.onset, self.pitch)
         return new_segment
 
+    #TODO is this necessary?
     def __sub__(self, other_line_segment):
         """
         Built-in subtract function to support computing a Translation which can translate one LineSegment onto another.
@@ -116,18 +111,14 @@ class LineSegment(TwoDVector):
         Built-in multiplication function to stretch or shrink a LineSegment. Only affects the duration of a note.
         Expects a LineSegment and a scalar value.
         """
-        self.duration *= factor
-        self.offset = self.onset + self.duration
-        return self
+        return LineSegment(self.onset, self.pitch, self.duration * factor)
 
     def __div__(self, factor):
         """
         Built-in multiplication function to stretch or shrink a LineSegment. Only affects the duration of a note.
         Expects a LineSegment and a scalar value.
         """
-        self.duration /= factor
-        self.offset = self.onset + duration
-        return self
+        return self.__mul__(self, 1 / factor)
 
     def __cmp__(self, other_line_segment):
         return super(LineSegment, self).__cmp__(other_line_segment)
@@ -136,6 +127,13 @@ class LineSegment(TwoDVector):
         return "onset {0}, duration {1}, pitch {2}".format(self.onset, self.duration, self.pitch)
     def __repr__(self):
         return "LineSegment(onset={0}, offset={1}, duration={2}, pitch={3})".format(self.onset, self.offset, self.duration, self.pitch)
+
+    def update(self):
+        # update the offset
+        self.offset = self.onset + self.duration
+        # update x, y attributes of the namedtuple superclass
+        super(LineSegment, self).__init__(self.onset, self.pitch)
+
 
     def doesOverlapWith(self, other_line_segment):
         """
@@ -157,7 +155,7 @@ class LineSegment(TwoDVector):
         Merges two overlapping line segments
         Does not check if the line segments are overlapping nor does it raise an exception if this is not the case. Overlap should be confirmed before calling this function!
         """
-        return LineSegment([self.onset, other_line_segment.offset - self.onset, self.pitch])
+        return LineSegment(self.onset, self.pitch, other_line_segment.offset - self.onset)
 
 class LineSegmentSet(list):
 

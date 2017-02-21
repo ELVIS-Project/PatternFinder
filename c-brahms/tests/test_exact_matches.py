@@ -26,7 +26,10 @@ class TestExactMatches(TestCase):
 
     def setUp(self):
         # Over the Rainbow query
-        self.pattern = [LineSegment(d) for d in [[0,4,48],[4,4,60],[8,2,59],[10,1,55],[11,1,57],[12,2,59],[14,2,60]]]
+        #over_the_rainbow = [[0,4,48],[4,4,60],[8,2,59],[10,1,55],[11,1,57],[12,2,59],[14,2,60]]]
+        #self.pattern = [LineSegment(d) for d in over_the_rainbow]
+        over_the_rainbow = [(0,48,4),(4,60,4),(8,59,2),(10,55,1),(11,57,1),(12,59,2),(14,60,2)]
+        self.pattern = [LineSegment(*d) for d in over_the_rainbow]
         self.source = copy.deepcopy(self.pattern)
 
     def tearDown(self):
@@ -136,7 +139,7 @@ class TestExactMatches(TestCase):
         self.assertEqual(list_of_shifts, expected_matches)
 
     def test_source_is_fragmented_pattern(self):
-        source = [LineSegment(d) for d in ((0,2,48), (2,2,48), (4,2,60), (6,2,60), (8,1,59), (9,1,59), (10,0.5,55), (10.5,0.5,55), (11,0.5,57), (11.5,0.5,57), (12,1,59), (13, 1, 59), (14,1,60), (15,1,60))]
+        source = [LineSegment(*d) for d in ((0,2,48), (2,2,48), (4,2,60), (6,2,60), (8,1,59), (9,1,59), (10,0.5,55), (10.5,0.5,55), (11,0.5,57), (11.5,0.5,57), (12,1,59), (13, 1, 59), (14,1,60), (15,1,60))]
         expected_matches = [TwoDVector(0,0)]
         list_of_shifts = cbrahmsGeo.P3(self.pattern, self.source)
         self.assertEqual(list_of_shifts, expected_matches)

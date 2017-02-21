@@ -85,7 +85,7 @@ def P2(pattern, source, option = None):
     """
     pattern = copy.deepcopy(pattern)
     source = copy.deepcopy(source)
-    source.append(LineSegment([float("inf"), 0, float("inf")]))
+    source.append(LineSegment(float("inf"), float("inf"), 0))
     # Lexicographically sort the pattern and source
     pattern.sort()
     source.sort()
