@@ -21,19 +21,6 @@ class TwoDVector(object):
     def __repr__(self):
         return "TwoDVector(x={0}, y={1})".format(str(self.x), str(self.y))
 
-class Translation(TwoDVector):
-    def __init__(self, line_seg, other_line_seg):
-        self.line_seg = line_seg
-        self.other_line_seg = other_line_seg
-        super(Translation, self).__init__(other_line_seg.onset - line_seg.onset, other_line_seg.pitch - line_seg.pitch)
-
-    def __cmp__(self, other_translation):
-        return super(Translation, self).__cmp__(other_translation)
-
-    def __repr__(self):
-        return "Translation(line_seg={0}, other_line_seg={1})".format(str(self.line_seg), str(self.other_line_seg))
-
-
 class TurningPoint(TwoDVector):
 
     def __init__(self, pattern_segment, source_segment, source_index, tp_type):
@@ -85,38 +72,35 @@ class LineSegment(TwoDVector):
         self.update()
 #        self.turning_point = []
 
-    def __add__(self, translation):
+    def __add__(self, t):
         # TODO should be able to just add 2-tuples without making them TwoDVectors
         """
-        Built-in add function to support translating line segments by a Translation object
-        Input is :type: Translation
-        Output is :type: LineSegment, having been shfited in two dimensions by Translation
+        Custom add function to shift line segments
+        Input is :type: TwoDVector
+        Output is :type: LineSegment, which corresponds to 'self' having been shfited in two dimensions by a TwoDVector
         """
-        new_segment = LineSegment(self.onset + translation.x, self.pitch + translation.y, self.duration)
-        super(LineSegment, self).__init__(self.onset, self.pitch)
+        new_segment = LineSegment(self.onset + t.x, self.pitch + t.y, self.duration)
         return new_segment
 
-    #TODO is this necessary?
     def __sub__(self, other_line_segment):
         """
-        Built-in subtract function to support computing a Translation which can translate one LineSegment onto another.
-        Input is :type: LineSegment
-        Output is :type: Translation, such that self + Translation = LineSegment
+        Custom subtract function to calculate the shift difference between line segments
+        Input is :type: TwoDVector
+        Output is :type: TwoDVector, such that self + TwoDVector = other_line_segment
         """
-        #return Translation(self, other_line_segment)
         return TwoDVector(self.onset - other_line_segment.onset, self.pitch - other_line_segment.pitch)
 
     def __mul__(self, factor):
         """
-        Built-in multiplication function to stretch or shrink a LineSegment. Only affects the duration of a note.
-        Expects a LineSegment and a scalar value.
+        Custom mult to stretch or shrink the duration of a LineSegment
+        Expects a scalar value.
         """
         return LineSegment(self.onset, self.pitch, self.duration * factor)
 
     def __div__(self, factor):
         """
-        Built-in multiplication function to stretch or shrink a LineSegment. Only affects the duration of a note.
-        Expects a LineSegment and a scalar value.
+        Custom div to stretch or shrink the duration of a LineSegment. Calls __mul__ with reciprocal
+        Expects a scalar value.
         """
         return self.__mul__(self, 1 / factor)
 
