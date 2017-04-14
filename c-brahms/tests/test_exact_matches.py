@@ -21,7 +21,8 @@ class TestExactMatches(TestCase):
         "P1_segment" : partial(cbrahmsGeo.P1, option='segment'),
         "P2_exact" : partial(cbrahmsGeo.P2, option=0),
         "P2_best" : cbrahmsGeo.P2,
-        "P3" : partial(cbrahmsGeo.P3, option=0)
+        "P3" : partial(cbrahmsGeo.P3, option=0),
+        "S1" : partial(cbrahmsGeo.S1, window = 0, scale = 1, start = 0)
     }
 
     def setUp(self):
