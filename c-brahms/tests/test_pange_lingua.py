@@ -1,4 +1,4 @@
-from unittest import TestCase, TestLoader, TestSuite # test framework
+from unittest import TestCase, TestLoader, TestSuite, TextTestRunner # test framework
 from nose_parameterized import parameterized, param # for auto-generating tests
 from vis.analyzers.indexers import noterest, metre # vis
 import music21
@@ -26,7 +26,9 @@ class TestPangeLingua(TestCase):
         ("P1-onset", partial(cbrahmsGeo.P1, option='onset')),
         ("P1-segment", partial(cbrahmsGeo.P1, option='segment')),
         ("P2", partial(cbrahmsGeo.P2, option=0)),
-        ("P3", partial(cbrahmsGeo.P3, option=0))
+        ("P3", partial(cbrahmsGeo.P3, option=0)),
+        ("S1", partial(cbrahmsGeo.S1, scale = 1)),
+        ("S2", partial(cbrahmsGeo.S2, threshold = 0, scale = 1))
     ]
 
     # List of queries. To add new tests - format is ("query_filename", [list of algorithms tuples e.g. ("algy-name", function) to test this query], [expected results])
@@ -58,3 +60,6 @@ class TestPangeLingua(TestCase):
         self.assertEqual(list_of_shifts, [TwoDVector(d[0], d[1]) for d in expected])
 
 PANGE_LINGUA_SUITE = TestLoader().loadTestsFromTestCase(TestPangeLingua)
+
+if __name__ == "__main__":
+    result = TextTestRunner(verbosity=2).run(PANGE_LINGUA_SUITE)

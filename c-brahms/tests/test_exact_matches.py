@@ -22,7 +22,8 @@ class TestExactMatches(TestCase):
         "P2_exact" : partial(cbrahmsGeo.P2, option=0),
         "P2_best" : cbrahmsGeo.P2,
         "P3" : partial(cbrahmsGeo.P3, option=0),
-        "S1" : partial(cbrahmsGeo.S1, window = 0, scale = 1, start = 0)
+        "S1" : partial(cbrahmsGeo.S1, window = 0, scale = 1, start = 0),
+        "S2" : partial(cbrahmsGeo.S2, threshold = 0, scale = 1)
     }
 
     def setUp(self):
@@ -126,7 +127,7 @@ class TestExactMatches(TestCase):
         """
         Creates a source which consists of many pattern repetitions, each being transposed slightly. Then tests whether the algorithm can find each sequential occurrence of the pattern.
         """
-        num_repetitions = 300
+        num_repetitions = 30
         expected_matches = [TwoDVector(0, 0)]
 
         # Repeat the pattern by adding a new occurrence on to the end
