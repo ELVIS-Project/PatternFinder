@@ -135,6 +135,7 @@ class LineSegment(TwoDVector):
 
 
     def doesOverlapWith(self, other_line_segment):
+        ## TODO Use music21.stream.isSequence?
         """
         Checks if two line segments overlap
         'Overlap' between two segments is defined as a non-empty intersection in a 2-d plane

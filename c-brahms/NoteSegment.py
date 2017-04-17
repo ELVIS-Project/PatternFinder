@@ -1,12 +1,28 @@
 from itertools import groupby # for use in initializing K tables
 from fractions import Fraction
 from collections import namedtuple
+from pprint import pformat #for K_enry __repr__
 import numpy as np
 import pandas as pd
 import music21
 import pdb
 
-Ktable = namedtuple('Ktable', ['a', 'b', 'y', 'c', 's', 'w', 'z', 'sv', 'pv'])
+
+#K_entry = namedtuple('K_entry', ['a', 'b', 'y', 'c', 's', 'w', 'z', 'source_vector', 'pattern_vector'])
+class K_entry():
+    def __init__(self, a, b, y, c, s, w, z, sv, pv):
+        self.a = a
+        self.b = b
+        self.y = y
+        self.c = c
+        self.s = s
+        self.w = w
+        self.z = z
+        self.source_vector = sv
+        self.pattern_vector = pv
+
+    def __repr__(self):
+        return pformat(self.__dict__)
 
 class NoteVector():
     #TODO make this a subclass of music21.Music21Object? or maybe even music21.interval.chromaticInterval, with duration != 0?
@@ -39,10 +55,11 @@ class NoteVector():
         #return (self.x, self.y).__cmp__((other_vector.x, other_vector.y))
 
     def __repr__(self):
-        return "NoteVector({0}, {1}, #{2} -> #{3})".format(str(self.x), str(self.y), self.site.index(self.start), self.site.index(self.end))
+        return "NoteVector({0}, {1}, #{2}: {3} -> #{4}: {5})".format(str(self.x), str(self.y), self.site.index(self.start), self.start, self.site.index(self.end), self.end)
 
 
 class NoteSegments(music21.stream.Stream):
+    # TODO make this a top level stream with a pattern and a source sub stream. would make so much more sense..
     """
     A container for references to the horizontal line segments in a parsed score. Since it's a subclass and is initialized with the score, it still contains all the musical context and metadata of the line segments.
     """
@@ -69,15 +86,19 @@ class NoteSegments(music21.stream.Stream):
         """
         # Dict comprehension using groupby in order to easily access database vectors based on their pitch translations (y values)
         intra_database_vectors = {key : list(g) for key, g in groupby(source.ivs, lambda x: x.y)}
-        # intra_pvtors = {key : list(g) for key, g in groupby(self.ivs, lambda x: x.start}
+        # intra_vectors = {key : list(g) for key, g in groupby(self.ivs, lambda x: x.start}
 
         # There is one K table per note in the pattern
+        # TODO make the K table a class so you can have a PQ in it; this will make the algorithm code cleaner (no need to index PQ's)
         self.K = [[] for note in self.flat.notes]
 
+        pdb.set_trace()
         for f in self.ivs:
+            print("PATTERN {0}".format(f))
             if not intra_database_vectors.has_key(f.y):
                 continue
             for g in intra_database_vectors[f.y]:
+                print("DB {0}".format(g))
                 # Scale
                 if f.x == 0 and g.x == 0:
                     scale = 1
@@ -87,7 +108,7 @@ class NoteSegments(music21.stream.Stream):
                     # Fraction(num, denom) only accepts integers as arguments, so you need to convert g.x and f.x first
                     scale = Fraction(Fraction(g.x), Fraction(f.x))
 
-                # Ktable data
+                # K_entry data
                 a = source.flat.notes.index(g.start)
                 b = source.flat.notes.index(g.end)
                 y = None # backlink for building occurrences
@@ -95,12 +116,12 @@ class NoteSegments(music21.stream.Stream):
                 s = scale
                 w = 1 # length of occurrence
                 z = 0 # partial occurrence
-                sv = g
-                pv = f
+                source_vector = g
+                pattern_vector = f
 
-                #Ktable append entry
+                # Append K_entry to the table
                 #TODO make these NoteVector object entries
-                self.K[self.flat.notes.index(f.start)].append(Ktable(a, b, y, c, s, w, z, sv, pv))
+                self.K[self.flat.notes.index(f.start)].append(K_entry(a, b, y, c, s, w, z, source_vector, pattern_vector))
 
             # Append the last row, denoted \sum{p_i} : the number of rows generated for table K[i]
             a = float("inf")
@@ -111,27 +132,63 @@ class NoteSegments(music21.stream.Stream):
             # y, z are not initialized in the pseudocode but an KeyError is thrown in S2 without them
             y = None
             z = 0
-            sv = None
-            pv = None
-            self.K[self.flat.notes.index(f.start)].append(Ktable(a, b, y, c, s, w, z, sv, pv))
+            source_vector = None
+            pattern_vector = None
+            self.K[self.flat.notes.index(f.start)].append(K_entry(a, b, y, c, s, w, z, source_vector, pattern_vector))
 
-            # Sort the K table
-            self.K[self.flat.notes.index(f.start)].sort(key = lambda x : (x.a, x.s))
+            # Sort the K table in order {a, b, s} as per his order set "Aleph". Not totally confident in the implications of the sort order here, so it could maybe be wrong.
+            self.K[self.flat.notes.index(f.start)].sort(key = lambda x : (x.a, x.b, x.s))
 
 
 
-    """
-        :int: source_window limits the search space
-        :int: pattern_window = 1 for S1 & W1 while in S2 & W2 it can act as a tolerance variable to limit the distance of skipped notes in the pattern
-    """
-    def compute_intra_vectors(self, window = 0):
+    def compute_intra_vectors(self, source_window = 0, pattern_window = 1, window = 10):
         """
         Computes intra set vectors.
         Returns a list of intra-set vectors sorted lexicographally by (y, x) rather than (x,y)
+
+        # TODO figure out where the user will set windowing
+        :int: source_window limits the search space
+        :int: pattern_window = 1 for S1 & W1 while in S2 & W2 it can act as a tolerance variable to limit the distance of skipped notes in the pattern
         """
+
         note_stream = self.flat.notes
         if window == 0:
             window = len(self) # TODO see if you can't put this in the argument as a default
         self.ivs = sorted([NoteVector(note_stream[i], v_j, note_stream) for i in range(len(note_stream)) for v_j in note_stream[i+1 : i+1+window]], key = lambda x: (x.y, x.x))
 
 
+    def report_Ktable_occurrences(self, results, source):
+        occurrences = music21.stream.Stream()
+        for r in results:
+            # Get the notes of this particular occurrence
+            result_stream = music21.stream.Stream()
+            ptr = r
+            # TODO make backtracking part of a Ktable (entry or table?) class method
+            while ptr != None:
+                result_stream.insert(ptr.source_vector.end) # use insert for the note to be placed at its proper offset
+                if ptr.y == None:
+                    first_note = ptr.source_vector.start
+                    result_stream.insert(first_note)
+                ptr = ptr.y
+            # Get the shift vector for this occurrence
+            # TODO make this a NoteVector() - but can't currently, because fist note of pattern is not necessarily contained in the same stream as source note
+            result_stream.shift = (first_note.offset - self.flat.notes[0].offset, first_note.pitch.ps - self.flat.notes[0].pitch.ps)
+            occurrences.append(result_stream)
+        return occurrences
+
+    """
+    def report_Ktable_occurrences(results, source_set):
+        occurrences = music21.stream.Stream()
+        for r in results[1:]: #results indexes from 1
+            result_stream = music21.stream.Stream()
+            occurrences.append(result_stream)
+
+            ptr = r
+            while ptr != None:
+                result_stream.append(source_set[ptr['b']].note)
+                if ptr['y'] == None:
+                    result_stream.append(source_set[ptr['a']].note)
+                ptr = ptr['y']
+
+        return occurrences
+    """
