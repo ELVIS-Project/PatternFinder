@@ -3,7 +3,6 @@ from copy import deepcopy # For use in LineSegmentSet so as not to modify the or
 import pdb
 import itertools
 
-Point = namedtuple('Point', ['x', 'y'])
 
 class TwoDVector(object):
     def __init__(self, x, y):
@@ -79,6 +78,7 @@ class LineSegment(TwoDVector):
         self.pitch = pitch
         self.duration = duration
         self.set_index = None
+        self.note = None
         self.update()
 #        self.turning_point = []
 
@@ -165,19 +165,20 @@ class Vector(TwoDVector):
 class LineSegmentSet(list):
 
     def __init__(self, segments):
-        copy_of_segments = deepcopy(segments)
-        self.extend(copy_of_segments)
+        #copy_of_segments = deepcopy(segments)
+        #self.extend(copy_of_segments)
+        self.extend(segments)
 
     def set_indices_of_segments(self):
         for i in range(len(self)):
             seg.set_index = i
 
-    def sort(key=None, reverse=None):
+#   def sort(self, key=None, reverse=None):
         """
         Sorts the list of segments and then reassigns indices to its constituents.
         """
-        super(LineSegmentSet, self).sort(key, reverse)
-        self.set_indices_of_segments()
+#        super(LineSegmentSet, self).sort(key, reverse)
+#        self.set_indices_of_segments()
 
     def mergeOverlappingSegments(self):
         """
