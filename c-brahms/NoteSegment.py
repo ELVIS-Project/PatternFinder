@@ -92,13 +92,10 @@ class NoteSegments(music21.stream.Stream):
         # TODO make the K table a class so you can have a PQ in it; this will make the algorithm code cleaner (no need to index PQ's)
         self.K = [[] for note in self.flat.notes]
 
-        pdb.set_trace()
         for f in self.ivs:
-            print("PATTERN {0}".format(f))
             if not intra_database_vectors.has_key(f.y):
                 continue
             for g in intra_database_vectors[f.y]:
-                print("DB {0}".format(g))
                 # Scale
                 if f.x == 0 and g.x == 0:
                     scale = 1
@@ -126,7 +123,7 @@ class NoteSegments(music21.stream.Stream):
             # Append the last row, denoted \sum{p_i} : the number of rows generated for table K[i]
             a = float("inf")
             b = float("inf")
-            c = len(self) # length of the pattern, which is higher than any possible index
+            c = self.flat.notes.index(f.start) + 1 # i + 1
             s = 0
             w = 0
             # y, z are not initialized in the pseudocode but an KeyError is thrown in S2 without them
