@@ -1,3 +1,5 @@
+from collections import namedtuple #for .scores immutable tuple
+from pprint import pformat #for repr
 import NoteSegment
 import copy
 import music21
@@ -15,17 +17,24 @@ def music21Chord_to_music21Notes(chordy):
 
     N.T.S.: it does not seem you can do music21.insert(<generator expression>). think of a slick way?
     """
+    note_list = []
     for pitch in chordy.pitches:
         note = music21.note.Note(pitch)
-        note.offset = chordy.offset
-        note.duration = chordy.duration
-        note.site = chordy.site
+        note.offset = element.getOffsetBySite(stream[0])
+        note.duration = element.duration
         note.didBelongToAChord = True
-        yield note
+        note.original = element
+
+        note_list.append(offset)
+        note_list.append(note)
+    return note_list
 
 class geoAlgorithm(object):
     def __init__(self, pattern_score, source_score, settings = DEFAULT_SETTINGS):
-        self.settings = settings
+        # Settings
+        self.settings = DEFAULT_SETTINGS
+        self.settings.update(settings) # So not all keywords must be specified on call
+        self.scores = namedtuple("Scores", ['pattern', 'source'])._make((pattern_score, source_score))
 
         self.original_pattern = music21.converter.parse(pattern_score)
         self.original_source = music21.converter.parse(source_score)
@@ -50,32 +59,6 @@ class geoAlgorithm(object):
                     element.original = element
                     stream[1].insert(element.getOffsetBySite(stream[0]), element)
 
-        """
-        self.pattern = copy.deepcopy(self.original_pattern)
-        self.source = copy.deepcopy(self.original_source)
-
-        for stream in (self.source, self.pattern):
-            for element in stream.flat.notes:
-                if element.isChord:
-                    for pitch in element.pitches:
-                        note = music21.note.Note(pitch)
-                        note.offset = element.offset
-                        note.duration = element.duration
-                        note.didBelongToAChord = True
-                        stream.insert(note)
-                    # Recall: stream.flat.notes is a new temporary stream. you have to remove the note by ID
-                    stream.remove(stream.flat.notes.getElementById(element.id), recurse=True)
-                else:
-                    #otherwise, this must be a note
-                    element.didBelongToAChord = False
-        """
-
-        # Append extra notes as per pseudocode
-        # TODO figure out an indexing work around so you don't need this
-        # affects: k_table initialization, compute_intra_vectors, S2 commenting
-        #self.pattern.append(music21.note.Note())
-        #self.source.append(music21.note.Note())
-
         # TODO use two streams one for orig, one for not, have notes point back to their respective chords?
         # Now we can make note sets
         self.pattern = NoteSegment.NoteSegments(self.pattern)
@@ -86,8 +69,8 @@ class geoAlgorithm(object):
         self.source.lexicographic_sort()
         # don't run the algorithm here or you'll miss out on other preprocessing
 
-    def post_process(self):
-        for n in self.results.flat.notes:
+    def colour_score(self, occurrences):
+        for n in occurrences.flat.notes:
             n.original.color = self.settings['colour']
 
     def algorithm(self):
@@ -102,12 +85,45 @@ class geoAlgorithm(object):
         """
         pass
 
+    def __repr__(self):
+        # TODO add scores tuple
+        return "{0}(\nscores = {1},\nsettings = {2})".format(self.__class__, self.scores, self.settings)
+
 
 class geoAlgorithmSW(geoAlgorithm):
     def run(self):
         super(geoAlgorithmSW, self).run() #preprocess
+
+        # Preprocess
         self.pattern.compute_intra_vectors(self.settings['window'])
         self.source.compute_intra_vectors(self.settings['window'])
+
+        # Algorithm returns a list of K_rows
         self.results = self.algorithm()
-        self.post_process()
-        return self.results
+        # Process_results returns a filtered stream of matched notes in the source
+        self.occurrences = self.process_results(self.results)
+
+        self.colour_score(self.occurrences)
+
+    def process_results(self, results):
+        if self.settings['scale'] != "all":
+            results = filter(lambda x: x.s == self.settings['scale'], results)
+
+        occurrences = music21.stream.Stream()
+        for r in results:
+            # Get the notes of this particular occurrence
+            result_stream = music21.stream.Stream()
+            ptr = r
+            # TODO make backtracking part of a Ktable (entry or table?) class method
+            while ptr != None:
+                result_stream.insert(ptr.source_vector.end.getOffsetBySite(self.source.flat.notes), ptr.source_vector.end) # use insert for the note to be placed at its proper offset
+                if ptr.y == None:
+                    first_note = ptr.source_vector.start
+                    result_stream.insert(first_note.getOffsetBySite(self.source.flat.notes), first_note)
+                ptr = ptr.y
+            # Get the shift vector for this occurrence
+            # TODO make this a NoteVector() - but can't currently, because fist note of pattern is not necessarily contained in the same stream as source note
+            result_stream.shift = (first_note.offset - self.pattern.flat.notes[0].offset, first_note.pitch.ps - self.pattern.flat.notes[0].pitch.ps)
+            occurrences.append(result_stream)
+
+        return occurrences

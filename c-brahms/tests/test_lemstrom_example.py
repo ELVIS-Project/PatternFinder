@@ -6,6 +6,7 @@ from LineSegment import TwoDVector, LineSegmentSet
 from pprint import pformat # for pretty printing test error messages
 from geometric_algorithms.S1 import S1
 from geometric_algorithms.S2 import S2
+from fractions import Fraction # for scale settings
 import music21
 import NoteSegment
 import cbrahmsGeo
@@ -24,12 +25,43 @@ class TestLemstromExample(TestCase):
         pass
 
     @parameterized.expand([
-        ("P1_onset", partial(cbrahmsGeo.P1, option = 'onset')),
-        ("P1_segment", partial(cbrahmsGeo.P1, option = 'segment')),
-        ("P2", partial(cbrahmsGeo.P2, option = 0)),
-        ("P3", partial(cbrahmsGeo.P3, option = 0)),
         ("S1", S1),
-        ("S2", partial(S2, threshold = 5))
+        ("S2", S2)
+    ])
+    def test_lemstrom_QUERY_A_music21(self, _, algorithm):
+        """
+        Exact match QUERY A ||| P1-3, S1-2, W1-2 Using Music21 and the NoteSegment class
+        Parses the ground truth polyphonic music example provided in Lemstrom and Laitninen's 2011 paper. Query A should be found by all algorithms if their error tolerance is zero.
+        """
+        settings = {'scale' : 1, 'threshold' : 5}
+        carlos = algorithm(self.lemstrom_pattern('a'), self.lemstrom_score, settings)
+        carlos.run()
+        self.assertEqual(len(carlos.occurrences), 1)
+        self.assertEqual(carlos.occurrences[0].shift, (3.0, -10))
+
+    @parameterized.expand([
+        ("S1", S1),
+        ("S2", S2)
+    ])
+    def test_lemstrom_QUERY_C_music21(self, _, algorithm):
+        """
+        Exact scaled match QUERY C ||| S1-2, W1-2
+        Query C is an exact match scaled by a factor of 3
+        """
+        settings = {'scale' : Fraction(1,3), 'threshold' : 5}
+        carlos = algorithm(self.lemstrom_pattern('c'), self.lemstrom_score, settings)
+        carlos.run()
+        self.assertEqual(len(carlos.occurrences), 1)
+        self.assertEqual(carlos.occurrences[0].shift, (3.0, -10))
+
+    @parameterized.expand([
+        #("P1_onset", partial(cbrahmsGeo.P1, option = 'onset')),
+        #("P1_segment", partial(cbrahmsGeo.P1, option = 'segment')),
+        #("P2", partial(cbrahmsGeo.P2, option = 0)),
+        #("P3", partial(cbrahmsGeo.P3, option = 0)),
+        #("S1", S1),
+        #("S2", partial(S2, threshold = 5))
+
     ])
     def test_EXACT_midiparser_lemstrom_example(self, _, algorithm):
         """
@@ -40,8 +72,8 @@ class TestLemstromExample(TestCase):
         self.assertEqual(list_of_shifts, [TwoDVector(3.0, -10)])
 
     @parameterized.expand([
-        ("P2", partial(cbrahmsGeo.P2, option = 1)),
-        ("S2", partial(S2, threshold = 4)) # recall S family algorithms count "matching pairs". Since there are 6 notes in the pattern, and counting 1 mismatch, that makes 4 intra-pattern vector "matching pairs" required
+        #("P2", partial(cbrahmsGeo.P2, option = 1)),
+        #("S2", partial(S2, threshold = 4)) # recall S family algorithms count "matching pairs". Since there are 6 notes in the pattern, and counting 1 mismatch, that makes 4 intra-pattern vector "matching pairs" required
     ])
     def test_PARTIAL_midiparser_lemstrom_example(self, _, algorithm):
         """
@@ -52,8 +84,8 @@ class TestLemstromExample(TestCase):
         self.assertEqual(one_mismatch, [TwoDVector(3.0, -10)])
 
     @parameterized.expand([
-        ("S1", partial(S1, window = 3, start = 10)),
-        ("S2", partial(S2, threshold = 5))
+        #("S1", partial(S1, window = 3, start = 10)),
+        #("S2", partial(S2, threshold = 5))
     ])
     def test_SCALED_midiparser_lemstrom_example(self, _, algorithm):
         """

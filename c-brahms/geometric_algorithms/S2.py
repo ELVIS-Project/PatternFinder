@@ -136,10 +136,5 @@ class S2(geoAlgorithm.geoAlgorithmSW):
             i += 1 # Indexing for PQs, clean it up so you don't need this
 
         fkappa = kappa[1:]
-        # TODO put filtering in the geoAlgorithm class
-        if settings['scale'] != "all":
-            fkappa = filter(lambda x: x.s == settings['scale'], kappa)
-
         results = [max(fkappa, key=lambda x: x.w)]
-
-        return pattern.report_Ktable_occurrences(results, source)
+        return results

@@ -1,6 +1,7 @@
 from Queue import PriorityQueue # Lemstrom's choice of data structure
 from geometric_algorithms import geoAlgorithm
 from LineSegment import LineSegmentSet
+from pprint import pprint, pformat
 import copy
 import pdb
 
@@ -41,6 +42,13 @@ class S1(geoAlgorithm.geoAlgorithmSW):
 
         pattern.initialize_Ktables(source)
 
+        """
+##
+        print("INITIALIZED K TABLES \n")
+        pprint(pattern.K)
+##
+        """
+
         # A list of priority queues which refer to table K[i-1]
         # TODO calculate max size of each PriorityQueue and put it in the arg?
         ## TODO subclass priority queue
@@ -58,6 +66,13 @@ class S1(geoAlgorithm.geoAlgorithmSW):
             #new_K_row = copy.deepcopy(K_row) # TODO is copying necessary?
 
             pqueues[1].put((lex_order, K_row)) # PQ[i] refers to K_{i-1}
+
+        """
+##
+        print("INITIALIZED QUEUES \n")
+        pprint(pqueues)
+##
+        """
 
         ### LOOP THROUGH ALL THE REMAINING K TABLES ###
         #TODO why not all the way to len(pattern)? why skip the last K table?
@@ -98,26 +113,5 @@ class S1(geoAlgorithm.geoAlgorithmSW):
             i += 1 #TODO not sure indexing is necessary
 
         ### REPORT OCCURRENCES
-        #TODO why not the last K table?
-        if settings['scale'] == "all":
-            # Recall that 'w' counts chains of vectors, so for m segments, there must be m-1 vectors in the chain
-            results = [K_row for K_row in pattern.K[-2] if K_row.w == (len(pattern.flat.notes) - 1)]
-        else:
-            results = [K_row for K_row in pattern.K[-2] if (K_row.w == (len(pattern.flat.notes) - 1) and (K_row.s == settings['scale']))]
-
-        return pattern.report_Ktable_occurrences(results, source)
-
-
-    """
-        ### REPORT SHIFTS
-        list_of_shifts = []
-        for r in results:
-            ptr = r
-            while ptr['y'] != None:
-                ptr = ptr['y']
-            list_of_shifts.append((ptr['s'], source_set[ptr['a']] - pattern[0]))
-        if scale == 0:
-            return [shift[1] for shift in list_of_shifts]
-        else:
-            return [shift[1] for shift in list_of_shifts if shift[0] == scale]
-    """
+        results = [K_row for K_row in pattern.K[-2] if K_row.w == (len(pattern.flat.notes) - 1)]
+        return results
