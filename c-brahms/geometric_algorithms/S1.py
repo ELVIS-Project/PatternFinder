@@ -15,7 +15,6 @@ class S1(geoAlgorithm.geoAlgorithmSW):
         super(S1, self).run()
 
     def algorithm(self):
-    # TODO make it a **settings dict iterator
         """
         Input: Two NoteSegments streams: one called the pattern, which we are looking for occurrences within the larger source.
         Output: all shifts which result in a time-scaled occurrence of the pattern
