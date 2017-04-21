@@ -21,12 +21,17 @@ class TestExactMatches(TestCase):
         "P1_segment" : partial(cbrahmsGeo.P1, option='segment'),
         "P2_exact" : partial(cbrahmsGeo.P2, option=0),
         "P2_best" : cbrahmsGeo.P2,
-        "P3" : partial(cbrahmsGeo.P3, option=0)
+        "P3" : partial(cbrahmsGeo.P3, option=0),
+        "S1" : partial(cbrahmsGeo.S1, window = 0, scale = 1, start = 0),
+        "S2" : partial(cbrahmsGeo.S2, threshold = 0, scale = 1)
     }
 
     def setUp(self):
         # Over the Rainbow query
-        self.pattern = [LineSegment(d) for d in [[0,4,48],[4,4,60],[8,2,59],[10,1,55],[11,1,57],[12,2,59],[14,2,60]]]
+        #over_the_rainbow = [[0,4,48],[4,4,60],[8,2,59],[10,1,55],[11,1,57],[12,2,59],[14,2,60]]]
+        #self.pattern = [LineSegment(d) for d in over_the_rainbow]
+        over_the_rainbow = [(0,48,4),(4,60,4),(8,59,2),(10,55,1),(11,57,1),(12,59,2),(14,60,2)]
+        self.pattern = [LineSegment(*d) for d in over_the_rainbow]
         self.source = copy.deepcopy(self.pattern)
 
     def tearDown(self):
@@ -122,7 +127,7 @@ class TestExactMatches(TestCase):
         """
         Creates a source which consists of many pattern repetitions, each being transposed slightly. Then tests whether the algorithm can find each sequential occurrence of the pattern.
         """
-        num_repetitions = 300
+        num_repetitions = 30
         expected_matches = [TwoDVector(0, 0)]
 
         # Repeat the pattern by adding a new occurrence on to the end
@@ -134,6 +139,13 @@ class TestExactMatches(TestCase):
 
         list_of_shifts = algorithm(self.pattern, self.source)
         self.assertEqual(list_of_shifts, expected_matches)
+
+    def test_source_is_fragmented_pattern(self):
+        source = [LineSegment(*d) for d in ((0,2,48), (2,2,48), (4,2,60), (6,2,60), (8,1,59), (9,1,59), (10,0.5,55), (10.5,0.5,55), (11,0.5,57), (11.5,0.5,57), (12,1,59), (13, 1, 59), (14,1,60), (15,1,60))]
+        expected_matches = [TwoDVector(0,0)]
+        list_of_shifts = cbrahmsGeo.P3(self.pattern, self.source)
+        self.assertEqual(list_of_shifts, expected_matches)
+
 
     @parameterized.expand(algorithms.items())
     def test_midiparser_chidori(self, _, algorithm):
