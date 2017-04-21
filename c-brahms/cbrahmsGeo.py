@@ -9,26 +9,13 @@ https://tuhat.halvi.helsinki.fi/portal/services/downloadRegister/14287445/03ISMI
 In addition to Ukkonen's paper, we follow a ruby implementation by Mika Turkia, found at https://github.com/turkia/geometric-mir-algorithms/blob/master/lib/mir.rb
 """
 
-from LineSegment import LineSegment, TurningPoint, TwoDVector
+from LineSegment import LineSegment, LineSegmentSet, TurningPoint, TwoDVector, Bucket
+from Queue import PriorityQueue # Lemstrom's choice of data structure
+import music21
 import itertools
 import midiparser
-import Queue
 import copy
 import pdb
-
-def sub_2D_vectors(l1, l2):
-    """
-    Input: two vectors in R^2
-    Output: the difference between them. i.e., the vector f such that l1 + f = l2
-    """
-    return [l2[0]-l1[0], l2[1]-l1[1]]
-
-def add_2D_vectors(l1, f):
-    """
-    Input: a horizontal line segment, and a 2-d function
-    Output: a horizontal line segment shifted by the 2-d function
-    """
-    return [l1[0] + f[0], l1[1] + f[1]]
 
 # An exact matching algorithm 
 def P1(pattern, source, option = None):
@@ -37,6 +24,9 @@ def P1(pattern, source, option = None):
     Output: all 2-D line segment shifts which shift the pattern into some exact match within the source. If the pattern is larger than the source, P1 should return an empty list.
 
     Note: triple-pound comments (###) reference Ukkonen's pseudocode.
+
+    POLYPHONIC BEHAVIOUR:
+        P1 can find exact melodic occurrences through many voices. It will only find multiple matches if the first note of the pattern can match more than one identical note in the source, while all the rest of the notes find possibly non-unique matches. THIS should be changed.
     """
     # Make copies of pattern, source to avoid altering the data
     pattern = copy.deepcopy(pattern) # of size m
@@ -53,7 +43,7 @@ def P1(pattern, source, option = None):
     ptrs = [0 for p in pattern]
 
     ### (1) for j <- 1, ..., n-m do
-    # Any solution to the P1 specification must at least match p_0 with a segment in source. So we loop through all possible matches for p_0, and ascertain whether any of the resulting shifts also induce a total match for the whole pattern. There are n - m + 1 possible matches (the pseudocode appears to have missed the + 1).
+    # Any solution to the P1 specification must at least match p_0 with a segment in source. So we loop through all possible matches for p_0, and ascertain whether any of the resulting shifts also induce a total match for the whole pattern. There are n - m + 1 possible matches (the pseudocode in the paper appears to have missed the + 1).
     for t in range(len(source) - len(pattern) + 1):
         # Compute the shift to match p_0 and s_j.
         shift = source[t] - pattern[0]
@@ -74,10 +64,10 @@ def P1(pattern, source, option = None):
 
             ### (10) until q_i > p_i + f
             # Check if there is no match for this p_i. If so, there is no exact match for this t_j. Break, and try the next one.
-            if option == 'onset':
-                if source[ptrs[p]] != pattern[p] + shift: break
-            elif option == 'segment':
+            if option == 'segment':
                 if source[ptrs[p]] != pattern[p] + shift or source[ptrs[p]].duration != pattern[p].duration: break
+            else: # or if option == 'onset':
+                if source[ptrs[p]] != pattern[p] + shift: break
 
             ### (11) if i = m + 1 then output(f)
             # Check if we have successfully matched all notes in the pattern
@@ -96,13 +86,13 @@ def P2(pattern, source, option = None):
     """
     pattern = copy.deepcopy(pattern)
     source = copy.deepcopy(source)
-    source.append(LineSegment([float("inf"), 0, float("inf")]))
+    source.append(LineSegment(float("inf"), float("inf"), 0))
     # Lexicographically sort the pattern and source
     pattern.sort()
     source.sort()
 
     # Priority queue of shifts
-    shifts = Queue.PriorityQueue(len(pattern) * len(source))
+    shifts = PriorityQueue(len(pattern) * len(source))
     # Current minimum shift
     shift_candidate = TwoDVector(float("-inf"), float("-inf"))
     # Multiplicity counter for each distinct shift
@@ -154,68 +144,94 @@ def P2(pattern, source, option = None):
             option = len(pattern) - max(zip(*shift_matches)[1])
 
     # Return shifts with the given mismatch
-    return [shift[0] for shift in shift_matches if shift[1] == len(pattern) - option] # number of mismatches is relative to the length of the pattern (not the length of the source).
+    # number of mismatches is relative to the length of the pattern (not the length of the source).
+    return [shift[0] for shift in shift_matches if shift[1] == len(pattern) - option]
 
-
-def P3(pattern, source, option):
+def P3(pattern, source, option = None):
     """
     Input: two lists of horizontal line segments. One is the 'pattern', which we are looking for in the larger 'source'
     Output: all shifts which result in the largest intersection (measured in length) between the two sets of line segments
+
+    Only checks for transpositions within -127 and 127 semitones.
     """
     #curiosities: Not sure a negative (leftwards) match is possible with this algorithm (i.e., just a suffix of the pattern matches the beginning of the source). think about it?
+    # Sanity check: Each bucket represents a SLOPE and a TALLY for every y value. 
+    # There are four turning points per pattern segment. Each pattern segment can influence the n tally (there are as many tallys as there are vertical translations) in four ways! We sort them all and go through it one at a time.
 
-    # Currently, midi parser outputs a list of [onset, note, offset] so that P1, P2 keep working
-    # Eventually the algorithms should take line segment set objects as input, but for now..
-    pattern = [LineSegment(p[0], p[2], p[2] - p[0], p[1]) for p in pattern]
-    source = [LineSegment(s[0], s[2], s[2] - s[0], s[1]) for s in source]
+    # Sort pattern and source
+    #pattern = LineSegmentSet(pattern)
+    source = LineSegmentSet(source)
+    #pattern.onset_sort = sorted(pattern)
 
-    # Keep track of C_h for each y-coordinate in 256 buckets, which corresponds to every possible MIDI value
-    # Negative indices will wrap around; we assume all vertical translations are between -128 and 128
-    vertical_translations = [{'value' : 0, 'slope' : 0, 'prev_turning_point' : 0} for i in range(256)]
-    # Store 4 * m turning points in a priority queue
-    pq_size = 4 * len(pattern)
-    translations = Queue.PriorityQueue(pq_size)
+    # Remove overlapping of segments
+    if option == "overlap":
+        pass
+    else:
+        # Merging overlaps depends on previously being sorted.
+        source.mergeOverlappingSegments()
+        source.mergeOverlappingSegments()
+
+    pattern.sort()
+    source_onset_sort = sorted(source, key = lambda x: (x.onset, x.pitch))
+    source_offset_sort = sorted(source, key = lambda x: (x.offset, x.pitch))
+
+        #helper = source_onset_sort[1:]
+        #source_onset_sort.append(None)
+        #source_no_overlap = [mergeTwoSegments(elt[0], elt[1]) if elt[0].doesOverlapWith(elt[1]) else elt[0] for elt in zip(source_onset_sort, helper)]
+
+
+    # All vertical translations are between -127 and 127 since there are 127 possible MIDI values.
+    # So, we need a total of (127*2 + 1) = 255 buckets to keep track of each C_h.
+    # Negative indices will wrap around. 
+    # Initial prev_tp does not matter since slope is zero
+    C_h = [Bucket(value=0, slope=0, prev_tp=TwoDVector(0, 0)) for i in range(256)]
+
+    # Store 4 * m turning points in a priority queue (4 types per pattern segment)
+    turning_points = PriorityQueue(4 * len(pattern))
+    for p in pattern:
+        turning_points.put(TurningPoint(p, source_onset_sort[0], 0, 0))
+        turning_points.put(TurningPoint(p, source_onset_sort[0], 0, 1))
+        turning_points.put(TurningPoint(p, source_offset_sort[0], 0, 2))
+        turning_points.put(TurningPoint(p, source_offset_sort[0], 0, 3))
+
     # Keep track of the longest intersection
     best = 0
     list_of_shifts = []
 
-    # Populate the priority queue with all 4 types of pointers
-    for p in pattern:
-        for t in range(4):
-            ralph = TurningPoint(p, source[0], 0, t)
-            translations.put(ralph)
+    # LOOP: All 4 * m turning points now traverse the source. types 0,1 traverse onsets, and types 2,3 traverse offsets.
+    for i in range(4 * len(pattern) * len(source)):
+        min_tp = turning_points.get()
+        # min_tp.y is a whole number (MIDI pitch) so we can cast it to an int
+        i = int(min_tp.y)
 
-    # All 4 * m turning points now traverse the source
-    for i in range(pq_size * len(source)):
-        min_translation = translations.get()
-
-        # Increment the cumulative intersection value for this y-coordinate translation
-        # min_translation.y is a MIDI pitch: it should be a whole number, and can be casted to int
-        vertical_translations[int(min_translation.y)]['value'] += \
-            (vertical_translations[int(min_translation.y)]['slope']
-            * (min_translation.value - vertical_translations[int(min_translation.y)]['prev_turning_point']))
-        # save the TURNING POINT value, not the segment translation distance.
-        vertical_translations[int(min_translation.y)]['prev_turning_point'] = min_translation.value
-        # TODO store prev_turning_point as a turning point object, not as just the x coord?
+        # Each Turning Point changes the SLOPE of the total intersection: a turning point dictates the behaviour of the score up to the next Turning Point. So every time we take out a new turning point from the priority queue, the first thing we have to do is update the score.
+        # Update total intersection value
+        if min_tp.x != C_h[i].prev_tp.x:
+            C_h[i].value += C_h[i].slope * (min_tp.x - C_h[i].prev_tp.x)
 
         # Keep track of best matches
-        if vertical_translations[int(min_translation.y)]['value'] > best:
-            list_of_shifts = []
-            best = vertical_translations[int(min_translation.y)]['value']
+        if C_h[i].value > best: # New record!
+            list_of_shifts = [] # Reset list of accepted translations
+            best = C_h[i].value
         # Append a translation if it hasn't been added already
-        if vertical_translations[int(min_translation.y)]['value'] >= best and min_translation.vector not in list_of_shifts:
-            # Append the distance between the two segments, measured from their onset times.
-            # TODO you don't want to append the dsitance measured by onset times; you want to append the distances based on the turning point values. we are measuring total INTERSECTION, it can be only at the 4 turning points that the intersection is the highest!
-            list_of_shifts.append(min_translation.vector)
+        if C_h[i].value >= best and min_tp not in list_of_shifts:
+            list_of_shifts.append(min_tp)
 
         # Update slope
-        if min_translation.type in [0, 3]:
-            vertical_translations[int(min_translation.y)]['slope'] += 1
+        if min_tp.type in [0, 3]:
+            C_h[i].slope += 1
         else:
-            vertical_translations[int(min_translation.y)]['slope'] -= 1
+            C_h[i].slope += -1
 
-        # Update pointer
-        if min_translation.source_index < len(source) - 1:
-           translations.put(TurningPoint(min_translation.pattern_segment, source[min_translation.source_index + 1], min_translation.source_index + 1, min_translation.type))
+        # Save current turning point so other TP's know long it has been since the value has been updated
+        C_h[i].prev_tp = min_tp
+        # Find next turning point of this type (move pointer forward)
+        if min_tp.source_index < len(source) - 1:
+            if min_tp.type == 0 or min_tp.type == 1:
+                turning_points.put(TurningPoint(min_tp.pattern_segment, source_onset_sort[min_tp.source_index + 1], min_tp.source_index + 1, min_tp.type))
+            else: # type == 2 or 3
+                turning_points.put(TurningPoint(min_tp.pattern_segment, source_offset_sort[min_tp.source_index + 1], min_tp.source_index + 1, min_tp.type))
 
     return list_of_shifts
+
+
