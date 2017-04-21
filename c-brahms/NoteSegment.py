@@ -1,11 +1,23 @@
 from itertools import groupby # for use in initializing K tables
 from fractions import Fraction
 from collections import namedtuple
-from pprint import pformat #for K_enry __repr__
+from pprint import pprint, pformat #for K_enry __repr__
+import copy # for link_and_create
 import numpy as np
 import pandas as pd
 import music21
 import pdb
+
+def link_and_create(ralph):
+    """
+    For copying a stream, linking its notes to the new stream, and returning the new copy
+    """
+    larry = copy.deepcopy(ralph)
+    # Used .recurse() instead of .flat because I'm paranoid that .flat creates a new temp stream and that the references will point to the temp stream instead of the original one
+    for n in zip(larry.recurse().notes, ralph.recurse().notes):
+        n[0].link = n[1]
+        n[1].link = n[0]
+    return larry
 
 
 #K_entry = namedtuple('K_entry', ['a', 'b', 'y', 'c', 's', 'w', 'z', 'source_vector', 'pattern_vector'])
@@ -77,6 +89,40 @@ class NoteSegments(music21.stream.Stream):
         for n in self.flat.notes:
             n.priority = int(n.pitch.ps) # priority values must be integers, and pitch.ps returns a float. This may lead to some buggy issues with quartertones, since two notes a quarter-tone a part will be treated as identical due to truncation.
 
+    def flatten_chords(self):
+        def music21Chord_to_music21Notes(chordy, site):
+            """
+            CHORD TO LIST OF NOTES FOR USE IN music21.stream.inser()
+            For serious flattening of the score into a 2-d plane of horizontal line segments.
+            music21.note.Note and music21.chord.Chord subclass the same bases, so in theory it shoud look something like this...
+
+            NOTE: this will screw up the coloring since music21 doesn't support coloring one note of a chord (i don't think?), so as compromise i'll just color the whole chord.
+            """
+            note_list = []
+            for pitch in chordy.pitches:
+                note = music21.note.Note(pitch)
+
+                # note essentials
+                note.offset = chordy.getOffsetBySite(site)
+                note.duration = chordy.duration
+
+                # our modifications
+                note.link = chordy.link
+                note.didBelongToAChord = True
+
+                # music21.stream.insert() expects [offset #1, note #1, offset #2, ...]
+                note_list.append(offset)
+                note_list.append(note)
+            return note_list
+
+        # Use .flat instead of .recurse() because you want to preserve the nested stream offsets. You can use .getOffsetInHierarchy() in music21 v.3 but we are using v.2 currently
+        for element in self.flat.notes:
+            if element.isChord:
+                self.insert(music21Chord_to_music21Notes(element, self.flat.notes))
+                self.remove(element, recurse=True)
+            else:
+                element.didBelongToAChord = False
+
     def initialize_Ktables(self, source):
         """
         K-table data structure used in algorithms S1-2, W1-2
@@ -84,6 +130,17 @@ class NoteSegments(music21.stream.Stream):
 
         Requires that self, source intra_vectors have already been initialized with their desired windowing
         """
+
+        """
+##
+        print("INITIALIZING KTABLES ....\n")
+        print("PATTER IVS ")
+        print(len(self.ivs))
+        print("SOURCE IVS ")
+        print(len(source.ivs))
+##
+        """
+
         # Dict comprehension using groupby in order to easily access database vectors based on their pitch translations (y values)
         intra_database_vectors = {key : list(g) for key, g in groupby(source.ivs, lambda x: x.y)}
         # intra_vectors = {key : list(g) for key, g in groupby(self.ivs, lambda x: x.start}
@@ -172,20 +229,3 @@ class NoteSegments(music21.stream.Stream):
             result_stream.shift = (first_note.offset - self.flat.notes[0].offset, first_note.pitch.ps - self.flat.notes[0].pitch.ps)
             occurrences.append(result_stream)
         return occurrences
-
-    """
-    def report_Ktable_occurrences(results, source_set):
-        occurrences = music21.stream.Stream()
-        for r in results[1:]: #results indexes from 1
-            result_stream = music21.stream.Stream()
-            occurrences.append(result_stream)
-
-            ptr = r
-            while ptr != None:
-                result_stream.append(source_set[ptr['b']].note)
-                if ptr['y'] == None:
-                    result_stream.append(source_set[ptr['a']].note)
-                ptr = ptr['y']
-
-        return occurrences
-    """
