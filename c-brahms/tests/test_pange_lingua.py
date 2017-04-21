@@ -40,7 +40,7 @@ class TestPangeLingua(TestCase):
             ("kyrie1_bass_mm2-5.xml", [("P2-option2", partial(cbrahmsGeo.P2, option=2))], [[60, 12]])
     ]
 
-    TESTS = reduce(lambda x, y: x+y, [[{
+    TESTS = reduce(lambda x, y: x+y, [[{ #concatenate the lists
             'query' : music_folder + q,
             'algorithm' : algy,
             'expected' : e
