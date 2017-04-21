@@ -42,7 +42,7 @@ def directed_mod12(pitches):
                't', 'u', 'v', 'w', 'x', 'y']
 
     result = ''
-    for c in range(len(pitches) - 1):
+    for c in range(len(pitches)):
         intvl = int(pitches[c])
         if intvl >= 0 and intvl <= 12:
             result = result + symbols[intvl]
