@@ -45,6 +45,7 @@ class geoAlgorithm(object):
 
         for stream in ((self.original_source.flat.notes, self.source), (self.original_pattern.flat.notes, self.pattern)):
             #use .flat.notes instead of .recurse() because note.getOffsetByHierarchy is only in music 21 version 3
+            i = 0
             for element in stream[0]:
                 if element.isChord:
                     for pitch in element.pitches:
@@ -53,8 +54,16 @@ class geoAlgorithm(object):
                         note.duration = element.duration
                         note.didBelongToAChord = True
                         note.original = element
+
+                        # Index
+                        note.index = i
+                        i += 1
                         stream[1].insert(note)
                 else:
+                    # Index
+                    element.index = i
+                    i += 1
+
                     element.didBelongToAChord = False
                     element.original = element
                     stream[1].insert(element.getOffsetBySite(stream[0]), element)
@@ -97,6 +106,8 @@ class geoAlgorithmSW(geoAlgorithm):
         # Preprocess
         self.pattern.compute_intra_vectors(self.settings['window'])
         self.source.compute_intra_vectors(self.settings['window'])
+        # TODO ktable initialization shouldn't be repeated for diff. algys, it should be done once and made part of the score?
+        self.pattern.initialize_Ktables(self.source)
 
         # Algorithm returns a list of K_rows
         self.results = self.algorithm()

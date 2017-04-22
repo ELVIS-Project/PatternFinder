@@ -22,8 +22,6 @@ class S2(geoAlgorithm.geoAlgorithmSW):
             threshold = len(self.pattern.flat.notes) - 1 # recall the length of an occurrence is in # of vectors, so the max # of vectors is len - 1
         scale = settings['scale']
 
-        pattern.initialize_Ktables(source)
-
         pqueues = [PriorityQueue() for table in pattern.K]
 
         # TODO figure out kappa indexing
@@ -57,13 +55,13 @@ class S2(geoAlgorithm.geoAlgorithmSW):
         i = 1 # TODO indexing for PQs, clean it up so you don't need this
         for K_table in pattern.K[1:-1]:
             # TODO this will make the program wait() if len(pattern)=0
-            q = pqueues[i].get()[1] # q is an intra db vector which matches some pattern vector that ends at pattern index q['c']. use [1] to ignore lex_order tuple
+            q = pqueues[i].get_nowait()[1] # q is an intra db vector which matches some pattern vector that ends at pattern index q['c']. use [1] to ignore lex_order tuple
             for K_row in K_table:
                 # I don't understand this line too well:
                 if (q.b, q.s) > (K_table[-1].a, K_table[-1].s):
                     break
                 while (q.b, q.s) < (K_row.a, K_row.s):
-                    q = pqueues[i].get()[1]
+                    q = pqueues[i].get_nowait()[1]
 
                 ### BINDING OF EXTENSION ###
                 ## (9) if [q.b, q.s] = [K[i]_j.a, K[i]_j.s] then
@@ -83,11 +81,11 @@ class S2(geoAlgorithm.geoAlgorithmSW):
                         ## (12) if r.w > q.w then q <--r
 
                     ##TODO couldn't you just modify "lex_order" to include 'w' as a third parameter??
-                    r = pqueues[i].get()[1]
+                    r = pqueues[i].get_nowait()[1]
                     while (r.b, r.s) == (q.b, q.s):
                         if r.w > q.w:
                             q = r
-                        r = pqueues[i].get()[1]
+                        r = pqueues[i].get_nowait()[1]
                     # put r back so that pqueues.get() acts more like a 'peek'
                     lex_order = (r.b, r.s)
                     pqueues[i].put((lex_order, r))

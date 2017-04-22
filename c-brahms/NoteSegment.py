@@ -20,18 +20,43 @@ def link_and_create(ralph):
     return larry
 
 
-#K_entry = namedtuple('K_entry', ['a', 'b', 'y', 'c', 's', 'w', 'z', 'source_vector', 'pattern_vector'])
+#K_entry = namedtuple('K_entry', ['a', 'b', 'y', 'c', 's', 'e', 'w', 'z', 'source_vector', 'pattern_vector'])
+#TODO make a K_entry just an extended NoteVector?
 class K_entry():
-    def __init__(self, a, b, y, c, s, w, z, sv, pv):
-        self.a = a
-        self.b = b
-        self.y = y
-        self.c = c
-        self.s = s
-        self.w = w
-        self.z = z
-        self.source_vector = sv
-        self.pattern_vector = pv
+    def __init__(self, p_vec, s_vec, K_index = 0, finalRow = False):
+
+        if not finalRow:
+            # Compute scale
+            if p_vec.x == 0 and s_vec.x == 0:
+                scale = 1
+            elif (p_vec.x == float("inf") and s_vec.x == float("inf")) or p_vec.x == 0 or s_vec.x == 0:
+                scale = None
+            else:
+                # Fraction(num, denom) only accepts integers as arguments, so you need to convert source_vec and pattern_vec first
+                scale = Fraction(Fraction(s_vec.x), Fraction(p_vec.x))
+
+            # K_entry data
+            a = s_vec.site.index(s_vec.start)
+            b = s_vec.site.index(s_vec.end)
+            c = p_vec.site.index(p_vec.end) # p_i'
+            s = scale # For S1, S2
+            w = 1 # length of occurrence
+            source_vector = s_vec
+            pattern_vector = p_vec
+        else:
+            a = float("inf")
+            b = float("inf")
+            c = K_index + 1 # i + 1
+            s = 0
+            w = 0
+            # y, z are not initialized in the pseudocode but an KeyError is thrown in S2 without them TODO make defaults in the K_entry __init__
+            source_vector = None
+            pattern_vector = None
+
+        y = None # backlink for building occurrences
+        e = 0 # For W1, W2
+        z = 0 # partial occurrence
+        self.a, self.b, self.c, self.s, self.y, self.e, self.w, self.z, self.source_vector, self.pattern_vector = a, b, c, s, y, e, w, z, source_vector, pattern_vector
 
     def __repr__(self):
         return pformat(self.__dict__)
@@ -123,6 +148,7 @@ class NoteSegments(music21.stream.Stream):
             else:
                 element.didBelongToAChord = False
 
+    # TODO make this a part of geoAlgorithm since it's really about a pattern and a source, not just any segment stream.
     def initialize_Ktables(self, source):
         """
         K-table data structure used in algorithms S1-2, W1-2
@@ -141,57 +167,24 @@ class NoteSegments(music21.stream.Stream):
 ##
         """
 
-        # Dict comprehension using groupby in order to easily access database vectors based on their pitch translations (y values)
-        intra_database_vectors = {key : list(g) for key, g in groupby(source.ivs, lambda x: x.y)}
-        # intra_vectors = {key : list(g) for key, g in groupby(self.ivs, lambda x: x.start}
-
         # There is one K table per note in the pattern
         # TODO make the K table a class so you can have a PQ in it; this will make the algorithm code cleaner (no need to index PQ's)
         self.K = [[] for note in self.flat.notes]
 
-        for f in self.ivs:
-            if not intra_database_vectors.has_key(f.y):
-                continue
-            for g in intra_database_vectors[f.y]:
-                # Scale
-                if f.x == 0 and g.x == 0:
-                    scale = 1
-                elif (f.x == float("inf") and g.x == float("inf")) or f.x == 0 or g.x == 0:
-                    continue
-                else:
-                    # Fraction(num, denom) only accepts integers as arguments, so you need to convert g.x and f.x first
-                    scale = Fraction(Fraction(g.x), Fraction(f.x))
+        # Dict comprehension using groupby in order to easily access database vectors based on their pitch translations (y values)
+        intra_database_vectors = {key : list(g) for key, g in groupby(source.ivs, lambda x: x.y)}
 
-                # K_entry data
-                a = source.flat.notes.index(g.start)
-                b = source.flat.notes.index(g.end)
-                y = None # backlink for building occurrences
-                c = self.flat.notes.index(f.end) # p_i'
-                s = scale
-                w = 1 # length of occurrence
-                z = 0 # partial occurrence
-                source_vector = g
-                pattern_vector = f
-
-                # Append K_entry to the table
-                #TODO make these NoteVector object entries
-                self.K[self.flat.notes.index(f.start)].append(K_entry(a, b, y, c, s, w, z, source_vector, pattern_vector))
+        # sort and group pattern vectors by the indices of their starting note
+        keyfunc = lambda x: x.site.index(x.start)
+        self.ivs.sort(key=keyfunc)
+        for K_index, group in groupby(self.ivs, keyfunc):
+            self.K[K_index] = [K_entry(p_vec, s_vec) for p_vec in group for s_vec in intra_database_vectors.get(p_vec.y) if K_entry(p_vec, s_vec).s is not None]
 
             # Append the last row, denoted \sum{p_i} : the number of rows generated for table K[i]
-            a = float("inf")
-            b = float("inf")
-            c = self.flat.notes.index(f.start) + 1 # i + 1
-            s = 0
-            w = 0
-            # y, z are not initialized in the pseudocode but an KeyError is thrown in S2 without them
-            y = None
-            z = 0
-            source_vector = None
-            pattern_vector = None
-            self.K[self.flat.notes.index(f.start)].append(K_entry(a, b, y, c, s, w, z, source_vector, pattern_vector))
+            self.K[K_index].append(K_entry(None, None, K_index, finalRow = True))
 
             # Sort the K table in order {a, b, s} as per his order set "Aleph". Not totally confident in the implications of the sort order here, so it could maybe be wrong.
-            self.K[self.flat.notes.index(f.start)].sort(key = lambda x : (x.a, x.b, x.s))
+            self.K[K_index].sort(key = lambda x : (x.a, x.b, x.s))
 
 
 

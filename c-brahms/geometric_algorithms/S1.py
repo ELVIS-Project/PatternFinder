@@ -39,8 +39,6 @@ class S1(geoAlgorithm.geoAlgorithmSW):
         source = self.source
         settings = self.settings
 
-        pattern.initialize_Ktables(source)
-
         """
 ##
         print("INITIALIZED K TABLES \n")
@@ -62,8 +60,6 @@ class S1(geoAlgorithm.geoAlgorithmSW):
         pattern.K[0][-1].s = float("inf")
         for K_row in pattern.K[0]:
             lex_order = (K_row.b, K_row.s) # PQs are sorted lexicographically by (b, s)
-            #new_K_row = copy.deepcopy(K_row) # TODO is copying necessary?
-
             pqueues[1].put((lex_order, K_row)) # PQ[i] refers to K_{i-1}
 
         """
@@ -74,20 +70,20 @@ class S1(geoAlgorithm.geoAlgorithmSW):
         """
 
         ### LOOP THROUGH ALL THE REMAINING K TABLES ###
-        #TODO why not all the way to len(pattern)? why skip the last K table?
+        #TODO why not all the way to len(pattern)? why skip the last K table? (skip or the algy doesn't work)
         #####
         ## (3) for i <-- 1,..., m - 2 do
             ## (4) q <-- pop(Q_i^{b,s})
             ## (5) for j <-- 0,...,\sum_{p_i} - 1 do
         i = 1 # TODO not sure if indexing is necessary
         for K_table in pattern.K[1:-1]:
-            q = pqueues[i].get()[1] #[1]-- get the :dict: and ignore the lex order tuple
+            q = pqueues[i].get_nowait()[1] #[1]-- get the :dict: and ignore the lex order tuple
             for K_row in K_table[:-1]: # TODO this deviates from pseudocode and skips the last K_row of the K table. why?
                 ### FIND AN ANTECEDENT OF THE BINDING 
                 ## (6) while [q.b, q.s] < [K[i]_j.a, K[i]_j.s] do
                     ## (7) q <-- pop(Q_i^{b,s}
                 while (q.b, q.s) < (K_row.a, K_row.s):
-                    q = pqueues[pattern.K.index(K_table)].get()[1]
+                    q = pqueues[i].get_nowait()[1]
 
                 ### BINDING OF EXTENSION
                 ## (8) if [q.b, q.s] = [K[i]_j.a, K[i]_j.s] then
@@ -101,7 +97,7 @@ class S1(geoAlgorithm.geoAlgorithmSW):
                     lex_order = (K_row.b, K_row.s)
                     #new_K_row = copy.deepcopy(K_row) #TODO copy necessary?
                     pqueues[i+1].put((lex_order, K_row))
-                    q = pqueues[i].get()[1]
+                    q = pqueues[i].get_nowait()[1]
 
             ## (13) K[i]_\sum_{p_i}.s <-- \infinity
             ## (14) Q_{i+1}^{b,s} <-- push(&K[i]_\sum_{p_i})
