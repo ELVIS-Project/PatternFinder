@@ -5,13 +5,13 @@ import music21
 import copy
 import pdb
 
-class S2(geoAlgorithm.geoAlgorithmSW):
+class W2(geoAlgorithm.geoAlgorithmSW):
 
     def __init__(self, pattern_score, source_score, settings = geoAlgorithm.DEFAULT_SETTINGS):
         super(geoAlgorithm.geoAlgorithmSW, self).__init__(pattern_score, source_score, settings)
 
     def run(self):
-        super(S2, self).run()
+        super(W2, self).run()
 
     def algorithm(self):
         pattern = self.pattern
@@ -35,14 +35,14 @@ class S2(geoAlgorithm.geoAlgorithmSW):
             ## (2) for j <-- 0,...,\sum_{p_0} ### Should be "p_i", I reckon a typo in the pseudocode. also why not \sum_{p_i} -1
                 ## (3) Q_{K[i]_j}.c^{b,s} <-- push(&K[i]_j) # c should be out of bounds here if it's initialized with len(pattern)?
         l = 0 # number of occurrences
-        pattern.K[0][-1].s = float("inf")
+        pattern.K[0][-1].e = float("inf")
         for i in range(len(pattern.flat.notes) - 1): #ignore last K table
             K = pattern.K[i]
             for j in range(len(K)):
                 #TODO temporary fix. don't push the last row unless it's the first K table
                 if i > 0 and j == (len(K) - 1):
                     continue
-                lex_order = (K[j].b, K[j].s)
+                lex_order = (K[j].b, K[j].a)
                 pqueues[K[j].c].put((lex_order, K[j]))
 
         ### LOOP THROUGH ALL K TABLES EXCEPT THE FIRST
@@ -58,14 +58,14 @@ class S2(geoAlgorithm.geoAlgorithmSW):
             q = pqueues[i].get_nowait()[1] # q is an intra db vector which matches some pattern vector that ends at pattern index q['c']. use [1] to ignore lex_order tuple
             for K_row in K_table:
                 # I don't understand this line too well:
-                if (q.b, q.s) > (K_table[-1].a, K_table[-1].s):
+                if (q.b, q.e) > (K_table[-1].a, K_table[-1].e):
                     break
-                while (q.b, q.s) < (K_row.a, K_row.s):
+                while (q.b, q.e) < (K_row.a, K_row.e):
                     q = pqueues[i].get_nowait()[1]
 
                 ### BINDING OF EXTENSION ###
                 ## (9) if [q.b, q.s] = [K[i]_j.a, K[i]_j.s] then
-                if (q.b, q.s) == (K_row.a, K_row.s):
+                if (q.b, q.e) == (K_row.a, K_row.e):
 
                     ### EXTEND THE LONGEST PREFIX OCCURRENCE ###
                     # So essentially, of all the intra-db vectors which match
@@ -82,12 +82,12 @@ class S2(geoAlgorithm.geoAlgorithmSW):
 
                     ##TODO couldn't you just modify "lex_order" to include 'w' as a third parameter??
                     r = pqueues[i].get_nowait()[1]
-                    while (r.b, r.s) == (q.b, q.s):
-                        if r.w > q.w:
+                    while (r.b, r.e) == (q.b, q.e):
+                        if r.w >= q.w:
                             q = r
                         r = pqueues[i].get_nowait()[1]
                     # put r back so that pqueues.get() acts more like a 'peek'
-                    lex_order = (r.b, r.s)
+                    lex_order = (r.b, r.a)
                     pqueues[i].put((lex_order, r))
 
                     ## (13) K[i]_j.w <-- q.w + 1
@@ -123,13 +123,13 @@ class S2(geoAlgorithm.geoAlgorithmSW):
 
                     ### Put the end of this occurence chain back in the priority queue
                     ## (22) Q_{K[i]_j.c}^{b,s} <-- push(&K[i]_j) 
-                    lex_order = (K_row.b, K_row.s)
+                    lex_order = (K_row.b, K_row.a)
                     pqueues[K_row.c].put((lex_order, K_row))
 
             ## (23) K[i]_\sum{p_i}.s <-- \infinity
             ## (24) Q_{i+1}^{b,s} <-- push(&K[i]_\sum{p_i})
-            K_table[-1].s = float("inf")
-            lex_order = (K_table[-1].b, K_table[-1].s)
+            K_table[-1].e = float("inf")
+            lex_order = (K_table[-1].b, K_table[-1].a)
             pqueues[i+1].put((lex_order, K_table[-1]))
             i += 1 # Indexing for PQs, clean it up so you don't need this
 

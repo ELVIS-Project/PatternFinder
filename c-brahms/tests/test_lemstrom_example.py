@@ -4,8 +4,7 @@ from functools import partial
 from nose_parameterized import parameterized
 from LineSegment import TwoDVector, LineSegmentSet
 from pprint import pformat # for pretty printing test error messages
-from geometric_algorithms.S1 import S1
-from geometric_algorithms.S2 import S2
+from geometric_algorithms import S1, S2, W1, W2
 from fractions import Fraction # for scale settings
 import music21
 import NoteSegment
@@ -24,10 +23,11 @@ class TestLemstromExample(TestCase):
     def tearDown(self):
         pass
 
-    @parameterized.expand([
-        ("S1", S1),
-        ("S2", S2)
-    ])
+    W-algorithms = [("W1", W1), ("W2", W2)]
+    S-algorithms = [("S1", S1), ("S2", S2)] + W-algorithms
+    exact = S-algorithms + W-algorithms
+
+    @parameterized.expand(exact)
     def test_lemstrom_QUERY_A_music21(self, _, algorithm):
         """
         Exact match QUERY A ||| P1-3, S1-2, W1-2 Using Music21 and the NoteSegment class
@@ -39,10 +39,7 @@ class TestLemstromExample(TestCase):
         self.assertEqual(len(carlos.occurrences), 1)
         self.assertEqual(carlos.occurrences[0].shift, (3.0, -10))
 
-    @parameterized.expand([
-        ("S1", S1),
-        ("S2", S2)
-    ])
+    @parameterized.expand(S-algorithms)
     def test_lemstrom_QUERY_C_music21(self, _, algorithm):
         """
         Exact scaled match QUERY C ||| S1-2, W1-2
@@ -54,6 +51,19 @@ class TestLemstromExample(TestCase):
         self.assertEqual(len(carlos.occurrences), 1)
         self.assertEqual(carlos.occurrences[0].shift, (3.0, -10))
 
+    @parameterized.expand(W-algorithms)
+    def test_lemstrom_QUERY_E_music21(self, _, algorithm):
+        """
+        Exact scaled match QUERY E ||| W1-2
+        Query C is an exact match scaled by a factor of 3
+        """
+        settings = {'scale' : Fraction(1,3), 'threshold' : 5}
+        carlos = algorithm(self.lemstrom_pattern('e'), self.lemstrom_score, settings)
+        carlos.run()
+        self.assertEqual(len(carlos.occurrences), 1)
+        self.assertEqual(carlos.occurrences[0].shift, (3.0, -10))
+
+
     @parameterized.expand([
         #("P1_onset", partial(cbrahmsGeo.P1, option = 'onset')),
         #("P1_segment", partial(cbrahmsGeo.P1, option = 'segment')),
@@ -61,6 +71,7 @@ class TestLemstromExample(TestCase):
         #("P3", partial(cbrahmsGeo.P3, option = 0)),
         #("S1", S1),
         #("S2", partial(S2, threshold = 5))
+
 
     ])
     def test_EXACT_midiparser_lemstrom_example(self, _, algorithm):
