@@ -39,19 +39,18 @@ Query and source files are passed in by file name, using relative file names fro
 Currently, the supported options for each algorithm are:
 
 #### P1 Options
-    ```onset``` (DEFAULT) : only line segment onsets are used to calculate exact matches
-    ```segment``` (not implemented) : line segment onsets AND offsets are used to calculate exact matches
+```onset``` (DEFAULT) : only line segment onsets are used to calculate exact matches
+```segment``` (not implemented) : line segment onsets AND offsets are used to calculate exact matches
 
 #### P2 Options
-    ```min``` (DEFAULT) : approximate matches which minimize the number of mismatches are displayed
-    ```onset``` (DEFAULT) : only line segment onsets are used to calculate exact matches
-    ```segment``` (not implemented) : line segment onsets AND offsets are used to calculate exact matches
-    ```all``` : all possible approximate matches are displayed (a total of len(source) * len(query) matches)
-    ```int x``` : all approximate matches with exactly x mismatches are displayed. Ex. P2 -o 0 will behave exactly the same as P1 except with a longer runtime.
+```min``` (DEFAULT): approximate matches which minimize the number of mismatches are displayed
+```onset``` (DEFAULT): only line segment onsets are used to calculate exact matches
+```segment``` (not implemented): line segment onsets AND offsets are used to calculate exact matches
+```all```: all possible approximate matches are displayed (a total of len(source) * len(query) matches)
+```int x```: all approximate matches with exactly x mismatches are displayed. Ex. P2 -o 0 will behave exactly the same as P1 except with a longer runtime.
 
 #### P3 Options
 P3 is not currently functional.
-
 
 ## Tests
 
@@ -65,20 +64,18 @@ Queries and sources used for ground truth:
 #### Bach BWV2 Chorale
 The query is a V-i cadence found at onset 30. The result for each algorithm should be \[[30.0, 0]\] (a horizontal translation of 30, and a vertical translation of 0)
 
-![alt text](music_files/BWV2_edit.jpg)
+![Bach Chorale BWV2](music_files/BWV2_edit.jpg)
 
 #### Chidori Meimei Folk Song
 The query is a four note eighth note pattern first seen in measure 2. It occurs at onsets 2, 6, 65, and 69, with the same pitches. The query is given a whole tone below the source to test for proper transposition-invariance.
 
-![alt text](music_files/chidori_meimei_edit.jpg)
-
+![Chidori Meimei Folk Song](music_files/chidori_meimei_edit.jpg)
 
 ### Lemstrom Example Suite
 In Lemstrom and Laitinen's 2011 paper, the authors included a musical example in which all 8 algorithms P1-3, S1-2, and W1-2 could find specific queries. This example was transcribed and imbedded in a test suite.
 
 ### Specific Algorithm Suites
 Each algorithm has unique settings and edgecases which must be tested separately; these are found in files named 'test_$algorithm.py'
-
 
 ## References
 
