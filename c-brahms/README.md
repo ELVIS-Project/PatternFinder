@@ -38,22 +38,18 @@ Query and source files are passed in by file name, using relative file names fro
 
 Currently, the supported options for each algorithm are:
 
-#### P1
-'onset' (DEFAULT) : only line segment onsets are used to calculate exact matches
+#### P1 Options
+    ```onset``` (DEFAULT) : only line segment onsets are used to calculate exact matches
+    ```segment``` (not implemented) : line segment onsets AND offsets are used to calculate exact matches
 
-'segment' (not implemented) : line segment onsets AND offsets are used to calculate exact matches
+#### P2 Options
+    ```min``` (DEFAULT) : approximate matches which minimize the number of mismatches are displayed
+    ```onset``` (DEFAULT) : only line segment onsets are used to calculate exact matches
+    ```segment``` (not implemented) : line segment onsets AND offsets are used to calculate exact matches
+    ```all``` : all possible approximate matches are displayed (a total of len(source) * len(query) matches)
+    ```int x``` : all approximate matches with exactly x mismatches are displayed. Ex. P2 -o 0 will behave exactly the same as P1 except with a longer runtime.
 
-#### P2
-'min' (DEFAULT) : approximate matches which minimize the number of mismatches are displayed
-'onset' (DEFAULT) : only line segment onsets are used to calculate exact matches
-
-'segment' (not implemented) : line segment onsets AND offsets are used to calculate exact matches
-
-'all' : all possible approximate matches are displayed (a total of len(source) * len(query) matches)
-
-int x : all approximate matches with exactly x mismatches are displayed. Ex. P2 -o 0 will behave exactly the same as P1 except with a longer runtime.
-
-#### P3
+#### P3 Options
 P3 is not currently functional.
 
 
