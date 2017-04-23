@@ -1,7 +1,7 @@
 from unittest import TestCase, TestLoader, TextTestRunner
 from tests import tools
 from functools import partial
-from nose_parameterized import parameterized
+from nose_parameterized import parameterized, param
 from LineSegment import TwoDVector, LineSegmentSet
 from pprint import pformat # for pretty printing test error messages
 from geometric_algorithms import S1, S2, W1, W2
@@ -13,105 +13,51 @@ import midiparser
 import pdb
 
 
+lemstrom_pattern = lambda x: 'music_files/lemstrom2011_test/query_' + x + '.mid'
+lemstrom_score = 'music_files/lemstrom2011_test/leiermann.xml'
+
+algorithm_W = [("W1", W1), ("W2", W2)]
+algorithm_S = [("S1", S1), ("S2", S2)] + algorithm_W
+algorithm_P = algorithm_S + algorithm_W
+
 class TestLemstromExample(TestCase):
 
-    def setUp(self):
-        self.lemstrom_score = 'music_files/lemstrom2011_test/leiermann.xml'
-        # A function to return a query file name. Usage: self.lemstrom_pattern('a') --> 'query_a.mid'
-        self.lemstrom_pattern = lambda x: 'music_files/lemstrom2011_test/query_' + x + '.mid'
+    # List of queries. To add new tests - format is ("query_filename", [list of algorithms tuples e.g. ("algy-name", function) to test this query], [expected results])
+    QUERIES = [
+            ('a', (S1, S2, W1, W2), (3.0, -10), {'scale' : 1, 'threshold' : 5}),
+            #('b', (S2, W2), (3.0, -10), {'scale' : 1, 'threshold' : 'max'),
+            ('c', (S1, S2, W1, W2), (3.0, -10), {'scale' : Fraction(1, 3), 'threshold' : 5}),
+            #('d', (S2, W2), (3.0, -10), {'scale' : Fraction(1,3), 'threshold' : 'max'}),
+            ('e', (W1, W2), (3.0, -10), {'threshold' : 5})
+            #('f', (W2,), (3.0, -10))
+    ]
 
-    def tearDown(self):
-        pass
+    TESTS = reduce(lambda x, y: x+y, [[{ #concatenate the lists
+            'query' : q,
+            'algorithm' : algy,
+            'expected' : e
+        } for algy in a] for (q, a, e, s) in QUERIES])
 
-    W-algorithms = [("W1", W1), ("W2", W2)]
-    S-algorithms = [("S1", S1), ("S2", S2)] + W-algorithms
-    exact = S-algorithms + W-algorithms
+    def custom_func_name(testcase_func, param_num, param):
+        return "%s_algorithm_%s_Query_%s" % (
+                testcase_func.__name__,
+                param[1]['algorithm'].__name__, #algorithm[0] for string name
+                param[1]['query']
+        )
 
-    @parameterized.expand(exact)
-    def test_lemstrom_QUERY_A_music21(self, _, algorithm):
-        """
-        Exact match QUERY A ||| P1-3, S1-2, W1-2 Using Music21 and the NoteSegment class
-        Parses the ground truth polyphonic music example provided in Lemstrom and Laitninen's 2011 paper. Query A should be found by all algorithms if their error tolerance is zero.
-        """
-        settings = {'scale' : 1, 'threshold' : 5}
-        carlos = algorithm(self.lemstrom_pattern('a'), self.lemstrom_score, settings)
+    @parameterized.expand([param(**case) for case in TESTS], testcase_func_name = custom_func_name)
+    def test(self, query, algorithm, expected, settings={}):
+        carlos = algorithm(lemstrom_pattern(query), lemstrom_score, settings)
         carlos.run()
         self.assertEqual(len(carlos.occurrences), 1)
         self.assertEqual(carlos.occurrences[0].shift, (3.0, -10))
-
-    @parameterized.expand(S-algorithms)
-    def test_lemstrom_QUERY_C_music21(self, _, algorithm):
-        """
-        Exact scaled match QUERY C ||| S1-2, W1-2
-        Query C is an exact match scaled by a factor of 3
-        """
-        settings = {'scale' : Fraction(1,3), 'threshold' : 5}
-        carlos = algorithm(self.lemstrom_pattern('c'), self.lemstrom_score, settings)
-        carlos.run()
-        self.assertEqual(len(carlos.occurrences), 1)
-        self.assertEqual(carlos.occurrences[0].shift, (3.0, -10))
-
-    @parameterized.expand(W-algorithms)
-    def test_lemstrom_QUERY_E_music21(self, _, algorithm):
-        """
-        Exact scaled match QUERY E ||| W1-2
-        Query C is an exact match scaled by a factor of 3
-        """
-        settings = {'scale' : Fraction(1,3), 'threshold' : 5}
-        carlos = algorithm(self.lemstrom_pattern('e'), self.lemstrom_score, settings)
-        carlos.run()
-        self.assertEqual(len(carlos.occurrences), 1)
-        self.assertEqual(carlos.occurrences[0].shift, (3.0, -10))
-
-
-    @parameterized.expand([
-        #("P1_onset", partial(cbrahmsGeo.P1, option = 'onset')),
-        #("P1_segment", partial(cbrahmsGeo.P1, option = 'segment')),
-        #("P2", partial(cbrahmsGeo.P2, option = 0)),
-        #("P3", partial(cbrahmsGeo.P3, option = 0)),
-        #("S1", S1),
-        #("S2", partial(S2, threshold = 5))
-
-
-    ])
-    def test_EXACT_midiparser_lemstrom_example(self, _, algorithm):
-        """
-        Exact match QUERY A ||| P1-3, S1-2, W1-2
-        Parses the ground truth polyphonic music example provided in Lemstrom and Laitninen's 2011 paper. Query A should be found by all algorithms if their error tolerance is zero.
-        """
-        list_of_shifts = tools.run_algorithm_with_midiparser(algorithm, self.lemstrom_pattern('a'), self.lemstrom_score)
-        self.assertEqual(list_of_shifts, [TwoDVector(3.0, -10)])
-
-    @parameterized.expand([
-        #("P2", partial(cbrahmsGeo.P2, option = 1)),
-        #("S2", partial(S2, threshold = 4)) # recall S family algorithms count "matching pairs". Since there are 6 notes in the pattern, and counting 1 mismatch, that makes 4 intra-pattern vector "matching pairs" required
-    ])
-    def test_PARTIAL_midiparser_lemstrom_example(self, _, algorithm):
-        """
-        One mismatch QUERY B ||| P2, S2, W2
-        Parses the ground truth polyphonic music example provided in Lemstrom and Laitninen's 2011 paper. It should be able to find query B with option = 1 mismatch.
-        """
-        one_mismatch = tools.run_algorithm_with_midiparser(algorithm, self.lemstrom_pattern('b'), self.lemstrom_score)
-        self.assertEqual(one_mismatch, [TwoDVector(3.0, -10)])
-
-    @parameterized.expand([
-        #("S1", partial(S1, window = 3, start = 10)),
-        #("S2", partial(S2, threshold = 5))
-    ])
-    def test_SCALED_midiparser_lemstrom_example(self, _, algorithm):
-        """
-        Exact scaled match QUERY C ||| S1-2, W1-2
-        Query C is an exact match scaled by a factor of 3
-        """
-        result = tools.run_algorithm_with_midiparser(algorithm, self.lemstrom_pattern('c'), self.lemstrom_score)
-        self.assertEqual([TwoDVector(3,-10)], result)
 
     def test_intra_vectors_NOTESEGMENT(self):
         """
         Checks if the NoteSegments class can do the intra-vector work
         """
-        source = NoteSegment.NoteSegments(music21.converter.parse(self.lemstrom_score))
-        pattern = NoteSegment.NoteSegments(music21.converter.parse(self.lemstrom_pattern('c')))
+        source = NoteSegment.NoteSegments(music21.converter.parse(lemstrom_score))
+        pattern = NoteSegment.NoteSegments(music21.converter.parse(lemstrom_pattern('c')))
 
         # Sort
         source.lexicographic_sort()
@@ -151,7 +97,7 @@ class TestLemstromExample(TestCase):
         Checks whether the LineSegmentSet Class can correctly identify the intra-database vectors as given in Lemstrom's paper
         """
         # The paper writes a collection of intra-database vectors that are supposed to be generated from ignoring the first measure and setting a window size of 3
-        source = LineSegmentSet(tools.parse_source_from_score(self.lemstrom_score))
+        source = LineSegmentSet(tools.parse_source_from_score(lemstrom_score))
         # Get intra-database vectors: ignore first measure, set w=3
         source.compute_intra_vectors(window = 3, start = 10)
         lemstrom_vectors = [TwoDVector(float(v[0]) / 4, v[1]) for v in [
