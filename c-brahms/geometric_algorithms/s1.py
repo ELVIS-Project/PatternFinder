@@ -14,6 +14,11 @@ class S1(geoAlgorithm.geoAlgorithmSW):
     def run(self):
         super(S1, self).run()
 
+    def process_results(self, results):
+        if (self.settings['scale'] != "all"):
+            results = filter(lambda x: x.s == self.settings['scale'], results)
+        return super(S1, self).process_results(results)
+
     def algorithm(self):
         """
         Input: Two NoteSegments streams: one called the pattern, which we are looking for occurrences within the larger source.

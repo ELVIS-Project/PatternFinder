@@ -1,11 +1,12 @@
 from collections import namedtuple #for .scores immutable tuple
 from pprint import pformat #for repr
+from LineSegment import LineSegment
 import NoteSegment
 import copy
 import music21
 import pdb
 
-DEFAULT_SETTINGS = {'window' : 5, 'scale' : "all", 'colour' : "red", 'threshold' : 2}
+DEFAULT_SETTINGS = {'window' : 5, 'scale' : "all", 'colour' : "red", 'threshold' : 'max', 'segment' : False}
 
 def music21Chord_to_music21Notes(chordy):
     """
@@ -73,10 +74,11 @@ class geoAlgorithm(object):
         self.pattern = NoteSegment.NoteSegments(self.pattern)
         self.source = NoteSegment.NoteSegments(self.source)
 
+    # TODO make this work
     def run(self):
         self.pattern.lexicographic_sort()
         self.source.lexicographic_sort()
-        # don't run the algorithm here or you'll miss out on other preprocessing
+        # don't run the algorithm here at top-level or you'll miss out on other preprocessing
 
     def colour_score(self, occurrences):
         for n in occurrences.flat.notes:
@@ -98,8 +100,27 @@ class geoAlgorithm(object):
         # TODO add scores tuple
         return "{0}(\nscores = {1},\nsettings = {2})".format(self.__class__, self.scores, self.settings)
 
+class geoAlgorithmP(geoAlgorithm):
+    def run(self):
+        super(geoAlgorithmP, self).run() #preprocess
+        self.pattern_line_segments = [LineSegment(note.getOffsetBySite(self.pattern.flat.notes), note.pitch.ps, note.duration.quarterLength, note_link=note) for note in self.pattern.flat.notes]
+        self.source_line_segments = [LineSegment(note.getOffsetBySite(self.source.flat.notes), note.pitch.ps, note.duration.quarterLength, note_link=note) for note in self.source.flat.notes]
+
+        self.results = self.algorithm(self.pattern_line_segments, self.source_line_segments, self.settings)
+
+        self.occurrences = self.process_results(self.results)
+
+    def process_results(self, results):
+        """
+        Expects a stream of occurrence streams
+        """
+        # Find the shifts
+        for r in results:
+            r.shift = (r[0].offset - self.pattern.flat.notes[0].offset, r[0].pitch.ps - self.pattern.flat.notes[0].pitch.ps)
+        return results
 
 class geoAlgorithmSW(geoAlgorithm):
+    #TODO make it automatically run on __init__
     def run(self):
         super(geoAlgorithmSW, self).run() #preprocess
 
@@ -117,8 +138,20 @@ class geoAlgorithmSW(geoAlgorithm):
         self.colour_score(self.occurrences)
 
     def process_results(self, results):
-        if self.settings['scale'] != "all":
-            results = filter(lambda x: x.s == self.settings['scale'], results)
+        #TODO
+        def flatten_chain(K_row, chain=None):
+            """
+            Call this with the final K_row in the chain
+            """
+            chain = music21.stream.Stream()
+            if K_row.y == None:
+                chain.insert(K_row.source_vector.start)
+                return chain
+            else:
+                chain.insert(K_row.source_vector.end)
+                return flatten_chain(K_row.y, chain)
+
+        ### Filtering. TEMPORARY FIX. TODO you should make separate subclasses?
 
         occurrences = music21.stream.Stream()
         for r in results:
@@ -126,6 +159,7 @@ class geoAlgorithmSW(geoAlgorithm):
             result_stream = music21.stream.Stream()
             ptr = r
             # TODO make backtracking part of a Ktable (entry or table?) class method
+            ## TODO make this a tail-recursive function
             while ptr != None:
                 result_stream.insert(ptr.source_vector.end.getOffsetBySite(self.source.flat.notes), ptr.source_vector.end) # use insert for the note to be placed at its proper offset
                 if ptr.y == None:
