@@ -72,11 +72,12 @@ class Bucket():
 class LineSegment(TwoDVector):
     #TODO should be able to just add 4 to .x or .onset and everything updates
 
-    def __init__(self, onset, pitch, duration = 0):
+    def __init__(self, onset, pitch, duration = 0, note_link=None):
 #    def __init__(self, data):
         self.onset = onset
         self.pitch = pitch
         self.duration = duration
+        self.note_link = note_link
         self.set_index = None
         self.note = None
         self.update()
