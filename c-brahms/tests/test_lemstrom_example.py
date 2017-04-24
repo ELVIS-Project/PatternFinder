@@ -4,7 +4,7 @@ from functools import partial
 from nose_parameterized import parameterized, param
 from LineSegment import TwoDVector, LineSegmentSet
 from pprint import pformat # for pretty printing test error messages
-from geometric_algorithms import S1, S2, W1, W2
+from geometric_algorithms import P1, S1, S2, W1, W2
 from fractions import Fraction # for scale settings
 import music21
 import NoteSegment
@@ -24,8 +24,8 @@ class TestLemstromExample(TestCase):
 
     # List of queries. To add new tests - format is ("query_filename", [list of algorithms tuples e.g. ("algy-name", function) to test this query], [expected results])
     QUERIES = [
-            ('a', (S1, S2, W1, W2), (3.0, -10), {'scale' : 1, 'threshold' : 5}),
-            #('b', (S2, W2), (3.0, -10), {'scale' : 1, 'threshold' : 'max'),
+            ('a', (P1, S1, S2, W1, W2), (3.0, -10), {'scale' : 1, 'threshold' : 5}),
+            #('b', (S2, W2), (3.0, -10), {'scale' : 1, 'threshold' : 'max'), #figure out how to do max.. default is threshold = 2, but then there will be all sorts of matches returned along with the maximal occurrence
             ('c', (S1, S2, W1, W2), (3.0, -10), {'scale' : Fraction(1, 3), 'threshold' : 5}),
             #('d', (S2, W2), (3.0, -10), {'scale' : Fraction(1,3), 'threshold' : 'max'}),
             ('e', (W1, W2), (3.0, -10), {'threshold' : 5})
@@ -49,8 +49,8 @@ class TestLemstromExample(TestCase):
     def test(self, query, algorithm, expected, settings={}):
         carlos = algorithm(lemstrom_pattern(query), lemstrom_score, settings)
         carlos.run()
-        self.assertEqual(len(carlos.occurrences), 1)
-        self.assertEqual(carlos.occurrences[0].shift, (3.0, -10))
+        #self.assertEqual(len(carlos.occurrences), len(expected))
+        self.assertEqual(carlos.occurrences[0].shift, expected)
 
     def test_intra_vectors_NOTESEGMENT(self):
         """
