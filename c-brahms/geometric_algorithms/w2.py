@@ -13,6 +13,13 @@ class W2(geoAlgorithm.geoAlgorithmSW):
     def run(self):
         super(W2, self).run()
 
+    def process_results(self, kappa):
+        self.filtered_results = kappa[1:]
+        if self.settings['threshold'] == 'max':
+            max_length = max(self.filtered_results, key=lambda x: x.w).w
+            self.filtered_results = filter(lambda x: x.w == max_length, self.filtered_results)
+        return super(W2, self).process_results(self.filtered_results)
+
     def algorithm(self):
         pattern = self.pattern
         source = self.source
@@ -20,6 +27,8 @@ class W2(geoAlgorithm.geoAlgorithmSW):
         threshold = settings['threshold']
         if threshold == "exact":
             threshold = len(self.pattern.flat.notes) - 1 # recall the length of an occurrence is in # of vectors, so the max # of vectors is len - 1
+        if threshold == "max":
+            threshold = 2
         scale = settings['scale']
 
         pqueues = [PriorityQueue() for table in pattern.K]
@@ -133,6 +142,4 @@ class W2(geoAlgorithm.geoAlgorithmSW):
             pqueues[i+1].put((lex_order, K_table[-1]))
             i += 1 # Indexing for PQs, clean it up so you don't need this
 
-        fkappa = kappa[1:]
-        results = [max(fkappa, key=lambda x: x.w)]
-        return results
+        return kappa
