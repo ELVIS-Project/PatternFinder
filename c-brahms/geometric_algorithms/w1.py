@@ -7,13 +7,7 @@ import copy
 import pdb
 
 
-class W1(geoAlgorithm.geoAlgorithmSW):
-
-    def __init__(self, pattern_score, source_score, settings = geoAlgorithm.DEFAULT_SETTINGS):
-        super(geoAlgorithm.geoAlgorithmSW, self).__init__(pattern_score, source_score, settings)
-
-    def run(self):
-        super(W1, self).run()
+class W1(geoAlgorithm.SW):
 
     def algorithm(self):
         """

@@ -2,17 +2,7 @@ import geoAlgorithm
 import NoteSegment
 import music21
 
-class P1(geoAlgorithm.geoAlgorithmP):
-
-    def __init__(self, pattern_score, source_score, settings = geoAlgorithm.DEFAULT_SETTINGS):
-        # TODO why don't i have to return this next statement?
-        super(P1, self).__init__(pattern_score, source_score, settings)
-
-    def run(self):
-        super(P1, self).run()
-
-    def process_results(self, results):
-        return super(P1, self).process_results(results)
+class P1(geoAlgorithm.P):
 
     """
     def algorithm(self, source, pattern, settings):
@@ -30,11 +20,14 @@ class P1(geoAlgorithm.geoAlgorithmP):
         ptrs = {p : iter(self) for p in pattern}
     """
 
-    def algorithm(self, pattern, source, settings):
+    def algorithm(self):
         """
         POLYPHONIC BEHAVIOUR:
             P1 can find exact melodic occurrences through many voices. It will only find multiple matches if the first note of the pattern can match more than one identical note in the source, while all the rest of the notes find possibly non-unique matches. THIS should be changed.
         """
+        source = self.source_line_segments
+        pattern = self.pattern_line_segments
+        settings = self.settings
         #TODO put this comment in a higher level file: triple-pound comments (###) reference Ukkonen's pseudocode.
 
         # Lexicographically sort the pattern and source

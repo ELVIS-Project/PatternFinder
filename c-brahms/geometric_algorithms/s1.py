@@ -6,18 +6,12 @@ import copy
 import pdb
 
 
-class S1(geoAlgorithm.geoAlgorithmSW):
+class S1(geoAlgorithm.SW):
 
-    def __init__(self, pattern_score, source_score, settings = geoAlgorithm.DEFAULT_SETTINGS):
-        super(geoAlgorithm.geoAlgorithmSW, self).__init__(pattern_score, source_score, settings)
-
-    def run(self):
-        super(S1, self).run()
-
-    def process_results(self, results):
+    def process_results(self):
         if (self.settings['scale'] != "all"):
-            results = filter(lambda x: x.s == self.settings['scale'], results)
-        return super(S1, self).process_results(results)
+            self.results = filter(lambda x: x.s == self.settings['scale'], self.results)
+        return super(S1, self).process_results()
 
     def algorithm(self):
         """

@@ -1,22 +1,21 @@
 from geometric_algorithms import geoAlgorithm
 from NoteSegment import NoteVector
+from collections import namedtuple
 import music21
 import pdb
 
-class DPW2(geoAlgorithm.geoAlgorithmSW):
+class DPW2(geoAlgorithm.SW):
 
-    def __init__(self, pattern_score, source_score, settings = geoAlgorithm.DEFAULT_SETTINGS):
-        super(geoAlgorithm.geoAlgorithmSW, self).__init__(pattern_score, source_score, settings)
 
-    def run(self):
-        super(DPW2, self).run()
-
-    def process_results(self, kappa):
-        self.filtered_results = kappa[1:]
+    def process_results(self):
+        pass
+        """
+        self.results = self.results[1:]
         if self.settings['threshold'] == 'max':
-            max_length = max(self.filtered_results, key=lambda x: x.w).w
-            self.filtered_results = filter(lambda x: x.w == max_length, self.filtered_results)
-        return super(DPW2, self).process_results(self.filtered_results)
+            max_length = max(self.results, key=lambda x: x.w).w
+            self.results = filter(lambda x: x.w == max_length, self.results)
+        return super(DPW2, self).process_results()
+        """
 
     def algorithm(self):
         def fill_M(M, cur_p, cur_s, last_p, last_s):
@@ -35,6 +34,7 @@ class DPW2(geoAlgorithm.geoAlgorithmSW):
             if cur_s >= len(source) or cur_p >= len(pattern):
                 return 0
 
+            chain = namedtuple("chain", ['best', 'next_ind'])
             best = 0
 
             # Option 1: Increase chain with cur_s, cur_p as a match

@@ -5,20 +5,14 @@ import music21
 import copy
 import pdb
 
-class S2(geoAlgorithm.geoAlgorithmSW):
+class S2(geoAlgorithm.SW):
 
-    def __init__(self, pattern_score, source_score, settings = geoAlgorithm.DEFAULT_SETTINGS):
-        super(geoAlgorithm.geoAlgorithmSW, self).__init__(pattern_score, source_score, settings)
-
-    def run(self):
-        super(S2, self).run()
-
-    def process_results(self, kappa):
-        self.filtered_results = kappa[1:]
+    def process_results(self):
+        self.results = self.results[1:]
         if self.settings['threshold'] == 'max':
-            max_length = max(self.filtered_results, key=lambda x: x.w).w
-            self.filtered_results = filter(lambda x: x.w == max_length, self.filtered_results)
-        return super(S2, self).process_results(self.filtered_results)
+            max_length = max(self.results, key=lambda x: x.w).w
+            self.results = filter(lambda x: x.w == max_length, self.results)
+        return super(S2, self).process_results()
 
 
     def algorithm(self):

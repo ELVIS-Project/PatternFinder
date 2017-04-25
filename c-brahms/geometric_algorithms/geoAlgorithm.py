@@ -31,16 +31,29 @@ def music21Chord_to_music21Notes(chordy):
     return note_list
 
 class geoAlgorithm(object):
+    """
+    Generic base class to manage execution of P, S, and W algorithms
+    """
     def __init__(self, pattern_score, source_score, settings = DEFAULT_SETTINGS):
-        # Settings
         self.settings = DEFAULT_SETTINGS
-        self.settings.update(settings) # So not all keywords must be specified on call
+        self.settings.update(settings) # So that not all keywords must be specified on call
         self.scores = namedtuple("Scores", ['pattern', 'source'])._make((pattern_score, source_score))
 
-        self.original_pattern = music21.converter.parse(pattern_score)
-        self.original_source = music21.converter.parse(source_score)
-        ### Get rid of the chords but keep the original score
+        self.pre_process()
 
+        # Run the algorithm
+        self.results = self.algorithm()
+        # Processing results is necessary as long as output format is non-constant
+        self.occurrences = self.process_results()
+
+        self.post_process()
+
+
+    def pre_process(self):
+        self.original_pattern = music21.converter.parse(self.scores.pattern)
+        self.original_source = music21.converter.parse(self.scores.source)
+
+        ### Get rid of the chords but keep the original score
         self.source = music21.stream.Stream(music21.stream.Part())
         self.pattern = music21.stream.Stream(music21.stream.Part())
 
@@ -74,71 +87,50 @@ class geoAlgorithm(object):
         self.pattern = NoteSegment.NoteSegments(self.pattern)
         self.source = NoteSegment.NoteSegments(self.source)
 
-    # TODO make this work
-    def run(self):
+        # Sort source and pattern
         self.pattern.lexicographic_sort()
         self.source.lexicographic_sort()
-        # don't run the algorithm here at top-level or you'll miss out on other preprocessing
-
-    def colour_score(self, occurrences):
-        for n in occurrences.flat.notes:
-            n.original.color = self.settings['colour']
 
     def algorithm(self):
-        """
-        Input:
-        :NoteSegments: pattern
-        :NoteSegments: pattern
-
-        Output:
-        :music21.stream.Stream: of notes in the source which count as a similar "occurrence" as defined in Lemstrom's papers and corresponding to each individual algorithm.
-        For each :stream: occurrence within :stream: results, an attribute :tuple: results.occurrence.shift should also be outputed. This tuple just gives the (x,y) translation of the pattern in order to line up with the source occurrence.
-        """
         pass
 
+    def process_results(self):
+        pass
+
+    def post_process(self):
+        if self.occurrences is None:
+            return
+        for n in self.occurrences.flat.notes:
+            n.original.color = self.settings['colour']
+
     def __repr__(self):
-        # TODO add scores tuple
         return "{0}(\nscores = {1},\nsettings = {2})".format(self.__class__, self.scores, self.settings)
 
-class geoAlgorithmP(geoAlgorithm):
-    def run(self):
-        super(geoAlgorithmP, self).run() #preprocess
+class P(geoAlgorithm):
+
+    def pre_process(self):
+        super(P, self).pre_process()
         self.pattern_line_segments = [LineSegment(note.getOffsetBySite(self.pattern.flat.notes), note.pitch.ps, note.duration.quarterLength, note_link=note) for note in self.pattern.flat.notes]
         self.source_line_segments = [LineSegment(note.getOffsetBySite(self.source.flat.notes), note.pitch.ps, note.duration.quarterLength, note_link=note) for note in self.source.flat.notes]
 
-        self.results = self.algorithm(self.pattern_line_segments, self.source_line_segments, self.settings)
-
-        self.occurrences = self.process_results(self.results)
-
-    def process_results(self, results):
+    def process_results(self):
         """
         Expects a stream of occurrence streams
         """
         # Find the shifts
-        for r in results:
+        for r in self.results:
             r.shift = (r[0].offset - self.pattern.flat.notes[0].offset, r[0].pitch.ps - self.pattern.flat.notes[0].pitch.ps)
-        return results
+        return self.results
 
-class geoAlgorithmSW(geoAlgorithm):
-    #TODO make it automatically run on __init__
-    def run(self):
-        super(geoAlgorithmSW, self).run() #preprocess
-
-        # Preprocess
+class SW(geoAlgorithm):
+    def pre_process(self):
+        super(SW, self).pre_process()
         self.pattern.compute_intra_vectors(self.settings['window'])
         self.source.compute_intra_vectors(self.settings['window'])
-        # TODO ktable initialization shouldn't be repeated for diff. algys, it should be done once and made part of the score?
         self.pattern.initialize_Ktables(self.source)
 
-        # Algorithm returns a list of K_rows
-        self.results = self.algorithm()
-        # Process_results returns a filtered stream of matched notes in the source
-        self.occurrences = self.process_results(self.results)
-
-        self.colour_score(self.occurrences)
-
-    def process_results(self, results):
-        #TODO
+    def process_results(self):
+        #TODO clean up chain flattening
         def flatten_chain(K_row, chain=None):
             """
             Call this with the final K_row in the chain
@@ -154,7 +146,7 @@ class geoAlgorithmSW(geoAlgorithm):
         ### Filtering. TEMPORARY FIX. TODO you should make separate subclasses?
 
         occurrences = music21.stream.Stream()
-        for r in results:
+        for r in self.results:
             # Get the notes of this particular occurrence
             result_stream = music21.stream.Stream()
             ptr = r
@@ -172,3 +164,4 @@ class geoAlgorithmSW(geoAlgorithm):
             occurrences.append(result_stream)
 
         return occurrences
+

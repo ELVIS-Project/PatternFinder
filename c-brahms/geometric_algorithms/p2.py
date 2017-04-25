@@ -5,25 +5,27 @@ import NoteSegment
 import music21
 import pdb
 
-class P2(geoAlgorithm.geoAlgorithmP):
+class P2(geoAlgorithm.P):
 
-    def __init__(self, pattern_score, source_score, settings = geoAlgorithm.DEFAULT_SETTINGS):
-        # TODO why don't i have to return this next statement?
-        super(P2, self).__init__(pattern_score, source_score, settings)
+    def pre_process(self):
+        super(P2, self).pre_process()
+        if self.settings['threshold'] == 'all':
+            pass
 
-    def run(self):
-        super(P2, self).run()
+    def process_results(self):
+        pass
 
-    def process_results(self, results):
-        return super(P2, self).process_results(results)
-
-    def algorithm(self, pattern, source, settings):
+    def algorithm(self):
         """
         Input: two lists of horizontal line segments. One is the 'pattern', which we are looking for in the larger 'source'
         Output: all horizontal / vertical line segment shifts which shift the pattern so that it shares a subset with the source
 
         The # of mismatches between source and pattern is defined as len(pattern) - # of matches between pattern and source.
         """
+        pattern = self.pattern_line_segments
+        source = self.source_line_segments
+        settings = self.settings
+
         source.append(LineSegment(float("inf"), float("inf"), 0))
         # Lexicographically sort the pattern and source
         pattern.sort()
@@ -89,18 +91,18 @@ class P2(geoAlgorithm.geoAlgorithmP):
                     source_note = source[min_shift[2]].note_link
                     result_stream.insert(source_note.getOffsetBySite(self.source.flat.notes), source_note)
 
-        pdb.set_trace()
         # Return all possible shifts and their multiplicities
-        if option == "all":
+        #pdb.set_trace()
+        if settings['threshold'] == "all" or settings['threshold'] == 'max':
             return shift_matches
         else:
-            # Return shifts only with 'option' number of mismatches
+            # Return shifts only with 'settings['threshold']' number of mismatches
             try:
-                option = int(option)
+                settings['threshold'] = int(settings['threshold'])
             # Default: minimize the mismatches
             except TypeError:
-                option = len(pattern) - max(zip(*shift_matches)[1])
+                settings['threshold'] = len(pattern) - max(zip(*shift_matches)[1])
 
         # Return shifts with the given mismatch
         # number of mismatches is relative to the length of the pattern (not the length of the source).
-        return [shift[0] for shift in shift_matches if shift[1] == len(pattern) - option]
+        return [shift[0] for shift in shift_matches if shift[1] == len(pattern) - settings['threshold']]
