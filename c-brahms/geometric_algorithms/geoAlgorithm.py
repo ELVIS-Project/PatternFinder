@@ -6,7 +6,7 @@ import copy
 import music21
 import pdb
 
-DEFAULT_SETTINGS = {'window' : 5, 'scale' : "all", 'colour' : "red", 'threshold' : 'max', 'segment' : False}
+DEFAULT_SETTINGS = {'window' : 5, 'scale' : "all", 'colour' : "red", 'threshold' : 'max', 'segment' : False, 'parsed_input' : False}
 
 def music21Chord_to_music21Notes(chordy):
     """
@@ -50,8 +50,12 @@ class geoAlgorithm(object):
 
 
     def pre_process(self):
-        self.original_pattern = music21.converter.parse(self.scores.pattern)
-        self.original_source = music21.converter.parse(self.scores.source)
+        if self.settings['parsed_input'] is False:
+            self.original_pattern = music21.converter.parse(self.scores.pattern)
+            self.original_source = music21.converter.parse(self.scores.source)
+        else:
+            self.original_pattern = self.scores.pattern
+            self.original_source = self.scores.source
 
         ### Get rid of the chords but keep the original score
         self.source = music21.stream.Stream(music21.stream.Part())
