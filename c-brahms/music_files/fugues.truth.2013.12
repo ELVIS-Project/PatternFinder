@@ -1,0 +1,959 @@
+# Truth file for the analysis of Bach and Shostakovich fugues
+# <http://www.algomus.fr/fugues>
+#
+# Copyright (C) 2011, 2012, 2013 by Algorithmic musicology group at LIFL/MIS 
+# Contributors: Mathieu Giraud, Richard Groult, Florence Levé
+# Maintainer: Florence Levé <florence.leve@u-picardie.fr>
+#
+# This file is made available under the Open Database License: http://opendatacommons.org/licenses/odbl/1.0/. 
+# Any rights in individual contents of the database are licensed under the Database Contents License: http://opendatacommons.org/licenses/dbcl/1.0/
+
+# The syntax of this file is described at <http://www.algomus.fr/truth>
+
+# This dataset gives a ground truth analysis for :
+#  - the 24 fugues of the first book of Bach's Well-Tempered Clavier (WTC I), BWV 846-893,
+#  - and the 12 first fugues from Shostakovich 24 Preludes and Fugues (op. 57, 1952).
+# The ground truth is based on several musicological sources as well as on our own
+# analysis.
+
+# Sources :
+#  - Prout      Ebenezer Prout, Analysis of J.S. Bach's forty-eight fugues (Das Wohltemperirte Clavier). E. Ashdown, London, 1910.
+#  - Tovey      Donald F. Tovey, Forty-Eight Preludes and Fugues, J.-S. Bach, 1924, Associated Board of the Royal Schools of Music
+#  - Keller     Hermann Keller, Das Wohltemperierte Klavier von Johann Sebastiann Bach, 1965, Bärenreiter
+#  - Bruhn      Siglind Bruhn, J. S. Bach's Well-Tempered Clavier. In-depth Analysis and Interpretation, 1993, ISBN 962-580-017-4, 962-580-018-2, 962-580-019-0, 962-580-020-4.
+#               Siglind Bruhn, J. S. Bach's Wohltemperiertes Klavier, Analyse und Gestaltung, Edition Gorz, 2006, ISBN 3-938095-05-9
+#  - Charlier   Claude Charlier, Pour une lecture alternative du Clavier bien tempéré, 2009, Éditions Jacquart
+#  - Plutalov   Denis V. Plutalov, Dmitry Shostakovich's Twenty-Four Preludes and Fugues op. 87., Ph.D. thesis, Univ. Nebraska, 2010
+#  - earsense   "48 Jewels" and "24 Jewels", www.earsense.org
+
+# Changelog 
+#     2013/12/27
+#           First release 12 first fugues from Shostakovich 24 Preludes and Fugues (op. 57, 1952):
+#             Complete occurrences of subjects (S), counter-subjects (CS) and second counter-subjects (CS2)
+#           Minor updates on the Bach fugues
+#
+#     2013/05/02
+#           First public release, 24 fugues, first book of Bach's Well-Tempered Clavier (WTC I), BWV 846-893
+#           Complete occurrences of subjects (S), counter-subjects (CS)
+#           including the occurrences with change of voices and the occurrences of augmented subjects (Saug).
+#           Incomplete occurrences are not reported, they will be reported in the next release.
+#           Cadences (conclusive PAC / root position IAC, and only strong HC / DC (typically before the coda))
+#           Pedals (must include other harmonies than V/V(6,4))
+
+# Roadmap
+#       spring 2014 : incomplete occurrences on Bach's WTC I.
+
+
+
+==== wtc-i-01 BWV 846 ====
+     C Major, 4 voices (SATB)
+
+  == S [length 1.5 start +1/8] 
+        S  2.5, 7, 16.25, 20.75 
+        A  1, 9, 10.75, 14, 16.5, 19.25, 24.5
+        T  4, 7.25, 12, 17, 19, 21.5, 24
+        B  5.5, 10.5, 15, 17.5 [start 0]
+
+  == cadences
+        *  14 (vi:PAC), 19 (I:rIAC), 24 (I:PAC)
+
+  == pedals
+        B  24 (I) [length 4]
+
+
+
+==== wtc-i-02 BWV 847 ====
+     C minor, 3 voices (SAT)
+
+  == S [length 2 start +1/8] (tonal_answer) 
+        S  3, 11, 20, 29.5
+        A  1, 15
+        T  7, 26.5
+
+  == CS [length 2 start +1/16] 
+        S  7 [start -1/4], 15 [start 0]
+        A  3, 20
+        T  11
+        SA 26.5 [changeafter +1/2 end +1/8]
+
+  == CS2 [length 1.5 start +1/8]
+        S  27 [end +1/8]
+        A  7.5, 11.5
+        T  15.5, 20.5
+
+  == cadences
+        *  17 (v:PAC), 22 (i:PAC), 28.5 (i:IAC) [end +1/8], 29.5 (I:PAC)
+
+  == pedals
+        T  29.5 (I) [length 2.5]
+
+
+
+==== wtc-i-03 BWV 848 ====
+     C# Major  3 voices (SAT)
+
+  == S [length 1.5 start -1/8]  (tonal_answer)  
+        S  1.5, 10.5 [start -3/16], 25 [start -3/16], 42.5, 52 [start -3/16]
+        A  3.5, 19.5, 27, 44.5
+        T  5.5, 14.5, 46.5
+
+  == CS [length 1.5 start -6/16] 
+        S  3.5, 14.5 [start -7/16], 27 [start -7/16], 44.5
+        A  5.5, 46.5
+        T  19.5 [start -7/16], 24.5 [start -3/16]
+
+  == CS2 [length 2 start +1/8]
+        S  5 [end -1/8], 19 [start +1/16], 46 [end -1/8]
+        A  
+        T  26.5, 44 [start +3/16]
+
+  == CS3 [length 2 start +1/8]
+        S  
+        A  
+        T  10, 51.5
+
+  == cadences
+        *  12 (V:PAC), 14 (ii:rIAC), 22.5 (iii:PAC), 28.5 (I:rIAC)
+        *  46 (V:rIAC), 53.5 (VI:DC), 55.5 (I:PAC)
+ 
+
+
+==== wtc-i-04 BWV 849 ====
+     C# minor, 5 voices (SATBC)
+
+  == S [length 3] 
+        S  14 [start +1/2], 48 [start +7/8 resolution +1/4], 59 [resolution +1/2], 66 (varied), 76 [resolution +1/2], 89 [resolution +1/4]
+        A  12 [start +1/2 end -1/2], 44 [start +1/2 resolution +1/2], 54 [start +1/2 resolution +1/2]
+        T  7 [start +1/2], 25 [start +1/2], 32 [start +1/2], 38 [start +1/2 resolution +1/2] 
+        B  4, 19 [start +1/2], 22 [start +3/4], 35 [start +1/2], 51 [start +1/2], 81
+        C  1, 29 [start +1/2], 73, 97 [start +1/2]
+
+  == S2 [length 2 start -3/4] 
+        S  36, 47, 82
+        A  60, 79
+        T  52, 55 [start -7/8], 74 [start -7/8]
+        B  92 [start -1/2]
+        C  45, 67, 77
+
+  == S3 [length 2 start +1/4]
+        ### Only complete occurrences, including the ascending resolution, are reported here
+        S 
+        A 
+        T  49, 64, 82, 97
+        B  60, 74, 99
+        C  55, 86
+
+  == cadences
+        *  22 (v:rIAC), 35 (III:PAC), 81 (i:rIAC), 112 (I:PAC)
+  
+
+  == pedals
+        C  105 (V) [length 4]
+        C  112 (I) [length 4]
+
+
+
+==== wtc-i-05 BWV 850 ====
+     D Major, 4 voices (SATB)
+
+  == S [length 1 start +1/4] 
+        S  5, 8, 11, 13
+        A  4, 12 
+        T  2, 14
+        B  1, 7, 15
+
+  == S alternative [length 0.5] ## Charlier
+
+  ## Definition of CS is not consensual in this fugue: CS are not reported in this release.
+
+  == cadences
+        *  3 (V:rIAC), 6 (V:rIAC), 9 (vi:rIAC), 17 (ii:PAC)
+        *  22 (I:HC), 23 (I:PAC), 27 (I:PAC)
+
+
+
+==== wtc-i-06 BWV 851 ====
+     D minor, 3 voices (SAT)
+
+  == S [length 2 start +1/8] #modal
+
+        S  1, 8, 13
+        A  3, 18, 28, 40
+        T  6, 17, 21, 34, 39
+        
+  == Sinv [base S]
+        S  22 [resolution +1/16], 27 [resolution +1/4]
+        A  14
+        T  23, 29
+        
+  == CS [length 2 start +1/8] 
+        S  3 [start 0]
+        A 
+        T  8 [start 0]
+        SA 6 [changeafter 1]
+
+  == cadences
+        *  21 (v:PAC), 43 (I:PAC)
+
+  == pedals        
+        T  43 (I) [length 2]
+
+
+
+==== wtc-i-07 BWV 852 ====
+     Eb Major, 3 voices (SAT)
+     
+  == S [length 1.5 start 0] (tonal_answer) ## Prout, Bruhn
+        S  1, 11 [start -1/8], 29 [start -1/4]
+        A  3, 17.5, 34 [start -1/8]
+        T  6, 20.5, 26 [start -1/8]
+
+  == S alternative [length 2] ## Keller 
+
+  == CS [length 1.5 start +1/8] 
+        S  3, 17.5, 26
+        A  6, 20.5, 29
+        T  11
+
+  == cadences
+        *  17.5 (vi:PAC), 30.5 (V:PAC), 34.5 (I:HC) [end +1/8], 35.5 (vi:DC), 37 (I:PAC)
+
+  == pedals
+        T  37 (I) [length 1]
+
+  
+
+==== wtc-i-08 BWV 853 ====
+     D#/Eb minor, 3 voices (SAT)
+
+  == S [length 2.5] (tonal_answer) 
+        S  3.5, 20, 24 [resolution +1/4], 27 [start -1/4] (varied), 57.5 [start +1/8], 69.5 [start +1/8]
+        A  1, 19.5, 27.5, 61.5 [start +1/8] (varied), 72.5 [resolution +1/4], 80.5 [start +1/8]
+        T  8, 12 [start +1/8 resolution +1/4], 67, 77 [start +1/8]
+
+  == Saug [length 5]
+        S  77.5
+        A  67.5
+        T  62
+
+  == Sinv [base S]
+        # Only complete occurrences of inverted S, with resolution
+        S  30, 45, 64.5
+        A  36, 47.5
+        T  39 (varied), 44.5
+
+  == cadences
+        *  19.5 (v:PAC), 30 (III:PAC), 39 (I:PAC)
+        *  52 (I:HC), 61.5 (I:HC), 87.5 (I:PAC)
+
+
+
+
+==== wtc-i-09 BWV 854 ====
+     E Major, 3 voices (SAT)
+
+  == S [length 0.5 start -1/8] ## Bruhn
+        S  2.5, 7, 20.5 [start -1/16], 25.5
+        A  1.5, 8, 16.5, 21.5
+        T  4, 10, 19.5, 28.25
+
+  == S alternative [length 1] ## Prout        
+  == S alternative [length 1.5] ## Keller
+
+  ## Tovey: "It is not worth while settling where the Subject ends and where the Counter-subject begins"
+
+  == CS [length 1 start +1/16] 
+        # Several complete CS are found within episodes, without S (not reported in this release)
+        S  7.5, 21 (varied)
+        A  2
+        T  20
+
+  == cadences
+        *  8.5 (V:rIAC), 17 (vi:rIAC), 29 (I:PAC)
+
+  
+
+==== wtc-i-10 BWV 855 ====
+     E minor, 2 voices (SA)
+
+  == S [length 2 end +1/8] ## Keller, Bruhn
+        S  1, 11, 22, 32
+        A  3, 13, 20, 30
+
+  == S alternative [end 0] ## Prout        
+
+  == CS [length 1.67 start +1/16] 
+        # Several complete CS are found within episodes, without S (not reported in this release)
+        S  3.34, 13.34, 20.34, 30.34
+        A  11.34, 22.34, 32.34
+
+  == cadences
+        *  42 (I:rIAC)
+
+
+
+==== wtc-i-11 BWV 856 ====
+     F Major, 3 voices (SAT)
+
+  == S [length 3 start -1/8] (tonal_answer) 
+        S  5, 18, 37, 51 (varied)
+        A  1, 22, 28, 39, 49 (varied)
+        T  10, 26, 41, 47
+
+  == S alternative [end +1/8] ## Keller
+
+  == CS [length 3 start -5/16] 
+        S  22, 26 (varied)
+        A  5
+        AT 18 [start -3/16 changeafter +3/8]
+
+  == cadences
+        *  46 (vi:PAC), 56 (ii:PAC), 72 (I:PAC)
+
+  == pedals
+        T  36 (V) [length 5]
+
+
+
+==== wtc-i-12 BWV 857 ====
+     F minor, 4 voices (SATB)
+
+  == S [length 3 start +1/4] (tonal_answer) 
+        S  13 [resolution +1/8], 47 [resolution +1/8]
+        A  4, 34 
+        T  1, 19, 40.5
+        B  7, 27.5, 53
+
+  == CS [length 3 start +1/8] 
+        A  7, 47 (varied) # Tenor above Alto in bars 47 and 48
+        T  4, 27.5
+        B  13
+        AS 19 [changeafter +1/2]
+        TS 34 [changeafter +1/2] (inverted_start)
+
+  == CS2 [length 3 start +1/8]
+        T  7
+        AS 27.5 [changeafter +1/2]
+        TA 13 [changeafter +1/2 change2after +3/2]
+ 
+  == CS3 [length 2 start -3/16]
+        A  28.5
+        TA 14 [changeafter +1/2]
+
+  == cadences
+        *  43.5 (VII:rIAC), 47 (v:HC), 58 (I:PAC)
+
+
+
+
+==== wtc-i-13 BWV 858 ====
+     F# Major, 3 voices (SAT)
+
+  == S [length 2 start +1/8] (tonal_answer)  
+        S  1, 11.5 (varied), 31.5
+        A  3, 15, 28
+        T  5, 20
+
+  == CS [length 2 start +1/8] 
+        S  3
+        A  5
+        T  15 (varied) [start +1/16], 31.5 (varied) [start +1/16]
+ 
+  == CS2 [length 1.25 start -1/8]
+        S  20.75, 28.75
+        T  12.25
+
+  == cadences
+        *  7 (I:rIAC), 11.5 (V:PAC), 17 (V:PAC), 23 (VI:PAC), 33.5 (I:rIAC), 35 (I:PAC)
+
+  == pedals
+        T  29 (IV) [length 1]
+        
+
+==== wtc-i-14 BWV 859 ====
+     F# minor, 4 voices (SATB)
+
+  == S [length 3 start +1/4] 
+        S  15, 25 [start +3/8] (varied), 37 
+        A  4
+        T  1, 29
+        B  8
+
+  == Sinv [length 3 start +1/4]
+        S  
+        A  20.5
+        T  
+        B  32
+
+  == CS [length 2.5 start +1/8] 
+        S  29.5
+        A  8.5, 25.5, 37.5 (varied)
+        T  4.5
+        B  15.5
+
+  == cadences
+        *  20.5 (v:PAC), 28 (v:PAC), 40 (I:PAC)
+  
+  == pedals
+        B  37.5 (V) [length 1.5]
+
+
+
+==== wtc-i-15 BWV 860 ====
+     G Major, 3 voices (SAT)
+
+  == S [length 4] 
+        S  1, 38
+        A  5 
+        T  11
+
+  == Sinv [base S] 
+        S  24
+        A  20
+        T  69.5 (varied)
+
+  == cadences
+        *  69.5 (V:PAC), 83 (I:PAC)
+
+  
+  == pedals
+        T  62 (ii) [length 3]
+        S  69.5 (V) [length 1.5]
+        T  83 (I) [length 4]
+
+==== wtc-i-16 BWV 861 ====
+     G minor, 4 voices (SATB)
+
+  == S [length 1.5 start +1/8] (tonal_answer)  
+        S  2.5, 15, 21.5, 28
+        A  1, 12, 17.5, 23, 31.5
+        T  6.5, 28.5, 33
+        B  5, 13.5, 17, 20
+
+  == CS [length 1 start +1/8] 
+        S  5.5, 17.5, 23.5 (varied)
+        A  3, 20.5, 28.5
+        T  12.5, 14
+        B  7, 15.5, 22 [start +1/16], 32
+        
+  == cadences
+        *  12 (III:PAC), 24.5 (i:PAC), 34.5 (I:PAC)
+
+
+
+==== wtc-i-17 BWV 862 ====
+     Ab Major, 4 voices (SATB)
+ 
+  == S [length 1 start +1/4] (tonal_answer) 
+        S  5, 24, 30, 33.5
+        A  6, 13, 18, 23, 29
+        T  1, 10, 17, 28
+        B  2, 27
+
+  ## Prout: "There is no regular countersubject"
+  ## Bruhn: "The Ab-major fugue does not contain a single consistent counter-subject"
+
+  == cadences
+        *  16 (VI:PAC), 19 (ii:rIAC), 23 (V:PAC), 33.5 (vi:DC), 35.5 (I:PAC)
+  
+
+==== wtc-i-18 BWV 863 ====
+     G# minor, 4 voices (SATB)
+
+  == S [length 1.5 start -1/4] (tonal_answer) 
+        S  5.5, 24.5, 37.5 [start -1/8]
+        A  3.5, 19.5
+        T  1.5, 11.5, 17.5, 32.5
+        B  7.5, 15.5, 26.5
+
+  == S alternative [length 0.75] ## Charlier
+
+  == CS [length 2 start +1/8] 
+        S  7, 11
+        A  5 [start +1/4], 15 (varied), 32 (varied), 37 (varied) [start +1/16]
+        T  3, 19
+        B  
+
+  == CS2 [length 1.5 start -3/8]
+        S  
+        A  11.5
+        T  5.5
+        B  19.5 [start -3/16]
+
+  == cadences
+        ## The subject of this fugue, when exposed in the bass voice, 
+        ## leads to several V -> I progressions in root position.
+        ## We report here only the rIAC/PAC actually concluding a phrase.
+        *  9 (i:PAC), 11 (v:PAC), 13 (i:PAC), 15 (i:PAC)
+        *  24.5 (II:rIAC), 32 (i:PAC), 41 (I:PAC)
+
+
+  == pedals
+        B  37 (V) [length 1.75]
+
+
+
+==== wtc-i-19 BWV 864 ====
+     A Major, 3 voices (SAT)
+
+  ## There are many alternative definitions of S in the fugue #19.
+  ## We choose to end the subject on the tied eight in the second
+  ## measure, its resolution being delayed.
+
+  == S [length 2 end -4/8 resolution 0] (tonal_answer) 
+        S  1 [resolution +1/8], 9
+        A  2, 27, 31 (varied) [start +1/8], 42 
+        T  4, 6, 13, 23
+
+  == S alternative [end -5/8] ## Prout
+  == S alternative [end -2/8] ## Bruhn
+  == S alternative [end 0] ## Tovey, Keller
+
+  == CS [length 2] 
+        S  
+        A  23
+        T  27
+
+  == cadences
+        *  9 (I:PAC), 13 (vi:rIAC), 16 (ii:PAC), 20 (V:PAC), 33 (I:PAC)
+        *  36 (ii:PAC), 42 (vi:PAC), 49 (I:PAC), 54 (I:rIAC)
+  
+
+==== wtc-i-20 BWV 865 ====
+     A minor, 4 voices (SATB)
+
+  == S [length 3 start +1/8] 
+        S  4, 27.5, 43
+        A  1, 31.5, 37
+        T  11, 28, 36.5, 65
+        B  8, 32, 43.5, 64.5
+
+  == Sinv [base S] 
+        # We do not report in this release the occurrences of Sinv
+        # that does not follow the inversion of S in their ends.
+        S  53.5, 67.5 
+        A  48.5
+        T  49
+        B  53
+
+  == cadences
+        *  14.5 (V:PAC), 18 (VII:PAC), 27.5 (i:PAC), 41.5 (III:rIAC), 48 (III:PAC), 64.5 (iv:PAC)
+        *  80 (I:HC), 82.5 (V:HC), 83.5 (I:PAC)
+  
+  == pedals
+        T  60.5 (V) [length 1.5]
+        B  60.5 (V) [length 1.5]
+        B  76 (VII) [length 1.5]
+        B  83.5 (I) [length 4.5]
+
+
+
+==== wtc-i-21 BWV 866 ====
+     Bb Major, 3 voices (SAT)
+
+  == S [length 4 start +1/8] (tonal_answer) 
+        S  1, 13, 37
+        A  5, 22, 41
+        T  9, 26
+
+  == CS [length 3 start -1/4] 
+        S  6, 23, 42
+        A  10, 27, 38
+        T  14
+
+  == CS2 [length 3 start -3/16]
+        S  10, 27
+        A  14
+        T  23, 38, 42
+
+  == cadences
+        *  17 (V:rIAC), 48 (I:PAC)
+  
+
+
+==== wtc-i-22 BWV 867 ====
+     Bb minor, 5 voices (SATBC)
+
+  == S [length 3] (tonal_answer) ## Keller, Bruhn ("female ending")  
+        S  1, 25, 67.5
+        A  3, 37, 55, 68
+        T  10, 55, 68.5 [end -1/4]
+        B  12, 29, 53, 69
+        C  15, 32, 48, 69.5
+
+  == S alternative [length 2] ## Prout, Bruhn ("male ending")
+
+  == cadences
+        *  25 (III:PAC), 37 (VII:PAC), 55 (IV:PAC), 64 (vi:DC), 75 (I:PAC)
+  
+
+
+==== wtc-i-23 BWV 868 ====
+     B Major, 4 voices (SATB)
+
+  == S [length 2 start +1/8] (tonal_answer) 
+        S  5 [resolution +1/8], 31 
+        A  3, 16 (varied), 29 [resolution +1/8] 
+        T  1, 11.5, 24 (varied)
+        B  7, 21.5
+
+  == Sinv [base S]
+        S  18
+        A  20 [resolution +1/4]
+        T
+        B
+
+  == CS [length 1.5 start -1/8] 
+        S  7.5
+        A  5.5, 31.5 [end -1/8 resolution +1/8]
+        T  3.5 [end -1/8 resolution +1/8]
+        B  
+
+  == cadences
+        *  13.5 (I:rIAC), 18 (V:PAC), 26 (ii:PAC), 34 (I:rIAC)
+
+  == pedals
+        B  31.5 (V) [length 0.75]
+
+
+
+==== wtc-i-24 BWV 869 ====
+     B minor, 4 voices (SATB)
+
+  == S [length 3 start +1/8] (tonal_answer) 
+        S  13 [resolution +2/4]
+        A  1, 21 
+        T  4, 30, 44 [resolution +1/8], 53.5 [resolution +1/4], 60.5 [resolution +1/4]
+        B  9, 38, 47.5, 57.5, 70
+
+  == CSa [start +3/16 length 0.75]  
+        S  38 [start +1/16 length 1], 69 [start +1/16 length 1], 70 (varied)
+        A  4, 9 (inverted), 53.5, 57.5 [start +1/16]
+        T  13 (inverted)
+        B  21 (varied) [start +5/16 length 1]  
+
+  == CSb [length 2.25] 
+        S  21.75, 30.75, 48.25 [start -1/4], 54.25, 58.25
+        A  4.75
+        T  9.75
+        B  13.75
+
+  == cadences
+        *  24 (v:rIAC), 76 (I:PAC)
+
+  == pedals
+        B  74 (V) [length 1]
+
+
+
+==== shosta-87-01b ==== extra_offset 1
+     C Major, 4 voices (SATB)
+
+  == S [length 8 start -1/2] 
+        S  27, 58, 79 
+        A  19, 66, 80
+        T  9, 40, 88 
+        B  1, 48, 87
+ 
+  == CS [length 7 end -1/2 resolution +1/4] 
+     	S  40, 66
+	A  27
+	T  19, 48
+	B  9, 58
+
+  == CS2 [length 7 start -1/4 end -1/2 resolution +1/4]
+        S  48
+        A  40 [start -1/2]
+        T  27, 58 [start -1/2], 66 [start -1/2]
+        B  19
+
+  == CS2inc [base CS2]
+        S
+        A  48 [length 3.5]
+        T  79 [start -1/4 length 4.5]
+        B  79 [start -1/4 length 4.5]
+
+  == pedals
+	* 74 (V) [length 4]
+
+
+
+==== shosta-87-02b ====
+     A minor, 3 voices (SAT)
+
+  == S [length 4 start 0] 
+        S  11, 37, 56 [start -1/8]
+        A  5, 27, 56
+        T  1, 21, 43, 60 [start -1/8]
+
+  == CS [length 4.5 start -1/8] 
+        S  22
+        A  12
+        T  6
+	TA 28 [changeafter 3]
+
+  == pedals
+        B  71 (I:rhythm) [length 7]
+
+
+
+
+==== shosta-87-03b ====
+     G Major, 3 voices (SAT)
+
+ == S [length 4 end +2/8] 
+        S  1, 35, 44 [end -1/8], 61, 65.5 [end 0]
+	A  5, 26, 48, 79 [end 0]
+	T  11, 22, 75 [end -1/8], 88
+ 
+ == CS [length 3.5 start +1/8] 
+	S  5.5, 22.5
+	A  11.5, 44.5
+	T  26.5, 35.5, 48.5
+
+ == CS alternative [length 4.5]
+
+ == CS2 [length 4] 
+    	S  11 [end +3/8]
+	A  22, 35 [end +3/8]
+	T  44
+
+ == pedals
+        B  97 (I) [length 4]
+
+
+
+==== shosta-87-04b ====
+     E minor, 4 voices (SATB)
+# double fugue
+
+  == S [length 4] 
+       S  15, 92
+       A  5, 26, 111
+       T  1
+       B  11, 22, 36, 87, 107, 119 # 87 the bass is doubled
+      
+  == CS [length 3.5]
+       S  36
+       A  11, 22
+       T  5
+       B  15, 26
+       BT 41 [changeafter 3]
+
+  == CS2 [length 4 start +1/4]
+       S  22
+       A  15, 36
+       T  11
+       B
+ 
+  == S2 [length 3.5 start +1/8]
+       S 47, 70, 79.5, 88, 107, 111
+       A 50.5, 66.5
+       T 55.5, 92.5, 112
+       B 59, 76, 92 [head length 3]
+
+  == CS3 [length 3 start +1/4]
+       S 51 [resolution +1/8], 67 [end -1/4]
+       A 56, 70.5 [resolution +1/8]
+       T 59.5 [resolution +1/4]
+       B 80 [resolution +1/8]
+
+==== shosta-87-05b ====
+     D Major, 3 voices (SAT)
+
+  == S [length 7 end -1/8] 
+     # Subject are considered as "complete" if they have both the head and the tail
+     # extended S: one measure inserted at the middle
+     # condensed S: one measure removed at the middle
+
+       S  8, 33, 92 [length 6] (condensed), 108, 117 [length 6] (condensed)  # 108 octave start
+       A  1, 52, 82, 109 [length 8] (extended), 118 [length 6] (condensed)
+       T  19, 40, 59, 75, 119 [length 6] (condensed), 134
+
+  == CS [length 6]
+       S  19, 52, 75
+       A  8, 33 (varied), 40, 59
+       T  82
+
+  == CSinc [base CS]
+       S  98 [head length 5]
+ 
+  == CS2 [length 5]
+       S  40 [start -1/8], 59 [start -1/2]
+       A  19, 75, 98
+       T  33
+
+  # alternative longer S/CS/CS2 ends
+  == S alternative [length 8 end +1/8]
+  == CS alternative [length 8]
+  == CS2 alternative [length 8]
+
+
+
+==== shosta-87-06b ====
+     B minor, 4 voices (SATB)
+
+  == S [length 3] 
+       S  20, 66, 97, 101, 107, 116
+       A  14, 72, 100 [start +1/4], 112, 117 
+       T  7, 52, 96, 111
+       B  1, 30, 36, 46, 83, 96, 108
+       # The first exposition, at the bass, is doubled one octave lower
+
+  == CS [start +1/8 end -1/8 length 3]
+       S  30 (varied), 52 [head 3], 72
+       A  20, 46, 66 [head 3]
+       T  14, 36, 107 [head 2]
+       B  7
+
+  == CS2 [length 3]  
+       S  36 [start +1/8]
+       A  30
+       T  20, 46 [start +1/8]
+       B  14
+
+  == pedals
+       B  92 (V) [length 3-1/4]
+       B  111 (i) [length 13]
+
+
+
+==== shosta-87-07b ====
+     A Major, 3 voices (SAT)
+
+  == S [length 4] 
+       S  1, 37, 62, 72 (varied), 79 (varied)
+       A  5, 21, 33, 70
+       T  11, 51
+       SA 25 [changeafter +5/8]
+       AS 47 [changeafter +3/8]
+
+  == CS [length 4 start +1/8 end -1/4] 
+       S  5, 21, 33
+       A  11, 37, 51, 62 	
+       T  25
+       SA 47 [changeafter +1/4]
+
+  == CS2 [length 3.5 start +1/4]
+       S  11, 51
+       A  
+       T  21
+       SA 25 [changeafter +1/4]
+
+  == pedals
+       T  62 (V) [length 8]
+       T  86 (VI) [length 3]
+       T  96 (I) [length 4]
+
+
+==== shosta-87-08b ==== extra_offset 1
+     F# minor, 3 voices (SAT)
+
+  == S [length 8 start -1/8 end +1/8] 
+       S  21, 56, 97, 128 [end +1/4] (varied)
+       A  10, 43, 86
+       T  1, 34, 65
+
+  == CS [length 8 start -1/4 end +1/4]   
+       S  34 [start -1/8]
+       A  21 [start -1/8], 56 [start 0], 65, 97 [start -1/8 head length 7]
+       T  10, 43
+
+  == CS2 [length 8 end +2/4]
+       S  43, 65 # 65 octaves changes
+       A
+       T  21
+
+
+==== shosta-87-09b ====
+     E Major, 2 voices (SA)
+# 3 notes between S and CS
+
+  == S [length 3 end -1/4] 
+       S  1, 14, 34, 43+1/4 [end -1/8], 46, 60 [start -1/8]
+       A  4, 11, 31, 43, 46+1/4 [end -1/8]
+
+  == S alternative [length 3]
+
+  == Sinv [base S]
+       S  21, 53 
+       A  24, 56
+
+  == CS [length 2+1/4 start +1/8]
+       S  4, 11, 31
+       A  14, 34
+
+  == CS alternative [length 3]
+
+  == CSinv [base CS]
+       S  24
+       A  21
+
+==== shosta-87-10b ====
+     C# minor, 4 voices (SATB)
+
+  == S [length 5 start +1/4] 
+       S  6, 53, 70, 93, 107, 130, 153, 171
+       A  15, 65, 112, 136
+       T  1, 33, 48, 129, 135, 152, 172
+       B  20, 38, 88, 147
+
+  == CS [length 5 start +2/4 end -1/4 resolution +1/8] 
+       # first occurrence of CS: first note of CS = last note of S
+       S  15 [start +1/4], 33 [start +1/4], 112 [start 0], 147 
+       A  20 [start 0], 38, 48, 70 [start 0]
+       T  6 [start 0], 53 [start 0], 65 [start 0], 88, 107
+       B  93 [start 0]
+
+  == CS2 [length 3 start -3/4 end +1/4]
+        S  21, 39 [start -4/4]
+        A  34 [start -4/4], 54, 89 [start -2/4], 108 [start -2/4], 148 [start 0]
+        T  16, 94 [start 0], 71 [start -1/4]
+        B  49 [start 0], 113 [start +1/4]
+
+  == pedals
+       B  129 (V) [length 18]
+       B  152 (I) [length 15]
+       B  171 (I) [length 7]
+
+
+==== shosta-87-11b ====
+     B Major, 3 voices (SAT)
+
+  == S [length 6 end +1/4] 
+       S  1, 34, 61, 91 [end +1/8], 106 [length 5] (compressed), 112 [length 5]
+       A  8, 54, 101, 117 [length 5]
+       T  21, 41, 76, 90 [end -1/8]
+
+  == Saug [length 13]
+       T  101
+
+  == CS [length 6.5 start -1/8] 
+       S  8, 41, 54, 76 [length 5]
+       A  21, 61
+       T  34 (varied)
+
+  == CS2 [length 5 start -1/4]
+       S  22
+       A  77
+       T  55
+
+==== shosta-87-12b ==== extra_offset 1
+     G# minor, 4 voices (SATB)
+
+  == S [length 3 start -2/4 end +1/8] 
+       S  5, 31, 53, 69, 114
+       A  1, 21, 57
+       T  15, 35, 47, 77 [end 0] ## 77 octave change
+       B  11, 25, 43, 65
+
+  == CS [length 4 start +3/4 end -1/4]
+       S  10 [start +5/8], 20, 34 [start +5/8], 42 (varied)
+       A  4 [start +3/8], 101
+       T  24, 30, 56
+       B  14 [start +3/8], 46 [start +5/8], 52 [start +4/5]
+
+  == pedals
+       B 76 (V) [length 6]
+       B 116-2/4 (I) [length 2]
+       B 119+2/4 (I) [length 3+3/4]
