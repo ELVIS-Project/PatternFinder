@@ -4,6 +4,7 @@ from collections import namedtuple
 from parse_fugue_truth import parse_truth
 from fractions import Fraction
 from LineSegment import * #for pickling
+import pandas as pd #for data wrangling
 import logging # to keep track of errors and progress
 import NoteSegment #for pickling
 import math #to round the measure ranges to nearest int
@@ -78,6 +79,35 @@ def get_pattern_from_fugue(shelf, fugue_tag, subject):
 
     return pattern
 
+# TODO so you can compare occurrences with the shift ouput from algorithms
+def get_offset_from_label(shelf, fugue_tag, label):
+    score = music21.parse.converter(shelf[fugue_tag]['file'])
+
+    measure_number = shelf[fugue_tag][label]['measure']
+    # Get the offset range of this label
+    measure_number, measure_loc, part_index = (measure_number, measure_number - int(measure_number), voice_to_part(first_occ['voice']))
+    measure = score.parts[part_index].measure(measure_number)
+
+    # 'start' and 'end' are quarterLength offset modifications
+    start_offset = (measure.duration.quarterLength * measure_loc) + first_occ['start']
+    end_offset = start_offset + (measure.duration.quarterLength * first_occ['length']) + first_occ['end']
+
+    ## filter the pattern based on this range
+    lower = int(math.floor(first_occ['measure']))
+    upper = int(math.ceil(first_occ['measure'] + first_occ['length']))
+    # fugue #20 has a weird extra spline; filter it out with [1:]
+    if fugue_tag == "wtc-i-20":
+        pattern = score.measures(lower, upper)[1:].parts[part_index]
+    else:
+        pattern = score.measures(lower, upper).parts[part_index]
+
+    for elt in pattern.recurse(classFilter=('GeneralNote')):
+        elt_offset_in_hierarchy = elt.getOffsetBySite(pattern.flat)
+        if elt_offset_in_hierarchy < start_offset or elt_offset_in_hierarchy >= end_offset:
+            pattern.remove(elt, recurse=True)
+    pass
+
+
 def write_score(score, file_name_base):
 
     # Save the pdf file as wtc-i-##_alg.pdf
@@ -92,14 +122,16 @@ def write_score(score, file_name_base):
     #os.rename(temp_file, ".".join([file_name_base, '.xml']))
 
 
-def run2(fugue_indices = range(1,24), algorithms = [P1, P2, S1, S2, W1, W2]):
+def run2(fugue_indices = range(1,24), algorithms = [P1, P2, S1, S2, W1, W2], settings = {}):
+    df_occ_index = []
+
     ## LOOP THROUGH ALGORITHMS ##
     for algorithm in algorithms:
         for i in fugue_indices:
             fugue_tag = 'wtc-i-' + str(i).zfill(2)
 
             source = music21.converter.parse(BACH_FUGUE_PATH(i))
-            settings = {'parsed_input' : True, 'runOnInit' : False}
+            settings.update({'parsed_input' : True, 'runOnInit' : False})
 
             ## LOOP THROUGH SUBJECTS ##
             for subject in FILTER_FOR_SUBJECT_LABELS(bach_truth[fugue_tag].keys()):
@@ -111,6 +143,15 @@ def run2(fugue_indices = range(1,24), algorithms = [P1, P2, S1, S2, W1, W2]):
                     logging.warning("Pattern has no length")
                     logging.debug("start_offset {0}, end_offset{1}".format(start_offset, end_offset))
                     continue
+
+                ## PREPARE DATAFRAME INDICES
+                # list occurrences:
+                #bach_truth[fugue_tag(i)][subject]['occurrences'] for subject in FILTER_FOR_SUBJECT_LABELS(bach_truth[fugue_tag(i)].keys()) for i in range(1,25)]
+                df_occ_index.append(map(lambda x: (fugue_tag, subject, x['measure']), bach_truth[fugue_tag][subject]['occurrences']))
+                df_columns = [x.__name__ for x in algorithms]
+
+
+
 
                 ## RUN THE ALGORITHM ##
                 print("Creating algorithm object " + algorithm.__name__)
@@ -127,53 +168,9 @@ def run2(fugue_indices = range(1,24), algorithms = [P1, P2, S1, S2, W1, W2]):
             new_file_base = os.path.join(BACH_PATH, "_".join([fugue_tag, larry.__class__.__name__, "all"])) # with all subjects coloured at once
             write_score(larry.original_source, new_file_base)
 
-def run(fugue_list = range(1, 24)):
-    for i in fugue_list:
-        fugue_tag = 'wtc-i-' + str(i).zfill(2)
-
-        ### Loop through fugues
-        #pattern = music21.converter.parse(BACH_FUGUE_PATH(i))
-        source = music21.converter.parse(BACH_FUGUE_PATH(i))
-        settings = {'parsed_input' : True, 'runOnInit' : False}
-
-        ### GET THE PATTERN
-        filter_for_subjects = lambda x: [x for x in x if x in ['S', 'S2', 'CS', 'CS2', 'Saug', 'Sinv']]
-        for subject in filter_for_subjects(bach_truth[fugue_tag].keys()):
-            print("Fetching pattern " + subject + " from fugue " + fugue_tag)
-            logging.info('test')
-            pattern = get_pattern_from_fugue(bach_truth, fugue_tag, subject)
-
-            if len(pattern.flat.notes) == 0:
-                logging.warning("Pattern has no length")
-                logging.debug("start_offset {0}, end_offset{1}".format(start_offset, end_offset))
-                continue
+            return pd.DataFrame(0, reduce(lambda x, y: x+y, df_occ_index), df_columns)
 
 
-            ### LOOP THROUGH ALGORITHMS
-            for algorithm in [P1, P2, S1, S2, W1, W2]:
-                print("Creating algorithm object " + algorithm.__name__)
-                larry = algorithm(pattern, source, settings)
-                print("Running algorithm " + larry.__class__.__name__ + " on fugue " + fugue_tag + " subject " + subject)
-                try:
-                    larry.run()
-                except:
-                    logging.error("Algorithm Failed on fugue {0}, subject {1} \n".format(fugue_tag, subject) + str(larry))
-                    continue
-
-                # Merge pattern with source in one score
-                #processed_score = music21.corpus.Opus.mergeScores()
-
-                ## Write the result
-                new_file_base = os.path.join(BACH_PATH, "_".join([fugue_tag, larry.__class__.__name__, subject]))
-                write_score(larry.original_source, new_file_base)
-
-                # Save the algorithm object as wtc-i-##_alg.pckl
-                """
-                print("Dumping algorithm object...")
-                f = open(".".join([new_file_base, '.pckl']), 'wb')
-                pickle.dump(larry, f) #gives error "it's not found at LineSegment.<lambda>"
-                f.close()
-                """
 
 logging.basicConfig(filename='exp.log', level=logging.DEBUG)
 

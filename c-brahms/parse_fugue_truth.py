@@ -10,8 +10,21 @@ import pdb
 
 # 'measure' and 'voice' are not part of their keyword list but we include it here.
 # 'change2after' is not included in their list of keywords but is used in the truth file.
-KEYWORDS = ['voice', 'measure', 'length', 'start', 'end', 'resolution', 'changeafter', 'change2after', 'base', 'head', 'tail', 'additional']
-occurrence = namedtuple('occ', KEYWORDS)
+KEYWORDS = {
+        'voice' : None,
+        'measure' : None,
+        'length' : 0,
+        'start' : 0,
+        'end' : 0,
+        'resolution' : None,
+        'changeafter' : None,
+        'changeafter2' : None,
+        'base' : None,
+        'head' : None,
+        'tail' : None,
+        'additional':  None
+        }
+occurrence = namedtuple('occ', KEYWORDS.keys())
 
 BACH_PATH = lambda x: os.path.join('music_files', 'bach_wtc1', 'wtc1f' + str(x).zfill(2) + '.krn')
 
@@ -36,10 +49,11 @@ def get_keywords_from_string(string):
         if key == 'start' or key == 'end':
             # Parse "+1/8"
             num, denum = it.next().partition('/')[::2]
+            # They write '1/8' for an eighth note, '3/16' for three sixteenth notes, so multiply their notation by 4 to obtain the quarter length offset
             if denum == '':
-                val = int(num)
+                val = int(num) * 4
             else:
-                val = Fraction(int(num), int(denum))
+                val = Fraction(int(num), int(denum)) * 4
         elif key == 'length':
             measure, mod = it.next().partition('+')[::2]
             if mod == '':
@@ -58,7 +72,7 @@ def parse_truth():
     it = truth.xreadlines()
 
     for line in it:
-        print(line)
+        #print(line)
         sline = line.strip()
         # Skip empty lines
         if len(sline) == 0:
@@ -88,7 +102,7 @@ def parse_truth():
         if m:
             # Initialize a new label for this fugue
             label = m.group(1).strip()
-            shelf[fugue][label] = {key : None for key in KEYWORDS}
+            shelf[fugue][label] = {key : val for key, val in KEYWORDS.items()}
             shelf[fugue][label]['occurrences'] = []
             if m.group(2):
                 shelf[fugue][label].update(get_keywords_from_string(m.group(2).strip()))
@@ -125,11 +139,13 @@ def parse_truth():
 
     truth.close()
     return shelf
-foo = parse_truth()
 
-f = open('fugue_truth.pckl', 'wb')
-pickle.dump(foo, f)
-f.close()
+if __name__ == "__main__":
+    foo = parse_truth()
+
+    f = open('fugue_truth.pckl', 'wb')
+    pickle.dump(foo, f)
+    f.close()
 
 
 """

@@ -13,7 +13,19 @@ class P2(geoAlgorithm.P):
             pass
 
     def process_results(self):
-        pass
+        if self.settings['threshold'] == "all":
+            return self.results
+        elif self.settings['threshold'] == "max":
+            # Default: minimize the mismatches
+            temp_threshold = len(self.pattern) - len(max(self.results, key=lambda x: len(x)))
+        else:
+            # Return shifts only with 'settings['threshold']' number of mismatches
+            temp_threshold = int(self.settings['threshold'])
+        for r in self.results:
+            if len(r) < len(self.pattern) - temp_threshold:
+                self.results.remove(r)
+        return self.results
+
 
     def algorithm(self):
         """
@@ -22,6 +34,7 @@ class P2(geoAlgorithm.P):
 
         The # of mismatches between source and pattern is defined as len(pattern) - # of matches between pattern and source.
         """
+        # TODO test this with a case where the source has half of the pattern query, but repeated at the same time in two parts. i think it'll think it's a perfect match.
         pattern = self.pattern_line_segments
         source = self.source_line_segments
         settings = self.settings
@@ -73,7 +86,11 @@ class P2(geoAlgorithm.P):
             if shift_candidate == min_shift[0]:
                 #TODO temp fix
                 source_note = source[min_shift[2]].note_link
-                result_stream.insert(source_note.getOffsetBySite(self.source.flat.notes), source_note)
+                # TODO sometimes the note is already in the result stream. that must mean that a previous shift, in the same class of candidate, originated from this note, and pointed to a different? but same unison source note. so if it's already there.. continue?
+                try:
+                    result_stream.insert(source_note.getOffsetBySite(self.source.flat.notes), source_note)
+                except music21.stream.StreamException as e:
+                    continue
                 c += 1
             else:
                 if shift_candidate != TwoDVector(float("-inf"), float("-inf")):
@@ -91,8 +108,8 @@ class P2(geoAlgorithm.P):
                     source_note = source[min_shift[2]].note_link
                     result_stream.insert(source_note.getOffsetBySite(self.source.flat.notes), source_note)
 
+        """
         # Return all possible shifts and their multiplicities
-        #pdb.set_trace()
         if settings['threshold'] == "all" or settings['threshold'] == 'max':
             return shift_matches
         else:
@@ -102,7 +119,9 @@ class P2(geoAlgorithm.P):
             # Default: minimize the mismatches
             except TypeError:
                 settings['threshold'] = len(pattern) - max(zip(*shift_matches)[1])
+        """
 
         # Return shifts with the given mismatch
         # number of mismatches is relative to the length of the pattern (not the length of the source).
-        return [shift[0] for shift in shift_matches if shift[1] == len(pattern) - settings['threshold']]
+        #return [shift[0] for shift in shift_matches if shift[1] == len(pattern) - settings['threshold']]
+        return occurrences

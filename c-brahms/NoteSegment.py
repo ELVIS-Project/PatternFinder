@@ -111,8 +111,10 @@ class NoteSegments(music21.stream.Stream):
         Helper class to sort the note segments lexicographically by (onset, pitch).
         Uses the priority attribute of music21.Music21Object, which automatically sorts the encompassing stream each time it is changed.
         """
+        self.autoSort = False
         for n in self.flat.notes:
             n.priority = int(n.pitch.ps) # priority values must be integers, and pitch.ps returns a float. This may lead to some buggy issues with quartertones, since two notes a quarter-tone a part will be treated as identical due to truncation.
+        self.autoSort = True
 
     def flatten_chords(self):
         def music21Chord_to_music21Notes(chordy, site):

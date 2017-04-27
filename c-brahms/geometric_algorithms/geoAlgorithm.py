@@ -6,7 +6,15 @@ import copy
 import music21
 import pdb
 
-DEFAULT_SETTINGS = {'window' : 5, 'scale' : "all", 'colour' : "red", 'threshold' : 'max', 'segment' : False, 'parsed_input' : False}
+DEFAULT_SETTINGS = {
+        'window' : 5,
+        'scale' : "all",
+        'colour' : "red",
+        'threshold' : 'max',
+        'mismatches' : 'min',
+        'segment' : False,
+        'parsed_input' : False,
+        'runOnInit' : True}
 
 def music21Chord_to_music21Notes(chordy):
     """
@@ -39,17 +47,24 @@ class geoAlgorithm(object):
         self.settings.update(settings) # So that not all keywords must be specified on call
         self.scores = namedtuple("Scores", ['pattern', 'source'])._make((pattern_score, source_score))
 
+        print("GeoAlgorithm: preprocessing...")
         self.pre_process()
+        print("GeoAlgorithm: done preprocessing")
 
+        if self.settings['runOnInit']:
+            self.run()
+
+    def run(self):
+        print("Running algorithm " + str(self))
         # Run the algorithm
         self.results = self.algorithm()
         # Processing results is necessary as long as output format is non-constant
         self.occurrences = self.process_results()
-
         self.post_process()
 
 
     def pre_process(self):
+        print("GeoAlgorithm: parsing...")
         if self.settings['parsed_input'] is False:
             self.original_pattern = music21.converter.parse(self.scores.pattern)
             self.original_source = music21.converter.parse(self.scores.source)
@@ -61,6 +76,7 @@ class geoAlgorithm(object):
         self.source = music21.stream.Stream(music21.stream.Part())
         self.pattern = music21.stream.Stream(music21.stream.Part())
 
+        print("GeoAlgorithm: removing chords...")
         for stream in ((self.original_source.flat.notes, self.source), (self.original_pattern.flat.notes, self.pattern)):
             #use .flat.notes instead of .recurse() because note.getOffsetByHierarchy is only in music 21 version 3
             i = 0
@@ -88,10 +104,13 @@ class geoAlgorithm(object):
 
         # TODO use two streams one for orig, one for not, have notes point back to their respective chords?
         # Now we can make note sets
+        print("GeoAlgorithm: making NoteSegments...")
         self.pattern = NoteSegment.NoteSegments(self.pattern)
         self.source = NoteSegment.NoteSegments(self.source)
 
-        # Sort source and pattern
+        # Sort source and pattern 
+        # Should sort another way other than changing the priorities. what a waste of computation
+        print("GeoAlgorithm: sorting...")
         self.pattern.lexicographic_sort()
         self.source.lexicographic_sort()
 
@@ -102,13 +121,18 @@ class geoAlgorithm(object):
         pass
 
     def post_process(self):
+        # Colour the score
         if self.occurrences is None:
             return
         for n in self.occurrences.flat.notes:
             n.original.color = self.settings['colour']
 
+        # Name the score
+        self.original_source.metadata = music21.metadata.Metadata()
+        self.original_source.metadata.title = str(self)
+
     def __repr__(self):
-        return "{0}(\nscores = {1},\nsettings = {2})".format(self.__class__, self.scores, self.settings)
+        return "{0}\npattern = {1},\nsource = {2},\nsettings = {3}".format(self.__class__.__name__, self.scores.pattern, self.scores.source, self.settings)
 
 class P(geoAlgorithm):
 
@@ -132,6 +156,11 @@ class SW(geoAlgorithm):
         self.pattern.compute_intra_vectors(self.settings['window'])
         self.source.compute_intra_vectors(self.settings['window'])
         self.pattern.initialize_Ktables(self.source)
+
+        if isinstance(self.settings['mismatches'], (int, long)):
+            ## TODO make it so you can't have threshold and mismatches set
+            ## TODO make it so threshold refers to number of notes (add at +1 in alg)
+            self.settings['threshold'] = len(self.pattern.flat.notes) - self.settings['mismatches'] - 1 #recall threshold refers to # of pattern vectors matched
 
     def process_results(self):
         #TODO clean up chain flattening
