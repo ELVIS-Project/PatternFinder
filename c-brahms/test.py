@@ -63,7 +63,7 @@ f.close()
 pattern = BACH_PATH(1)
 source = BACH_PATH(1)
 settings = {}
-solver = {alg : obj for alg, obj in zip(algorithms, map(lambda x: x(pattern, source, settings), algorithms))}
+#solver = {alg : obj for alg, obj in zip(algorithms, map(lambda x: x(pattern, source, settings), algorithms))}
 #for pattern, source in ((lemstrom_pattern('a'), lemstrom_source)):
 #    larry = namedtuple('solver', algorithms)
 #    larry.P1(
