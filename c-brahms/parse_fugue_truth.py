@@ -85,6 +85,9 @@ def parse_truth():
         if '#' in sline[0]:
             continue
 
+        #SKIP SHOSTA 
+        if "shosta" in line:
+            break
 
         # New Preamble
         m = re.search('^==== (wtc-i-(\d{2})) BWV (\d{3})', sline)
@@ -98,7 +101,7 @@ def parse_truth():
                     }
             continue
 
-        m = re.search('^== (\w+\s\w*)\s*(\[.*\])?\s*(\(.*\))?', sline)
+        m = re.search('^== (\w+\s*\w*)\s*(\[.*\])?\s*(\(.*\))?', sline)
         if m:
             # Initialize a new label for this fugue
             label = m.group(1).strip()

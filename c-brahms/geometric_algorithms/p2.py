@@ -17,14 +17,15 @@ class P2(geoAlgorithm.P):
             return self.results
         elif self.settings['threshold'] == "max":
             # Default: minimize the mismatches
-            temp_threshold = len(self.pattern) - len(max(self.results, key=lambda x: len(x)))
+            temp_threshold = len(max(self.results, key=lambda x: len(x)))
         else:
-            # Return shifts only with 'settings['threshold']' number of mismatches
+            # Return shifts with more than or equal to settings['threshold'] matches
             temp_threshold = int(self.settings['threshold'])
         for r in self.results:
-            if len(r) < len(self.pattern) - temp_threshold:
+            if len(r) < temp_threshold:
                 self.results.remove(r)
-        return self.results
+
+        return super(P2, self).process_results()
 
 
     def algorithm(self):

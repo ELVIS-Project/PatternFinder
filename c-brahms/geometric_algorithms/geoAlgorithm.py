@@ -7,14 +7,54 @@ import music21
 import pdb
 
 DEFAULT_SETTINGS = {
-        'window' : 5,
+        'pattern_window' : 1,
+        '%pattern_window' : 1,
+        'source_window' : 5,
         'scale' : "all",
         'colour' : "red",
         'threshold' : 'max',
+        '%threshold' : 1,
         'mismatches' : 'min',
         'segment' : False,
+        'overlap' : True,
         'parsed_input' : False,
         'runOnInit' : True}
+
+def get_notesegments_from_score(source_score):
+    #original_pattern = music21.converter.parse(pattern_score) already passed by get_pattern_from_fugue
+    #original_pattern = pattern_score
+    original_source = music21.converter.parse(source_score)
+
+    ### Get rid of the chords but keep the original score
+    #pattern = music21.stream.Stream(music21.stream.Part())
+    source = music21.stream.Stream(music21.stream.Part())
+
+    print("GeoAlgorithm: removing chords...")
+    #use .flat.notes instead of .recurse() because note.getOffsetByHierarchy is only in music 21 version 3
+    i = 0
+    for element in original_source.flat.notes:
+        print(element)
+        if element.isChord:
+            for pitch in element.pitches:
+                note = music21.note.Note(pitch)
+                note.offset = element.getOffsetBySite(original_source.flat.notes)
+                note.duration = element.duration
+                note.didBelongToAChord = True
+                note.original = element
+
+                # Index
+                note.index = i
+                i += 1
+                source.insert(note)
+        else:
+            # Index
+            element.index = i
+            i += 1
+
+            element.didBelongToAChord = False
+            element.original = element
+            source.insert(element.getOffsetBySite(original_source.flat.notes), element)
+    return ((original_source, source))
 
 def music21Chord_to_music21Notes(chordy):
     """
@@ -55,11 +95,22 @@ class geoAlgorithm(object):
             self.run()
 
     def run(self):
-        print("Running algorithm " + str(self))
-        # Run the algorithm
+        print("Running algorithm " + str(self)) # Run the algorithm
         self.results = self.algorithm()
+
+        #TODO not necessary? necessary?
+        # If no results, return empty stream
+        #if len(self.results) == 0:
+        #    self.occurrences = music21.stream.Stream()
+
         # Processing results is necessary as long as output format is non-constant
         self.occurrences = self.process_results()
+
+        if self.__class__.__name__ == "P3":
+            self.occurrencesAsShifts = self.occurrences
+        else:
+            self.occurrencesAsShifts = [o.shift for o in self.occurrences]
+
         self.post_process()
 
 
@@ -131,6 +182,7 @@ class geoAlgorithm(object):
         self.original_source.metadata = music21.metadata.Metadata()
         self.original_source.metadata.title = str(self)
 
+
     def __repr__(self):
         return "{0}\npattern = {1},\nsource = {2},\nsettings = {3}".format(self.__class__.__name__, self.scores.pattern, self.scores.source, self.settings)
 
@@ -153,8 +205,8 @@ class P(geoAlgorithm):
 class SW(geoAlgorithm):
     def pre_process(self):
         super(SW, self).pre_process()
-        self.pattern.compute_intra_vectors(self.settings['window'])
-        self.source.compute_intra_vectors(self.settings['window'])
+        self.pattern.compute_intra_vectors(self.settings['pattern_window'])
+        self.source.compute_intra_vectors(self.settings['source_window'])
         self.pattern.initialize_Ktables(self.source)
 
         if isinstance(self.settings['mismatches'], (int, long)):

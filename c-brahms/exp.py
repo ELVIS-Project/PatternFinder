@@ -1,9 +1,10 @@
-from geometric_algorithms import P1, P2, S1, S2, W1, W2, DPW2, geoAlgorithm
+from geometric_algorithms import P1, P2, P3, S1, S2, W1, W2, DPW2, geoAlgorithm
 from pprint import pprint as pp
 from collections import namedtuple
 from parse_fugue_truth import parse_truth
 from fractions import Fraction
 from LineSegment import * #for pickling
+from functools import partial
 import pandas as pd #for data wrangling
 import logging # to keep track of errors and progress
 import NoteSegment #for pickling
@@ -27,11 +28,11 @@ BACH_FUGUE_PATH = lambda x: os.path.join(BACH_PATH, 'wtc1f' + str(x).zfill(2) + 
 LEM_PATH_P = lambda x: 'music_files/lemstrom2011_test/query_' + x + '.mid'
 LEM_PATH_S = os.path.join('music_files', 'lemstrom2011_test', 'leiermann.xml')
 
-ALGORITHMS = [P1, P2, S1, S2, W1, W2, DPW2]
+ALGORITHMS = [P1, P2, P3, S1, S2, W1, W2, DPW2]
 
 FILTER_FOR_SUBJECT_LABELS = lambda x: [x for x in x if x in ['S', 'S2', 'CS', 'CS2', 'Saug', 'Sinv']]
 
-SUBJECT_COLOUR = {
+COLOUR_SCHEMA = {
         'S' : 'blue',
         'S2' : 'cyan',
         'CS' : 'red',
@@ -39,6 +40,19 @@ SUBJECT_COLOUR = {
         'Saug' : 'purple',
         'Sinv' : 'pink'
         }
+
+DF_COLUMNS = [
+        'gt',
+        'occ',
+        'fug',
+        'sub',
+        'alg',
+        'pw',
+        '%pw',
+        'sw',
+        'thresh',
+        '%thresh',
+        'sub_len']
 
 # Music21 User Settings
 us = music21.environment.UserSettings()
@@ -56,6 +70,7 @@ def get_pattern_from_fugue(shelf, fugue_tag, subject):
     first_occ = min(shelf[fugue_tag][subject]['occurrences'], key=lambda x: x['measure'])
 
     # Get the offset range of this first statement
+    # #TODO you're lucky: the first occurrence always happens to be SATBC, but what about 'SA' or '*'?
     measure_number, measure_loc, part_index = (int(first_occ['measure']), first_occ['measure'] - int(first_occ['measure']), voice_to_part(first_occ['voice']))
     measure = score.parts[part_index].measure(measure_number)
 
@@ -66,46 +81,38 @@ def get_pattern_from_fugue(shelf, fugue_tag, subject):
     ## filter the pattern based on this range
     lower = int(math.floor(first_occ['measure']))
     upper = int(math.ceil(first_occ['measure'] + first_occ['length']))
-    # fugue #20 has a weird extra spline; filter it out with [1:]
+    # fugue #20 has a weird extra spine; filter it out with [1:]
     if fugue_tag == "wtc-i-20":
         pattern = score.measures(lower, upper)[1:].parts[part_index]
     else:
         pattern = score.measures(lower, upper).parts[part_index]
 
+    # TODO TEMP fix pattern must have absolute score offsets
+    # actually, pattern should have measure offsets starting at zero, so that it can shift forward and find the ground truth offset centred aroudn the measure nubmer
+    #pattern = music21.stream.Stream([score.parts[part_index].measure(n) for n in range(lower, upper + 1)])
     for elt in pattern.recurse(classFilter=('GeneralNote')):
         elt_offset_in_hierarchy = elt.getOffsetBySite(pattern.flat)
         if elt_offset_in_hierarchy < start_offset or elt_offset_in_hierarchy >= end_offset:
             pattern.remove(elt, recurse=True)
+    # Make the pattern start at offset 0
+    shift_amount = (-1) * pattern.flat.notes[0].getOffsetBySite(pattern.flat.notes)
+    for s in pattern.recurse(streamsOnly = True):
+        s.shiftElements(shift_amount, classFilterList = [music21.note.GeneralNote])
 
     return pattern
 
 # TODO so you can compare occurrences with the shift ouput from algorithms
-def get_offset_from_label(shelf, fugue_tag, label):
-    score = music21.parse.converter(shelf[fugue_tag]['file'])
-
-    measure_number = shelf[fugue_tag][label]['measure']
-    # Get the offset range of this label
-    measure_number, measure_loc, part_index = (measure_number, measure_number - int(measure_number), voice_to_part(first_occ['voice']))
-    measure = score.parts[part_index].measure(measure_number)
+def get_offset_from_keywords(measure_data, start, voice, score):
+    #TODO temp fix since sometimes there is an 'SA' voice to indicate changeafter
+    if len(voice) > 1:
+        voice = voice[:1]
+    measure_number = int(measure_data)
+    measure_loc = measure_data - measure_number # float which ranges from 0 to 1
+    measure = score.parts[1].measure(measure_number) # if you don't take .parts before .measure(), the offset becomes shifted to 0. take parts[1] because in fugue #20, parts[0] is empty
 
     # 'start' and 'end' are quarterLength offset modifications
-    start_offset = (measure.duration.quarterLength * measure_loc) + first_occ['start']
-    end_offset = start_offset + (measure.duration.quarterLength * first_occ['length']) + first_occ['end']
-
-    ## filter the pattern based on this range
-    lower = int(math.floor(first_occ['measure']))
-    upper = int(math.ceil(first_occ['measure'] + first_occ['length']))
-    # fugue #20 has a weird extra spline; filter it out with [1:]
-    if fugue_tag == "wtc-i-20":
-        pattern = score.measures(lower, upper)[1:].parts[part_index]
-    else:
-        pattern = score.measures(lower, upper).parts[part_index]
-
-    for elt in pattern.recurse(classFilter=('GeneralNote')):
-        elt_offset_in_hierarchy = elt.getOffsetBySite(pattern.flat)
-        if elt_offset_in_hierarchy < start_offset or elt_offset_in_hierarchy >= end_offset:
-            pattern.remove(elt, recurse=True)
-    pass
+    start_offset = measure.offset + (measure.duration.quarterLength * measure_loc) + start
+    return start_offset
 
 
 def write_score(score, file_name_base):
@@ -122,53 +129,135 @@ def write_score(score, file_name_base):
     #os.rename(temp_file, ".".join([file_name_base, '.xml']))
 
 
-def run2(fugue_indices = range(1,24), algorithms = [P1, P2, S1, S2, W1, W2], settings = {}):
-    df_occ_index = []
+def looper(fugues, algorithms, pattern_windows, source_windows, mismatches):
+    return ((fugue, algorithm, subject, pattern_window, source_window, mismatch) for fugue in fugues for algorithm in algorithms for subject in FILTER_FOR_SUBJECT_LABELS(bach_truth['wtc-i-' + str(fugue).zfill(2)].keys()) for pattern_window in pattern_windows for source_window in source_windows for mismatch in mismatches)
 
-    ## LOOP THROUGH ALGORITHMS ##
-    for algorithm in algorithms:
-        for i in fugue_indices:
-            fugue_tag = 'wtc-i-' + str(i).zfill(2)
+def fugue_looper(fugues):
+    return ((fugue, subject) for fugue in fugues for subject in FILTER_FOR_SUBJECT_LABELS(bach_truth['wtc-i-' + str(fugue).zfill(2)].keys()))
 
-            source = music21.converter.parse(BACH_FUGUE_PATH(i))
-            settings.update({'parsed_input' : True, 'runOnInit' : False})
+def algorithm_looper(algorithms, pattern_windows, source_windows, thresholds):
+    for alg in algorithms:
+        if alg.__name__ in ['P1', 'P3']:
+            yield (alg, {})
+        if alg.__name__ in ['S1', 'W1']:
+            for source_window in source_windows:
+                yield (alg, {'source_window': source_window})
+        if alg.__name__ in ['P2', 'S2', 'W2']:
+            for source_window in source_windows:
+                for pattern_window in pattern_windows:
+                    for threshold in thresholds:
+                        yield (alg, {
+                            'source_window' : source_window,
+                            'pattern_window' : pattern_window,
+                            'threshold' : threshold
+                            })
 
-            ## LOOP THROUGH SUBJECTS ##
-            for subject in FILTER_FOR_SUBJECT_LABELS(bach_truth[fugue_tag].keys()):
+def get_ground_truth_dataframe():
+    gt = pd.DataFrame()
+
+    for i in range(1,25):
+        source = music21.converter.parse(BACH_FUGUE_PATH(i))
+        fugue_tag = 'wtc-i-' + str(i).zfill(2)
+
+        for subject in FILTER_FOR_SUBJECT_LABELS(bach_truth[fugue_tag].keys()):
+            # GET A GROUND TRUTH DATAFRAME
+            ground_truth_columns = ['fugue', 'subject', 'occ', 'measure', 'start']
+            ground_truth = pd.DataFrame(
+                    {key : val for key, val in zip(ground_truth_columns, [i, subject, 'n/a', 'n/a', 'n/a'])},
+                    range(len(bach_truth[fugue_tag][subject]['occurrences'])),
+                    ground_truth_columns)
+
+            ground_truth['occ'] = [get_offset_from_keywords(x['measure'], x['start'], x['voice'], source) for x in bach_truth[fugue_tag][subject]['occurrences']]
+            ground_truth['measure'] = [x['measure'] for x in bach_truth[fugue_tag][subject]['occurrences']]
+            ground_truth['start'] = [x['start'] for x in bach_truth[fugue_tag][subject]['occurrences']]
+            gt = pd.concat([gt, ground_truth], ignore_index=True)
+
+    gt.to_pickle('experiment/ground_truth.pckl')
+    return gt
+
+
+PATTERN_WINDOWS = [x * 0.1 for x in range(1,5)]
+SOURCE_WINDOWS = [4,5,6,7,8]
+THRESHOLDS = [x * 0.1 for x in range(6,11)] #proportional to length of pattern
+
+def run2(fugue_indices = range(1,24), algorithms = [P1, P2, P3, S1, S2, W1, W2], settings={}, pattern_windows = PATTERN_WINDOWS, source_windows = SOURCE_WINDOWS, thresholds = THRESHOLDS):
+    data_frame = pd.DataFrame()
+
+
+    ### LOOP THROUGH THE SUBJECTS
+    for i in fugue_indices:
+        fugue_tag = 'wtc-i-' + str(i).zfill(2)
+
+        #source_notes_link, source_notes = geoAlgorithm.get_notesegments_from_score(BACH_FUGUE_PATH(i))
+        for subject in FILTER_FOR_SUBJECT_LABELS(bach_truth[fugue_tag].keys()):
+
+            ### LOOP THROUGH THE ALGORITHMS
+            for algorithm, settings in algorithm_looper(algorithms, pattern_windows, source_windows, thresholds):
+
+                # Get the source and the pattern here so each algy gets a fresh score to color
+                source = music21.converter.parse(BACH_FUGUE_PATH(i))
                 print("Fetching pattern " + subject + " from fugue " + fugue_tag)
                 pattern = get_pattern_from_fugue(bach_truth, fugue_tag, subject)
-
                 if len(pattern.flat.notes) == 0:
                     print("Pattern has no length.")
                     logging.warning("Pattern has no length")
-                    logging.debug("start_offset {0}, end_offset{1}".format(start_offset, end_offset))
                     continue
 
-                ## PREPARE DATAFRAME INDICES
-                # list occurrences:
-                #bach_truth[fugue_tag(i)][subject]['occurrences'] for subject in FILTER_FOR_SUBJECT_LABELS(bach_truth[fugue_tag(i)].keys()) for i in range(1,25)]
-                df_occ_index.append(map(lambda x: (fugue_tag, subject, x['measure']), bach_truth[fugue_tag][subject]['occurrences']))
-                df_columns = [x.__name__ for x in algorithms]
-
-
-
+                ## UPDATE SETTINGS
+                settings.update({
+                    'parsed_input' : True,
+                    'runOnInit' : False
+                    })
+                if settings.has_key('threshold'):
+                    percent_threshold = settings['threshold']
+                    settings.update({
+                        'threshold' : int(len(pattern.flat.notes) * settings['threshold']) #proportional to length of pattern
+                        })
+                else:
+                    percent_threshold = 1
+                if settings.has_key('pattern_window'):
+                    percent_pwindow = settings['pattern_window']
+                    settings.update({
+                        'pattern_window' : int(len(pattern.flat.notes) * settings['pattern_window']) #proportional to length of pattern
+                        })
+                else:
+                    percent_pwindow = 1
 
                 ## RUN THE ALGORITHM ##
                 print("Creating algorithm object " + algorithm.__name__)
                 larry = algorithm(pattern, source, settings)
-                larry.settings.update({'colour' : SUBJECT_COLOUR[subject]})
-                print("Running algorithm " + larry.__class__.__name__ + " on fugue " + fugue_tag + " subject " + subject)
+                larry.settings.update({'colour' : COLOUR_SCHEMA[subject]})
+                print("Running algorithm " + larry.__class__.__name__ + " on fugue " + fugue_tag + " subject " + subject + " with p_w {0}, s_w {1}, and threshold {2}".format(larry.settings['pattern_window'], larry.settings['source_window'], larry.settings['threshold']))
                 try:
                     larry.run()
-                except:
+                except music21.stream.StreamException as e:
                     logging.error("Algorithm Failed on fugue {0}, subject {1} \n".format(fugue_tag, subject) + str(larry))
+                    print(e.message)
                     continue
 
-            ## WRITE THE SCORE ##
-            new_file_base = os.path.join(BACH_PATH, "_".join([fugue_tag, larry.__class__.__name__, "all"])) # with all subjects coloured at once
-            write_score(larry.original_source, new_file_base)
+                ## PREPARE DATAFRAME INDICES
+                df = pd.DataFrame(
+                        {key : val for key, val in zip(DF_COLUMNS, [0, 'n/a', i, subject, algorithm.__name__, larry.settings['pattern_window'], percent_pwindow, larry.settings['source_window'], larry.settings['threshold'], percent_threshold, len(larry.pattern.flat.notes)])},
+                        range(len(larry.occurrences)),
+                        DF_COLUMNS)
 
-            return pd.DataFrame(0, reduce(lambda x, y: x+y, df_occ_index), df_columns)
+                # PUT ALGORITHM RESULTS IN DATAFRAME
+                df['occ'] = [x[0] for x in larry.occurrencesAsShifts]
+                df['gt'] = df['occ'].isin([get_offset_from_keywords(x['measure'], x['start'], x['voice'], source) for x in bach_truth[fugue_tag][subject]['occurrences']])
+                data_frame = pd.concat([data_frame, df], ignore_index=True)
+
+            # Write one pickle per subject
+            #data_frame.to_pickle('experiment/' + "_".join([str(i), subject] + '.pckl'))
+        # Write one pickle per fugue
+        print('Writing fugue dataframe...')
+        data_frame.to_pickle('experiment/' + str(i) + '.pckl')
+
+        ## WRITE THE SCORE ##
+        new_file_base = os.path.join(BACH_PATH, "_".join([fugue_tag, larry.__class__.__name__, "all"])) # with all subjects coloured at once
+
+        #write_score(larry.original_source, new_file_base)
+
+    return data_frame
 
 
 
@@ -178,6 +267,7 @@ f = open('fugue_truth.pckl', 'rb')
 bach_truth = pickle.load(f)
 f.close()
 
+gt = pd.read_pickle('experiment/ground_truth.pckl')
 
 
 ### TAVERN
@@ -185,3 +275,7 @@ for (dirpath, dirnames, filenames) in os.walk('tavern'):
     if os.path.basename(dirpath) == 'Krn':
         pass
 
+# list occurrences:
+#bach_truth[fugue_tag(i)][subject]['occurrences'] for subject in FILTER_FOR_SUBJECT_LABELS(bach_truth[fugue_tag(i)].keys()) for i in range(1,25)]
+#df_occ_index.append(lambda x, y: x+y, larry.occurrencesAsShifts)
+                #df_occ_index.append(map(lambda x: (fugue_tag, subject, x['measure']), bach_truth[fugue_tag][subject]['occurrences']))

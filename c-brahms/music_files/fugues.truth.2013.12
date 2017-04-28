@@ -181,7 +181,7 @@
         A  3, 18, 28, 40
         T  6, 17, 21, 34, 39
         
-  == Sinv [base S]
+  == Sinv [length 2 start +1/8 base S]
         S  22 [resolution +1/16], 27 [resolution +1/4]
         A  14
         T  23, 29
@@ -236,7 +236,7 @@
         A  67.5
         T  62
 
-  == Sinv [base S]
+  == Sinv [length 5 base S]
         # Only complete occurrences of inverted S, with resolution
         S  30, 45, 64.5
         A  36, 47.5
@@ -407,7 +407,7 @@
         A  5 
         T  11
 
-  == Sinv [base S] 
+  == Sinv [length 4 base S] 
         S  24
         A  20
         T  69.5 (varied)
@@ -528,7 +528,7 @@
         T  11, 28, 36.5, 65
         B  8, 32, 43.5, 64.5
 
-  == Sinv [base S] 
+  == Sinv [length 3 start +1/8 base S] 
         # We do not report in this release the occurrences of Sinv
         # that does not follow the inversion of S in their ends.
         S  53.5, 67.5 
@@ -597,7 +597,7 @@
         T  1, 11.5, 24 (varied)
         B  7, 21.5
 
-  == Sinv [base S]
+  == Sinv [length 2 start +1/8 base S]
         S  18
         A  20 [resolution +1/4]
         T
@@ -875,7 +875,7 @@
 
   == S alternative [length 3]
 
-  == Sinv [base S]
+  == Sinv [length 3 base S]
        S  21, 53 
        A  24, 56
 
@@ -885,7 +885,7 @@
 
   == CS alternative [length 3]
 
-  == CSinv [base CS]
+  == CSinv [length 3 base CS]
        S  24
        A  21
 
