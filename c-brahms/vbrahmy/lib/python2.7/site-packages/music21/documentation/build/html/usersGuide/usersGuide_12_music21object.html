@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>User’s Guide, Chapter 12: Getting Back to Basics: The Music21Object &mdash; music21 Documentation</title>
+    
+    <link rel="stylesheet" href="../_static/m21.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/copybutton.js"></script>
+    <link rel="top" title="music21 Documentation" href="../index.html" />
+    <link rel="up" title="User’s Guide" href="index.html" />
+    <link rel="next" title="User’s Guide: Chapter 14: Time Signatures" href="usersGuide_14_timeSignatures.html" />
+    <link rel="prev" title="User’s Guide, Chapter 11: Corpus Searching" href="usersGuide_11_corpusSearching.html" /><link href='http://fonts.googleapis.com/css?family=Source+Code+Pro|Open+Sans:300italic,400italic,700italic,400,300,700' rel='stylesheet' type='text/css'>
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="usersGuide_14_timeSignatures.html" title="User’s Guide: Chapter 14: Time Signatures"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="usersGuide_11_corpusSearching.html" title="User’s Guide, Chapter 11: Corpus Searching"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">music21</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">User&#8217;s Guide</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="usersGuide_11_corpusSearching.html"
+                        title="previous chapter">User&#8217;s Guide, Chapter 11: Corpus Searching</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="usersGuide_14_timeSignatures.html"
+                        title="next chapter">User&#8217;s Guide: Chapter 14: Time Signatures</a></p>
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about/index.html">About Music21</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">User&#8217;s Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="usersGuide_99_Table_of_Contents.html">User&#8217;s Guide: Table of Contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usersGuide_01_installing.html">User&#8217;s Guide, Chapter 1: Installing and Getting Started with <code class="docutils literal"><span class="pre">music21</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="usersGuide_02_notes.html">User&#8217;s Guide, Chapter 2: Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usersGuide_03_pitches.html">User&#8217;s Guide, Chapter 3: Pitches, Durations, and Notes again</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usersGuide_04_stream1.html">User&#8217;s Guide, Chapter 4: Lists, Streams (I) and Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usersGuide_05_listsOfLists.html">User&#8217;s Guide, Chapter 5: Lists of Lists, Functions, and Recursion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usersGuide_06_stream2.html">User&#8217;s Guide, Chapter 6: Streams (II): Hierarchies, Recursion, and Flattening</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usersGuide_07_chords.html">User&#8217;s Guide, Chapter 7: Chords</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usersGuide_08_installingMusicXML.html">User&#8217;s Guide, Chapter 8: Installing MusicXML Readers and File Formats (1)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usersGuide_09_chordify.html">User&#8217;s Guide, Chapter 9: Chordify</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usersGuide_10_examples1.html">User&#8217;s Guide, Chapter 10: Examples 1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usersGuide_11_corpusSearching.html">User&#8217;s Guide, Chapter 11: Corpus Searching</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">User&#8217;s Guide, Chapter 12: Getting Back to Basics: The Music21Object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usersGuide_14_timeSignatures.html">User&#8217;s Guide: Chapter 14: Time Signatures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usersGuide_17_derivations.html">User&#8217;s Guide: Chapter 17: Derivations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usersGuide_21_sorting.html">User&#8217;s Guide, Chapter 21: Ordering and Sorting of Stream Elements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usersGuide_22_graphing.html">User’s Guide, Chapter 22: Graphing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usersGuide_23_advancedCorpus.html">User&#8217;s Guide, Chapter 23: Advanced Corpus and Metadata Searching</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usersGuide_25_postTonalTools1.html">User&#8217;s Guide, Chapter 25: Post-Tonal Tools (1)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usersGuide_26_clientWeakref.html">User&#8217;s Guide, Chapter 26: Clients and Weak References.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usersGuide_54_extendingConverter.html">User&#8217;s Guide: Chapter 54: Extending Converter with New Formats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usersGuide_55_advancedMeter.html">User&#8217;s Guide: Chapter 55: Advanced Meter Topics</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../moduleReference/index.html">Module Reference</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installing/index.html">Installation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../developerReference/index.html">Developer Reference</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/usersGuide/usersGuide_12_music21object.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <span class="target" id="usersguide-12-music21object"></span><div class="section" id="user-s-guide-chapter-12-getting-back-to-basics-the-music21object">
+<h1>User&#8217;s Guide, Chapter 12: Getting Back to Basics: The Music21Object<a class="headerlink" href="#user-s-guide-chapter-12-getting-back-to-basics-the-music21object" title="Permalink to this headline">¶</a></h1>
+<p>Almost everything that we&#8217;ve been working with so far, <code class="docutils literal"><span class="pre">Note</span></code> objects,
+<code class="docutils literal"><span class="pre">Chord</span></code> objects, <code class="docutils literal"><span class="pre">Stream</span></code> objects, etc., are subclasses of a object
+that, for lack of a better name, is called
+<a class="reference internal" href="../moduleReference/moduleBase.html#music21.base.Music21Object" title="music21.base.Music21Object"><code class="xref py py-class docutils literal"><span class="pre">Music21Object</span></code></a>.</p>
+<p>A <code class="docutils literal"><span class="pre">Music21Object</span></code> is something that can go in a <code class="docutils literal"><span class="pre">Stream</span></code>, knows
+where it is in a Stream, and has a <code class="docutils literal"><span class="pre">Duration</span></code> at <code class="docutils literal"><span class="pre">.duration</span></code>.</p>
+<p>Of course, not every object in Python is a <code class="docutils literal"><span class="pre">Music21Object</span></code>, but a
+little surprisingly, not every object in <code class="docutils literal"><span class="pre">music21</span></code> is a
+&#8220;<code class="docutils literal"><span class="pre">Music21Object</span></code>&#8221;. For instance, the <a class="reference internal" href="../moduleReference/modulePitch.html#music21.pitch.Pitch" title="music21.pitch.Pitch"><code class="xref py py-class docutils literal"><span class="pre">Pitch</span></code></a>
+object is not. If you try to put one in a <code class="docutils literal"><span class="pre">Stream</span></code>, you&#8217;ll get an
+error:</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="n">p</span> <span class="o">=</span> <span class="n">pitch</span><span class="o">.</span><span class="n">Pitch</span><span class="p">(</span><span class="s">&quot;A-2&quot;</span><span class="p">)</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">Stream</span><span class="p">()</span>
+<span class="n">s</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre>---------------------------------------------------------------------------
+
+StreamException                           Traceback (most recent call last)
+
+&lt;ipython-input-7-892b280b781c&gt; in &lt;module&gt;()
+      1 p = pitch.Pitch(&quot;A-2&quot;)
+      2 s = stream.Stream()
+----&gt; 3 s.insert(0, p)
+
+
+/Users/cuthbert/git/music21base/music21/stream/__init__.py in insert(self, offsetOrItemOrList, itemOrNone, ignoreSort, setActiveSite)
+   1314         if not isinstance(item, base.Music21Object):
+   1315             raise StreamException(&#39;to put a non Music21Object in a stream, &#39; +
+-&gt; 1316                                   &#39;create a music21.ElementWrapper for the item&#39;)
+   1317         else:
+   1318             element = item
+
+
+StreamException: to put a non Music21Object in a stream, create a music21.ElementWrapper for the item
+</pre></div>
+</div>
+<p><a class="reference internal" href="../moduleReference/moduleDuration.html#music21.duration.Duration" title="music21.duration.Duration"><code class="xref py py-class docutils literal"><span class="pre">Duration</span></code></a>s are also not
+<code class="docutils literal"><span class="pre">Music21Objects</span></code>:</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="n">d</span> <span class="o">=</span> <span class="n">duration</span><span class="o">.</span><span class="n">Duration</span><span class="p">(</span><span class="s">&#39;half&#39;</span><span class="p">)</span>
+<span class="n">s</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre>---------------------------------------------------------------------------
+
+StreamException                           Traceback (most recent call last)
+
+&lt;ipython-input-8-54db82b20718&gt; in &lt;module&gt;()
+      1 d = duration.Duration(&#39;half&#39;)
+----&gt; 2 s.insert(0, d)
+
+
+/Users/cuthbert/git/music21base/music21/stream/__init__.py in insert(self, offsetOrItemOrList, itemOrNone, ignoreSort, setActiveSite)
+   1314         if not isinstance(item, base.Music21Object):
+   1315             raise StreamException(&#39;to put a non Music21Object in a stream, &#39; +
+-&gt; 1316                                   &#39;create a music21.ElementWrapper for the item&#39;)
+   1317         else:
+   1318             element = item
+
+
+StreamException: to put a non Music21Object in a stream, create a music21.ElementWrapper for the item
+</pre></div>
+</div>
+<p>Why don&#8217;t we just make everything a <code class="docutils literal"><span class="pre">Music21Object</span></code>? There&#8217;s an
+overhead in making a Music21Object, so if we did that, the system would
+probably run about 10x slower than it does. But there&#8217;s no reason to put
+a <code class="docutils literal"><span class="pre">Pitch</span></code> or a <code class="docutils literal"><span class="pre">Duration</span></code> in a Stream, when a <code class="docutils literal"><span class="pre">Note</span></code> is basically
+a <code class="docutils literal"><span class="pre">Pitch</span></code> plus a <code class="docutils literal"><span class="pre">Duration</span></code>. This works much better:</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="n">n</span> <span class="o">=</span> <span class="n">note</span><span class="o">.</span><span class="n">Note</span><span class="p">(</span><span class="s">&#39;A-2&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s">&#39;half&#39;</span><span class="p">)</span>
+<span class="n">s</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+<span class="n">s</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="s">&#39;text&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="ipython-result highlight-python"><div class="highlight"><pre> {0.0} &lt;music21.note.Note A-&gt;
+</pre></div>
+</div>
+<p>How can we tell that a <code class="docutils literal"><span class="pre">Note</span></code> is a <code class="docutils literal"><span class="pre">Music21Object</span></code>? Well we can read
+the docs (<a class="reference internal" href="../moduleReference/moduleNote.html#music21.note.Note" title="music21.note.Note"><code class="xref py py-class docutils literal"><span class="pre">Note</span></code></a>) where it says:</p>
+<p><strong>Note</strong> <code class="docutils literal"><span class="pre">bases</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="o">*</span> <span class="n">NotRest</span>
+<span class="o">*</span> <span class="n">GeneralNote</span>
+<span class="o">*</span> <span class="n">Music21Object</span>
+</pre></div>
+</div>
+<p>Or we can use the <code class="docutils literal"><span class="pre">isinstance(obj,</span> <span class="pre">class)</span></code> operator on a given note.
+The class we are looking for is <code class="docutils literal"><span class="pre">base.Music21Object</span></code>. We still have
+our A♭ as <code class="docutils literal"><span class="pre">n</span></code>, so we can do:</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Music21Object</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="ipython-result highlight-python"><div class="highlight"><pre> <span class="bp">True</span>
+</pre></div>
+</div>
+<p>Note that we need to have a Note object first, we can&#8217;t do:</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="nb">isinstance</span><span class="p">(</span><span class="n">note</span><span class="o">.</span><span class="n">Note</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Music21Object</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="ipython-result highlight-python"><div class="highlight"><pre> <span class="bp">False</span>
+</pre></div>
+</div>
+<p>There&#8217;s one other way that you can tell if an object is a
+<code class="docutils literal"><span class="pre">Music21Object</span></code>, that&#8217;s to check whether <code class="docutils literal"><span class="pre">Music21Object</span></code> appears in
+the object&#8217;s <code class="docutils literal"><span class="pre">.classes</span></code>:</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="s">&#39;Music21Object&#39;</span> <span class="ow">in</span> <span class="n">n</span><span class="o">.</span><span class="n">classes</span>
+</pre></div>
+</div>
+<div class="ipython-result highlight-python"><div class="highlight"><pre> <span class="bp">True</span>
+</pre></div>
+</div>
+<p>But that&#8217;s a bit of a cop-out. Things that are not <code class="docutils literal"><span class="pre">Music21Objects</span></code>
+don&#8217;t generally have a <code class="docutils literal"><span class="pre">.classes</span></code> property, so that won&#8217;t work:</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">datetime</span>
+<span class="n">dt</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2015</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">27</span><span class="p">)</span>
+<span class="n">dt</span>
+</pre></div>
+</div>
+<div class="ipython-result highlight-python"><div class="highlight"><pre> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2015</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">27</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="s">&#39;Music21Object&#39;</span> <span class="ow">in</span> <span class="n">dt</span><span class="o">.</span><span class="n">classes</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre>---------------------------------------------------------------------------
+
+AttributeError                            Traceback (most recent call last)
+
+&lt;ipython-input-19-b332c49485ae&gt; in &lt;module&gt;()
+----&gt; 1 &#39;Music21Object&#39; in dt.classes
+
+
+AttributeError: &#39;datetime.datetime&#39; object has no attribute &#39;classes&#39;
+</pre></div>
+</div>
+<p>But it&#8217;s a useful and easy way of checking to see if something you know
+<em>is</em> a <code class="docutils literal"><span class="pre">Music21Object</span></code> is a specific class:</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="s">&#39;Chord&#39;</span> <span class="ow">in</span> <span class="n">n</span><span class="o">.</span><span class="n">classes</span>
+</pre></div>
+</div>
+<div class="ipython-result highlight-python"><div class="highlight"><pre> <span class="bp">False</span>
+</pre></div>
+</div>
+<p>In fact, it&#8217;s useful enough that we&#8217;ve put it in a few objects in
+<code class="docutils literal"><span class="pre">music21</span></code> that aren&#8217;t <code class="docutils literal"><span class="pre">Music21Objects</span></code></p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="s">&#39;Duration&#39;</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">classes</span>
+</pre></div>
+</div>
+<div class="ipython-result highlight-python"><div class="highlight"><pre> <span class="bp">True</span>
+</pre></div>
+</div>
+<p>more to come...</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="usersGuide_14_timeSignatures.html" title="User’s Guide: Chapter 14: Time Signatures"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="usersGuide_11_corpusSearching.html" title="User’s Guide, Chapter 11: Corpus Searching"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">music21</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >User&#8217;s Guide</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2006-2015, Michael Scott Cuthbert and cuthbertLab.
+      Last updated on Sep 28, 2015.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

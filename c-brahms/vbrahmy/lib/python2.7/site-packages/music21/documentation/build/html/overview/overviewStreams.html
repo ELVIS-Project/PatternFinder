@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Advanced Streams &mdash; music21 Documentation</title>
+    
+    <link rel="stylesheet" href="../_static/m21.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.0.11',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/copybutton.js"></script>
+    <link rel="top" title="music21 Documentation" href="../index.html" />
+    <link rel="up" title="Music21 Concepts Overview" href="index.html" />
+    <link rel="next" title="Overview: Importing File and Data Formats" href="overviewFormats.html" />
+    <link rel="prev" title="Music21 Concepts Overview" href="index.html" /><link href='http://fonts.googleapis.com/css?family=Source+Code+Pro|Open+Sans:300italic,400italic,700italic,400,300,700' rel='stylesheet' type='text/css'>
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="overviewFormats.html" title="Overview: Importing File and Data Formats"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Music21 Concepts Overview"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">music21</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Music21 Concepts Overview</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Music21 Concepts Overview</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="overviewFormats.html"
+                        title="next chapter">Overview: Importing File and Data Formats</a></p>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Advanced Streams</a><ul>
+<li><a class="reference internal" href="#flattening-hierarchical-streams">Flattening Hierarchical Streams</a></li>
+<li><a class="reference internal" href="#accessing-stream-elements-by-id-and-group">Accessing Stream Elements by Id and Group</a></li>
+<li><a class="reference internal" href="#visualizing-streams-in-plots">Visualizing Streams in Plots</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#advanced-topic-ordering-streams">Advanced Topic: Ordering Streams</a></li>
+</ul>
+
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about/index.html">About Music21</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../usersGuide/index.html">Users Guide</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../moduleReference/index.html">Module Reference</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installing/index.html">Installation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Music21 Concepts Overview</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="">Advanced Streams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#advanced-topic-ordering-streams">Advanced Topic: Ordering Streams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overviewFormats.html">Overview: Importing File and Data Formats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overviewPostTonal.html">Overview: Post-Tonal Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overviewMeters.html">Overview: Meters, Time Signatures, and Processing Beams, Accents, and Beats</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../developerReference/index.html">Developer Reference</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/overview/overviewStreams.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="advanced-streams">
+<span id="overviewstreams"></span><h1>Advanced Streams<a class="headerlink" href="#advanced-streams" title="Permalink to this headline">¶</a></h1>
+<p><em>(this file is just a collection of Stream topics that haven&#8217;t
+yet made it into the User&#8217;s Guide...I&#8217;m working on it!)</em></p>
+<div class="section" id="flattening-hierarchical-streams">
+<h2>Flattening Hierarchical Streams<a class="headerlink" href="#flattening-hierarchical-streams" title="Permalink to this headline">¶</a></h2>
+<p>While nested Streams offer expressive flexibility, it is often useful to be able to flatten all Stream and Stream subclasses into a single Stream containing only the elements that are not Stream subclasses. The  <a class="reference internal" href="../moduleReference/moduleStream.html#music21.stream.Stream.flat" title="music21.stream.Stream.flat"><code class="xref py py-attr docutils literal"><span class="pre">flat</span></code></a> property provides immediate access to such a flat representation of a Stream. For example, doing a similar count of components, such as that show above, we see that we cannot get to all of the Note objects of a complete Score until we flatten its Part and Measure objects by accessing the <cite>flat</cite> attribute.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">sBach</span><span class="o">.</span><span class="n">getElementsByClass</span><span class="p">(</span><span class="n">note</span><span class="o">.</span><span class="n">Note</span><span class="p">))</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">sBach</span><span class="o">.</span><span class="n">flat</span><span class="o">.</span><span class="n">getElementsByClass</span><span class="p">(</span><span class="n">note</span><span class="o">.</span><span class="n">Note</span><span class="p">))</span>
+<span class="go">213</span>
+</pre></div>
+</div>
+<p>Element offsets are always relative to the Stream that contains them. For example, a Measure, when placed in a Stream, might have an offset of 16. This offset describes the position of the Measure in the Stream. Components of this Measure, such as Notes, have offset values relative only to their container, the Measure. The first Note of this Measure, then, has an offset of 0. In the following example we find that the offset of measure eight (using the <a class="reference internal" href="../moduleReference/moduleBase.html#music21.base.Music21Object.getOffsetBySite" title="music21.base.Music21Object.getOffsetBySite"><code class="xref py py-meth docutils literal"><span class="pre">getOffsetBySite()</span></code></a> method) is 21; the offset of the second Note in this Measure (index 1), however, is 1.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">sBach</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">getElementsByClass</span><span class="p">(</span><span class="s">&#39;Measure&#39;</span><span class="p">)[</span><span class="mi">7</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">getOffsetBySite</span><span class="p">(</span><span class="n">sBach</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="go">21.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n</span> <span class="o">=</span> <span class="n">sBach</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">measure</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="o">.</span><span class="n">notes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n</span>
+<span class="go">&lt;music21.note.Note B-&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n</span><span class="o">.</span><span class="n">getOffsetBySite</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<span class="go">1.0</span>
+</pre></div>
+</div>
+<p>Flattening a structure of nested Streams will set new, shifted offsets for each of the elements on the Stream, reflecting their appropriate position in the context of the Stream from which the <cite>flat</cite> property was accessed. For example, if a flat version of the first part of the Bach chorale is obtained, the note defined above has the appropriate offset of 22 (the Measure offset of 21 plus the Note offset within this Measure of 1).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">pFlat</span> <span class="o">=</span> <span class="n">sBach</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">flat</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">indexN</span> <span class="o">=</span> <span class="n">pFlat</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pFlat</span><span class="p">[</span><span class="n">indexN</span><span class="p">]</span>
+<span class="go">&lt;music21.note.Note B-&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pFlat</span><span class="p">[</span><span class="n">indexN</span><span class="p">]</span><span class="o">.</span><span class="n">offset</span>
+<span class="go">22.0</span>
+</pre></div>
+</div>
+<p>As an aside, it is important to recognize that the offset of the Note has not been edited; instead, a Note, as all Music21Objects, can store multiple pairs of sites and offsets. Music21Objects retain an offset relative to all Stream or Stream subclasses they are contained within, even if just in passing.</p>
+</div>
+<div class="section" id="accessing-stream-elements-by-id-and-group">
+<h2>Accessing Stream Elements by Id and Group<a class="headerlink" href="#accessing-stream-elements-by-id-and-group" title="Permalink to this headline">¶</a></h2>
+<p>All <a class="reference internal" href="../moduleReference/moduleBase.html#music21.base.Music21Object" title="music21.base.Music21Object"><code class="xref py py-class docutils literal"><span class="pre">Music21Object</span></code></a> subclasses, such as
+<a class="reference internal" href="../moduleReference/moduleNote.html#music21.note.Note" title="music21.note.Note"><code class="xref py py-class docutils literal"><span class="pre">Note</span></code></a> and <a class="reference internal" href="../moduleReference/moduleStream.html#music21.stream.Stream" title="music21.stream.Stream"><code class="xref py py-class docutils literal"><span class="pre">Stream</span></code></a>,
+have attributes for <a class="reference internal" href="../moduleReference/moduleBase.html#music21.base.Music21Object.id" title="music21.base.Music21Object.id"><code class="xref py py-attr docutils literal"><span class="pre">id</span></code></a>
+and <code class="xref py py-attr docutils literal"><span class="pre">group</span></code>.</p>
+<p>The <cite>id</cite> attribute is commonly used to
+distinguish Part objects in a Score, but may have other applications.
+The <a class="reference internal" href="../moduleReference/moduleStream.html#music21.stream.Stream.getElementById" title="music21.stream.Stream.getElementById"><code class="xref py py-meth docutils literal"><span class="pre">getElementById()</span></code></a> method can be used
+to access elements of a Stream by <cite>id</cite>. As an example, after examining
+all of the <cite>id</cite> attributes of the Score, a new Score can be created,
+rearranging the order of the Parts by using the
+<a class="reference internal" href="../moduleReference/moduleStream.html#music21.stream.Stream.insert" title="music21.stream.Stream.insert"><code class="xref py py-meth docutils literal"><span class="pre">insert()</span></code></a> method with an offset of zero.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">part</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">sBach</span><span class="o">.</span><span class="n">parts</span><span class="p">]</span>
+<span class="go">[&#39;Soprano&#39;, &#39;Alto&#39;, &#39;Tenor&#39;, &#39;Bass&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sNew</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">Score</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sNew</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">sBach</span><span class="o">.</span><span class="n">getElementById</span><span class="p">(</span><span class="s">&#39;Bass&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sNew</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">sBach</span><span class="o">.</span><span class="n">getElementById</span><span class="p">(</span><span class="s">&#39;Tenor&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sNew</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">sBach</span><span class="o">.</span><span class="n">getElementById</span><span class="p">(</span><span class="s">&#39;Alto&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sNew</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">sBach</span><span class="o">.</span><span class="n">getElementById</span><span class="p">(</span><span class="s">&#39;Soprano&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sNew</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>   
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="../_images/overviewStreams-06.png"><img alt="../_images/overviewStreams-06.png" src="../_images/overviewStreams-06.png" style="width: 600px;" /></a>
+</div>
+<div class="section" id="visualizing-streams-in-plots">
+<h2>Visualizing Streams in Plots<a class="headerlink" href="#visualizing-streams-in-plots" title="Permalink to this headline">¶</a></h2>
+<p>While the <code class="xref py py-meth docutils literal"><span class="pre">show()</span></code> method provides common
+musical views of a Stream, a visual plot a Stream&#8217;s elements is very
+useful. Sometimes called a piano roll, we might graph the pitch of a
+Note over its position in a Measure (or offset if no Measures are
+defined). The <a class="reference internal" href="../moduleReference/moduleStream.html#music21.stream.Stream.plot" title="music21.stream.Stream.plot"><code class="xref py py-meth docutils literal"><span class="pre">plot()</span></code></a> method permits us to
+create a plot of any Stream or Stream subclass (note that the additional
+package matplotlib needs to be installed to run graphs, see <a class="reference internal" href="../installing/installAdditional.html#installadditional"><span>Extending Music21 with Additional Software</span></a>
+for more information). There are a large variety
+of plots: see <a class="reference internal" href="../moduleReference/moduleGraph.html#modulegraph"><span>music21.graph</span></a> for a complete list. There are a number
+of ways to get the desired plot; one, as demonstrated below, is to provide
+the name of the plot as a string. We can also add a keyword argument for
+the title of the plot (and configure many other features).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sBach</span><span class="o">.</span><span class="n">getElementById</span><span class="p">(</span><span class="s">&#39;Soprano&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s">&#39;PlotHorizontalBarPitchSpaceOffset&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s">&#39;Soprano&#39;</span><span class="p">)</span>   
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="../_images/overviewStreams-07.png"><img alt="../_images/overviewStreams-07.png" src="../_images/overviewStreams-07.png" style="width: 600px;" /></a>
+</div>
+</div>
+<div class="section" id="advanced-topic-ordering-streams">
+<h1>Advanced Topic: Ordering Streams<a class="headerlink" href="#advanced-topic-ordering-streams" title="Permalink to this headline">¶</a></h1>
+<p>As list-like objects, Streams hold objects in a particular order.
+These objects are usually ordered by their musical position in
+the score according to their offset in quarter notes.  Objects with
+the same offset are ordered by what class they are a part of.  For instance,
+you&#8217;d expect that if you have a TimeSignature, Note, Clef, and KeySignature
+at offset 0.0 in a piece that if you iterate through a Stream in order,
+you&#8217;d get the Clef, KeySignature, TimeSignature, and Note in that order (which
+is the order they appear in a Score).  Music21 automatically sorts the classes
+in that order.  Classes have an attribute called &#8220;classSortOrder&#8221; that defines
+the order in which they should appear.  Classes with lower classSortOrder come
+first as this example indicates:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">classSortOrder</span> <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="p">[</span><span class="n">clef</span><span class="o">.</span><span class="n">Clef</span><span class="p">,</span> <span class="n">key</span><span class="o">.</span><span class="n">KeySignature</span><span class="p">,</span> <span class="n">meter</span><span class="o">.</span><span class="n">TimeSignature</span><span class="p">,</span> <span class="n">note</span><span class="o">.</span><span class="n">Note</span><span class="p">]]</span>
+<span class="go">[0, 2, 4, 20]</span>
+</pre></div>
+</div>
+<p>N.B. that classSortOrder can be obtained either from the class definition (<cite>clef.Clef.classSortOrder</cite>)
+or from an instance of that class (<cite>c = clef.Clef() ; c.classSortOrder</cite>):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">clef</span><span class="o">.</span><span class="n">TrebleClef</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">k</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">KeySignature</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="c"># 2 sharps</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">triple</span> <span class="o">=</span> <span class="n">meter</span><span class="o">.</span><span class="n">TimeSignature</span><span class="p">(</span><span class="s">&#39;3/8&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n</span> <span class="o">=</span> <span class="n">note</span><span class="o">.</span><span class="n">Note</span><span class="p">(</span><span class="s">&quot;F#5&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">classSortOrder</span> <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="p">[</span><span class="n">c</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">triple</span><span class="p">,</span> <span class="n">n</span><span class="p">]]</span>
+<span class="go">[0, 2, 4, 20]</span>
+</pre></div>
+</div>
+<p>Thus, all new Music21Object classes should define classSortOrder somewhere.
+It can be any integer (or even a floating point number).</p>
+<p>If it is important that objects in at the same offset have a particular order,
+you can set the order by setting the <cite>.priority</cite> attribute of each object.
+The default is zero.  If two objects have the same priority then the classSortOrder
+is used as a secondary comparison.  The following example creates a second note
+and specifies that the first note comes before the TimeSignature, but the second comes
+after:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">n2</span> <span class="o">=</span> <span class="n">note</span><span class="o">.</span><span class="n">Note</span><span class="p">(</span><span class="s">&quot;D5&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n</span><span class="o">.</span><span class="n">priority</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">triple</span><span class="o">.</span><span class="n">priority</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n2</span><span class="o">.</span><span class="n">priority</span> <span class="o">=</span> <span class="mi">2</span>
+</pre></div>
+</div>
+<p>Now let&#8217;s put all our objects in a Stream
+at offset 0.0 in a random order and see what order the objects come out
+when we iterate over the Stream:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">Stream</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">n2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">triple</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">s</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">print</span><span class="p">(</span><span class="n">el</span><span class="p">)</span>
+<span class="go">&lt;music21.clef.TrebleClef&gt;</span>
+<span class="go">&lt;music21.key.KeySignature of 2 sharps&gt;</span>
+<span class="go">&lt;music21.note.Note F#&gt;</span>
+<span class="go">&lt;music21.meter.TimeSignature 3/8&gt;</span>
+<span class="go">&lt;music21.note.Note D&gt;</span>
+</pre></div>
+</div>
+<p>This is the order we hoped for.</p>
+<p>There is one more way that elements in a Stream can be returned, for advanced
+uses only.  Each Stream has an <cite>autoSort</cite> property.  By default it is On.  But
+if you turn it off, then elements are returned in the order they are added
+regardless of offset, priority, or classSortOrder.  Here is an example of that:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">messyStream</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">Stream</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">messyStream</span><span class="o">.</span><span class="n">autoSort</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">messyStream</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mf">4.0</span><span class="p">,</span> <span class="n">note</span><span class="o">.</span><span class="n">Note</span><span class="p">(</span><span class="s">&quot;C#&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n1</span> <span class="o">=</span> <span class="n">note</span><span class="o">.</span><span class="n">Note</span><span class="p">(</span><span class="s">&quot;D#&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n2</span> <span class="o">=</span> <span class="n">note</span><span class="o">.</span><span class="n">Note</span><span class="p">(</span><span class="s">&quot;E&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n1</span><span class="o">.</span><span class="n">priority</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n2</span><span class="o">.</span><span class="n">priority</span> <span class="o">=</span> <span class="mi">0</span> <span class="c"># should come before n1 if at same offset</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">messyStream</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">n1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">messyStream</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">n2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">messyStream</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="s">&#39;text&#39;</span><span class="p">)</span>
+<span class="go">{4.0} &lt;music21.note.Note C#&gt;</span>
+<span class="go">{2.0} &lt;music21.note.Note D#&gt;</span>
+<span class="go">{2.0} &lt;music21.note.Note E&gt;</span>
+</pre></div>
+</div>
+<p>the setting <cite>autoSort = False</cite> can speed up some operations if you already know
+that all the notes are in order.  Inside the stream.py module you&#8217;ll see some
+even faster operations such as <cite>_insertCore()</cite> and <cite>_appendCore()</cite> which are
+even faster and which we use when translating from one format to another.  After
+running an <cite>_insertCore()</cite> operation, the Stream is in an unusuable state until
+<cite>_elementsChanged()</cite> is run, which lets the Stream ruminate over its new state
+as if a normal <cite>insert()</cite> or <cite>append()</cite> operation has been done.  Mixing
+<cite>_insertCore()</cite> and <cite>_appendCore()</cite> commands without running <cite>_elementsChanged()</cite>
+is likely to have disasterous consequences.  Use one or the other.</p>
+<p>However, append does work well with <cite>autoSort = False</cite>, as this example demonstrates:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">messyStream</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">note</span><span class="o">.</span><span class="n">Note</span><span class="p">(</span><span class="s">&quot;F&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">messyStream</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="s">&#39;text&#39;</span><span class="p">)</span>
+<span class="go">{4.0} &lt;music21.note.Note C#&gt;</span>
+<span class="go">{2.0} &lt;music21.note.Note D#&gt;</span>
+<span class="go">{2.0} &lt;music21.note.Note E&gt;</span>
+<span class="go">{5.0} &lt;music21.note.Note F&gt;</span>
+</pre></div>
+</div>
+<p>If you want to get back to the sorted state, just turn <cite>autoSort = True</cite>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">messyStream</span><span class="o">.</span><span class="n">autoSort</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">messyStream</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="s">&#39;text&#39;</span><span class="p">)</span>
+<span class="go">{2.0} &lt;music21.note.Note E&gt;</span>
+<span class="go">{2.0} &lt;music21.note.Note D#&gt;</span>
+<span class="go">{4.0} &lt;music21.note.Note C#&gt;</span>
+<span class="go">{5.0} &lt;music21.note.Note F&gt;</span>
+</pre></div>
+</div>
+<p>Note that this is a destructive operation.  Turning <cite>autoSort</cite> back to
+<cite>False</cite> won&#8217;t get you back the earlier order:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">messyStream</span><span class="o">.</span><span class="n">autoSort</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">messyStream</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="s">&#39;text&#39;</span><span class="p">)</span>
+<span class="go">{2.0} &lt;music21.note.Note E&gt;</span>
+<span class="go">{2.0} &lt;music21.note.Note D#&gt;</span>
+<span class="go">{4.0} &lt;music21.note.Note C#&gt;</span>
+<span class="go">{5.0} &lt;music21.note.Note F&gt;</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="overviewFormats.html" title="Overview: Importing File and Data Formats"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Music21 Concepts Overview"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">music21</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Music21 Concepts Overview</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2006-2015, Michael Scott Cuthbert and cuthbertLab.
+      Last updated on Sep 13, 2015.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

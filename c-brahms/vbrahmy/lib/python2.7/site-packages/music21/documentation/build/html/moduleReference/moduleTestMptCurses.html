@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>music21.test.mptCurses &mdash; music21 Documentation</title>
+    
+    <link rel="stylesheet" href="../_static/m21.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.0.12',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/copybutton.js"></script>
+    <link rel="top" title="music21 Documentation" href="../index.html" />
+    <link rel="up" title="Module Reference" href="index.html" />
+    <link rel="next" title="music21.test.multiprocessTest" href="moduleTestMultiprocessTest.html" />
+    <link rel="prev" title="music21.test.dedent" href="moduleTestDedent.html" /><link href='http://fonts.googleapis.com/css?family=Source+Code+Pro|Open+Sans:300italic,400italic,700italic,400,300,700' rel='stylesheet' type='text/css'>
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="moduleTestMultiprocessTest.html" title="music21.test.multiprocessTest"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="moduleTestDedent.html" title="music21.test.dedent"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">music21</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="moduleTestDedent.html"
+                        title="previous chapter">music21.test.dedent</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="moduleTestMultiprocessTest.html"
+                        title="next chapter">music21.test.multiprocessTest</a></p>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">music21.test.mptCurses</a><ul>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+<li><a class="reference internal" href="#modulegather">ModuleGather</a></li>
+<li><a class="reference internal" href="#moduleresponse">ModuleResponse</a></li>
+</ul>
+</li>
+</ul>
+
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about/index.html">About Music21</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../usersGuide/index.html">Users Guide</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Module Reference</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installing/index.html">Installation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../developerReference/index.html">Developer Reference</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/moduleReference/moduleTestMptCurses.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="music21-test-mptcurses">
+<span id="moduletestmptcurses"></span><h1>music21.test.mptCurses<a class="headerlink" href="#music21-test-mptcurses" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-music21.test.mptCurses"></span><p>Multiprocess testing.  Tests all doctests and Test unittest objects in all
+modules that are imported when running &#8220;import music21&#8221;.  Runs threads on
+each core of a multicore system unless there are more than 2 cores, in which
+case it runs on n-1 cores.</p>
+<p>N.B. this gets a slightly different set of modules than test/test.py does
+because the <cite>imp</cite> module is not available for threaded processing.  Running
+both modules gives great coverage of just about everything &#8211; do that before
+building a new release.</p>
+<p>Run test/testDocumentation after this.</p>
+<div class="section" id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="music21.test.mptCurses.mainPoolRunner">
+<code class="descclassname">music21.test.mptCurses.</code><code class="descname">mainPoolRunner</code><span class="sig-paren">(</span><em>testGroup=['test'], restoreEnvironmentDefaults=False, leaveOut=1</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.test.mptCurses.mainPoolRunner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run all tests. Group can be test and/or external</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="music21.test.mptCurses.poolInit">
+<code class="descclassname">music21.test.mptCurses.</code><code class="descname">poolInit</code><span class="sig-paren">(</span><em>q</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.test.mptCurses.poolInit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="music21.test.mptCurses.printSummary">
+<code class="descclassname">music21.test.mptCurses.</code><code class="descname">printSummary</code><span class="sig-paren">(</span><em>summaryOutput</em>, <em>timeStart</em>, <em>pathsToRun</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.test.mptCurses.printSummary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="music21.test.mptCurses.runOneModuleWithoutImp">
+<code class="descclassname">music21.test.mptCurses.</code><code class="descname">runOneModuleWithoutImp</code><span class="sig-paren">(</span><em>args</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.test.mptCurses.runOneModuleWithoutImp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="music21.test.mptCurses.updateFromQueue">
+<code class="descclassname">music21.test.mptCurses.</code><code class="descname">updateFromQueue</code><span class="sig-paren">(</span><em>modGather</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.test.mptCurses.updateFromQueue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="modulegather">
+<h2>ModuleGather<a class="headerlink" href="#modulegather" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="music21.test.mptCurses.ModuleGather">
+<em class="property">class </em><code class="descclassname">music21.test.mptCurses.</code><code class="descname">ModuleGather</code><a class="headerlink" href="#music21.test.mptCurses.ModuleGather" title="Permalink to this definition">¶</a></dt>
+<dd><p>Utility class for gathering and importing all modules in the music21
+package. Puts them in self.modulePaths.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">music21.test</span> <span class="kn">import</span> <span class="n">testSingleCoreAll</span> <span class="k">as</span> <span class="n">testModule</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mg</span> <span class="o">=</span> <span class="n">testModule</span><span class="o">.</span><span class="n">ModuleGather</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">mg</span><span class="o">.</span><span class="n">modulePaths</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">D:\Web\eclipse\music21base\music21\chord.py</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<p class="rubric"><a class="reference internal" href="#music21.test.mptCurses.ModuleGather" title="music21.test.mptCurses.ModuleGather"><code class="xref py py-class docutils literal"><span class="pre">ModuleGather</span></code></a> methods</p>
+<dl class="method">
+<dt id="music21.test.mptCurses.ModuleGather.getModuleWithoutImp">
+<code class="descclassname">ModuleGather.</code><code class="descname">getModuleWithoutImp</code><span class="sig-paren">(</span><em>fp</em>, <em>restoreEnvironmentDefaults=False</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.test.mptCurses.ModuleGather.getModuleWithoutImp" title="Permalink to this definition">¶</a></dt>
+<dd><p>gets one module object from the file path without using Imp</p>
+</dd></dl>
+
+</div>
+<div class="section" id="moduleresponse">
+<h2>ModuleResponse<a class="headerlink" href="#moduleresponse" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="music21.test.mptCurses.ModuleResponse">
+<em class="property">class </em><code class="descclassname">music21.test.mptCurses.</code><code class="descname">ModuleResponse</code><span class="sig-paren">(</span><em>returnCode</em>, <em>fp</em>, <em>moduleName</em>, <em>success</em>, <em>testRunner</em>, <em>errors</em>, <em>failures</em>, <em>testsRun</em>, <em>runTime</em><span class="sig-paren">)</span><a class="headerlink" href="#music21.test.mptCurses.ModuleResponse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p class="rubric"><a class="reference internal" href="#music21.test.mptCurses.ModuleResponse" title="music21.test.mptCurses.ModuleResponse"><code class="xref py py-class docutils literal"><span class="pre">ModuleResponse</span></code></a> read-only properties</p>
+<dl class="attribute">
+<dt id="music21.test.mptCurses.ModuleResponse.errors">
+<code class="descclassname">ModuleResponse.</code><code class="descname">errors</code><a class="headerlink" href="#music21.test.mptCurses.ModuleResponse.errors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 5</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="music21.test.mptCurses.ModuleResponse.failures">
+<code class="descclassname">ModuleResponse.</code><code class="descname">failures</code><a class="headerlink" href="#music21.test.mptCurses.ModuleResponse.failures" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 6</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="music21.test.mptCurses.ModuleResponse.fp">
+<code class="descclassname">ModuleResponse.</code><code class="descname">fp</code><a class="headerlink" href="#music21.test.mptCurses.ModuleResponse.fp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="music21.test.mptCurses.ModuleResponse.moduleName">
+<code class="descclassname">ModuleResponse.</code><code class="descname">moduleName</code><a class="headerlink" href="#music21.test.mptCurses.ModuleResponse.moduleName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="music21.test.mptCurses.ModuleResponse.returnCode">
+<code class="descclassname">ModuleResponse.</code><code class="descname">returnCode</code><a class="headerlink" href="#music21.test.mptCurses.ModuleResponse.returnCode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="music21.test.mptCurses.ModuleResponse.runTime">
+<code class="descclassname">ModuleResponse.</code><code class="descname">runTime</code><a class="headerlink" href="#music21.test.mptCurses.ModuleResponse.runTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 8</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="music21.test.mptCurses.ModuleResponse.success">
+<code class="descclassname">ModuleResponse.</code><code class="descname">success</code><a class="headerlink" href="#music21.test.mptCurses.ModuleResponse.success" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="music21.test.mptCurses.ModuleResponse.testRunner">
+<code class="descclassname">ModuleResponse.</code><code class="descname">testRunner</code><a class="headerlink" href="#music21.test.mptCurses.ModuleResponse.testRunner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 4</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="music21.test.mptCurses.ModuleResponse.testsRun">
+<code class="descclassname">ModuleResponse.</code><code class="descname">testsRun</code><a class="headerlink" href="#music21.test.mptCurses.ModuleResponse.testsRun" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 7</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="moduleTestMultiprocessTest.html" title="music21.test.multiprocessTest"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="moduleTestDedent.html" title="music21.test.dedent"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">music21</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2006-2015, Michael Scott Cuthbert and cuthbertLab.
+      Last updated on Sep 26, 2015.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>&lt;no title&gt; &mdash; music21 Documentation</title>
+    
+    <link rel="stylesheet" href="../_static/m21.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.0.11',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/copybutton.js"></script>
+    <link rel="top" title="music21 Documentation" href="../index.html" /><link href='http://fonts.googleapis.com/css?family=Source+Code+Pro|Open+Sans:300italic,400italic,700italic,400,300,700' rel='stylesheet' type='text/css'>
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">music21</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about/index.html">About Music21</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../usersGuide/index.html">Users Guide</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../moduleReference/index.html">Module Reference</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installing/index.html">Installation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview/index.html">Music21 Concepts Overview</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../systemReference/index.html">System Reference</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../developerReference/index.html">Developer Reference</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/tutorials/MersenneDemo.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <span class="target" id="mersennedemo"></span><div class="code python highlight-python"><div class="highlight"><pre>%load_ext music21.ipython21.ipExtension
+</pre></div>
+</div>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">music21</span> <span class="kn">import</span> <span class="o">*</span>
+</pre></div>
+</div>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">getTransposeAmount</span><span class="p">(</span><span class="n">position</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">position</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="n">transposeList</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">transposeAmount</span> <span class="o">=</span> <span class="n">transposeList</span><span class="p">[</span><span class="n">position</span> <span class="o">%</span> <span class="mi">8</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">transposeAmount</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">getTransposeAmount</span><span class="p">(</span><span class="n">position</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">transposeAmount</span>
+</pre></div>
+</div>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">getNoteNameFromTransposition</span><span class="p">(</span><span class="n">transpose</span><span class="p">):</span>
+    <span class="n">noteList</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;C&#39;</span><span class="p">,</span><span class="s">&#39;D#&#39;</span><span class="p">,</span><span class="s">&#39;E&#39;</span><span class="p">,</span><span class="s">&#39;G&#39;</span><span class="p">,</span><span class="s">&#39;A-&#39;</span><span class="p">,</span><span class="s">&#39;B&#39;</span><span class="p">]</span> <span class="c"># A2, m2, m3, m2, A2 ...</span>
+    <span class="n">octave</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">+</span> <span class="n">transpose</span><span class="o">/</span><span class="mi">6</span>
+    <span class="n">noteName</span> <span class="o">=</span> <span class="n">noteList</span><span class="p">[</span><span class="n">transpose</span> <span class="o">%</span> <span class="mi">6</span><span class="p">]</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">octave</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">noteName</span>
+
+<span class="k">def</span> <span class="nf">getNoteFromTransposition</span><span class="p">(</span><span class="n">transpose</span><span class="p">):</span>
+    <span class="n">noteName</span> <span class="o">=</span> <span class="n">getNoteNameFromTransposition</span><span class="p">(</span><span class="n">transpose</span><span class="p">)</span>
+    <span class="n">noteObj</span> <span class="o">=</span> <span class="n">note</span><span class="o">.</span><span class="n">Note</span><span class="p">(</span><span class="n">noteName</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span><span class="s">&#39;16th&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">noteObj</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&#39;B&#39;</span><span class="p">:</span>
+        <span class="n">noteObj</span><span class="o">.</span><span class="n">accidental</span> <span class="o">=</span> <span class="n">pitch</span><span class="o">.</span><span class="n">Accidental</span><span class="p">(</span><span class="s">&#39;natural&#39;</span><span class="p">)</span>
+        <span class="n">noteObj</span><span class="o">.</span><span class="n">accidental</span><span class="o">.</span><span class="n">displayType</span> <span class="o">=</span> <span class="s">&#39;always&#39;</span>
+    <span class="k">return</span> <span class="n">noteObj</span>
+</pre></div>
+</div>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">getNotesForLength</span><span class="p">(</span><span class="n">totalNotes</span><span class="p">,</span> <span class="n">appendStream</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+    <span class="n">currentNoteType</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">appendStream</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">retStream</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">Part</span><span class="p">()</span>
+        <span class="n">retStream</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">meter</span><span class="o">.</span><span class="n">TimeSignature</span><span class="p">(</span><span class="s">&#39;2/4&#39;</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">retStream</span> <span class="o">=</span> <span class="n">appendStream</span>
+
+    <span class="n">firstNoteIndex</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">retStream</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">totalNotes</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">noteObj</span> <span class="o">=</span> <span class="n">getNoteFromTransposition</span><span class="p">(</span><span class="n">currentNoteType</span><span class="p">)</span>
+        <span class="n">retStream</span><span class="o">.</span><span class="n">_appendCore</span><span class="p">(</span><span class="n">noteObj</span><span class="p">)</span>
+        <span class="n">currentNoteType</span> <span class="o">+=</span> <span class="n">getTransposeAmount</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="n">retStream</span><span class="o">.</span><span class="n">_elementsChanged</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">totalNotes</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">retStream</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">duration</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s">&#39;half&#39;</span>
+    <span class="k">elif</span> <span class="n">totalNotes</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">retStream</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">duration</span><span class="o">.</span><span class="n">quarterLength</span> <span class="o">=</span> <span class="mf">1.5</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">retStream</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">duration</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s">&#39;eighth&#39;</span>
+    <span class="n">retStream</span><span class="p">[</span><span class="n">firstNoteIndex</span><span class="p">]</span><span class="o">.</span><span class="n">addLyric</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">totalNotes</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">retStream</span>
+</pre></div>
+</div>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="n">s</span> <span class="o">=</span> <span class="n">getNotesForLength</span><span class="p">(</span><span class="mi">31</span><span class="p">)</span>
+<span class="n">s</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="../_images/MersenneDemo_5_0.png" src="../_images/MersenneDemo_5_0.png" />
+<div class="code python highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">makeMersenneMelody</span><span class="p">(</span><span class="n">maxPowerOfTwo</span><span class="p">):</span>
+    <span class="n">retStream</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">Part</span><span class="p">()</span>
+    <span class="n">retStream</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">meter</span><span class="o">.</span><span class="n">TimeSignature</span><span class="p">(</span><span class="s">&#39;2/4&#39;</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">maxPowerOfTwo</span><span class="p">):</span>
+        <span class="n">retStream</span><span class="o">.</span><span class="n">repeatAppend</span><span class="p">(</span><span class="n">note</span><span class="o">.</span><span class="n">Rest</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s">&#39;half&#39;</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">totalNotes</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">i</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
+        <span class="n">getNotesForLength</span><span class="p">(</span><span class="n">totalNotes</span><span class="p">,</span> <span class="n">retStream</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">maxPowerOfTwo</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">retStream</span><span class="o">.</span><span class="n">repeatAppend</span><span class="p">(</span><span class="n">note</span><span class="o">.</span><span class="n">Rest</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s">&#39;half&#39;</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">totalNotes</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">i</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
+        <span class="n">getNotesForLength</span><span class="p">(</span><span class="n">totalNotes</span><span class="p">,</span> <span class="n">retStream</span><span class="p">)</span>
+    <span class="n">retStream</span><span class="o">.</span><span class="n">repeatAppend</span><span class="p">(</span><span class="n">note</span><span class="o">.</span><span class="n">Rest</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s">&#39;half&#39;</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">retStream</span>
+</pre></div>
+</div>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="n">s2</span> <span class="o">=</span> <span class="n">makeMersenneMelody</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="n">s2</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="../_images/MersenneDemo_8_0.png" src="../_images/MersenneDemo_8_0.png" />
+<div class="code python highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">makeMersenneScore</span><span class="p">(</span><span class="n">maxPowerOfTwo</span><span class="p">):</span>
+    <span class="n">p1</span> <span class="o">=</span> <span class="n">makeMersenneMelody</span><span class="p">(</span><span class="n">maxPowerOfTwo</span><span class="p">)</span>
+    <span class="n">p2</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">Part</span><span class="p">()</span>
+    <span class="n">p2</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">clef</span><span class="o">.</span><span class="n">BassClef</span><span class="p">())</span>
+    <span class="n">p2</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">meter</span><span class="o">.</span><span class="n">TimeSignature</span><span class="p">(</span><span class="s">&#39;2/4&#39;</span><span class="p">))</span>
+    <span class="n">p1Measures</span> <span class="o">=</span> <span class="n">p1</span><span class="o">.</span><span class="n">duration</span><span class="o">.</span><span class="n">quarterLength</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">p1Measures</span><span class="p">)):</span>
+        <span class="n">p2</span><span class="o">.</span><span class="n">_appendCore</span><span class="p">(</span><span class="n">note</span><span class="o">.</span><span class="n">Note</span><span class="p">(</span><span class="s">&#39;E2&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s">&#39;eighth&#39;</span><span class="p">))</span>
+        <span class="n">p2</span><span class="o">.</span><span class="n">_appendCore</span><span class="p">(</span><span class="n">note</span><span class="o">.</span><span class="n">Note</span><span class="p">(</span><span class="s">&#39;B2&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s">&#39;eighth&#39;</span><span class="p">))</span>
+        <span class="n">p2</span><span class="o">.</span><span class="n">_appendCore</span><span class="p">(</span><span class="n">note</span><span class="o">.</span><span class="n">Note</span><span class="p">(</span><span class="s">&#39;E3&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s">&#39;eighth&#39;</span><span class="p">))</span>
+        <span class="n">p2</span><span class="o">.</span><span class="n">_appendCore</span><span class="p">(</span><span class="n">note</span><span class="o">.</span><span class="n">Note</span><span class="p">(</span><span class="s">&#39;B2&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s">&#39;eighth&#39;</span><span class="p">))</span>
+    <span class="n">p2</span><span class="o">.</span><span class="n">_elementsChanged</span><span class="p">()</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">Score</span><span class="p">()</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">p1</span><span class="p">)</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">p2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">s</span>
+</pre></div>
+</div>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="n">s3</span> <span class="o">=</span> <span class="n">makeMersenneScore</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="n">s3</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="../_images/MersenneDemo_11_0.png" src="../_images/MersenneDemo_11_0.png" />
+<div class="code python highlight-python"><div class="highlight"><pre><span class="n">s3</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="s">&#39;midi&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">music21</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2006-2015, Michael Scott Cuthbert and cuthbertLab.
+      Last updated on Sep 12, 2015.
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>
