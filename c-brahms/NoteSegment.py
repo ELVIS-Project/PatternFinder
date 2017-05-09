@@ -61,6 +61,50 @@ class K_entry():
     def __repr__(self):
         return pformat(self.__dict__)
 
+class GeometricNote(music21.note.Note):
+
+    def __add__(self, other_note):
+        pass
+
+class NoteVector2(music21.interval.Interval):
+    def __init__(self, *args, **kwargs):
+        super(NoteVector2, self).__init__(*args, **kwargs)
+        self.x = 0
+        self.y = self.chromatic.semitones
+
+    def __cmp__(self, other_vector):
+        """
+        A lexicographic comparison function. For example, [1,42] < [2,3] and [2,1] < [3,22]
+        """
+        # TODO add piano roll duration comparison here?
+        #if pianoRoll == True:
+        #    self.duration = larry.getOffsetBySite(larrySite) - ralph.getOffsetbySite(ralphSite)
+        #else:
+        #    self.duration = 0
+
+        if (self.x, self.y) < (other_vector.x, other_vector.y):
+            return -1
+        elif (self.x, self.y) > (other_vector.x, other_vector.y):
+            return 1
+        return 0
+
+
+class InterNoteVector(NoteVector2):
+    def __init__(self, ralph, ralphSite, larry, larrySite):
+        super(InterNoteVector, self).__init__(noteStart=ralph, noteEnd=larry)
+        self.x = larry.getOffsetBySite(larrySite) - ralph.getOffsetBySite(ralphSite)
+        self.noteStartSite = ralphSite
+        self.noteStartIndex = ralphSite.index(ralph)
+        self.noteEndIndex = larrySite.index(larry)
+        self.noteEndSite = larrySite
+
+    def __repr__(self):
+        return super(InterNoteVector, self).__repr__() + " (x={0}, y={1}) ".format(self.x, self.y) + " #{0}: {1} --> #{2}: {3}".format(self.noteStartIndex, self.noteStart, self.noteEndIndex, self.noteEnd)
+
+class IntraNoteVector(InterNoteVector):
+    def __init__(self, ralph, larry, site):
+        super(IntraNoteVector, self).__init__(self, ralph, site, larry, site)
+
 class NoteVector():
     #TODO make this a subclass of music21.Music21Object? or maybe even music21.interval.chromaticInterval, with duration != 0?
     """

@@ -1,30 +1,48 @@
+from LineSegment import LineSegment
+from itertools import takewhile
+from more_itertools import peekable
+from NoteSegment import InterNoteVector
 import geoAlgorithm
 import NoteSegment
 import music21
+import pdb
 
 class P1(geoAlgorithm.P):
 
-    """
-    def algorithm(self, source, pattern, settings):
-        def is_full_occurrence(s, ptrs):
-            for p in pattern[1:]:
-                ptrs[p] = max(ptrs[p], p + t)
-                while source[ptrs[p]] < pattern[p] + shift and ptrs[p] + 1 < len(source):
-                    ptrs[p] += 1
-
-                if source[ptrs[p]] != pattern[p] + shift: break
-                if p == len(pattern)-1:
-                    shift_matches.append(shift)
-
-
-        ptrs = {p : iter(self) for p in pattern}
-    """
-
     def algorithm(self):
+        source = self.source
+        pattern = self.pattern
+
+        def is_pure_occurrence(ptrs, cur_shift):
+            for inter_vector_gen in ptrs:
+                # Take the first intervec that's too big
+                try:
+                    while inter_vector_gen.peek() < cur_shift:
+                        inter_vector_gen.next()
+                        cndt_inter_vector = inter_vector_gen.peek()
+
+                    if cndt_inter_vector != cur_shift:
+                        return False
+                except StopIteration:
+                    return False
+            return True
+
+        # Remember you need lambda p: ()(note) or else the list comprehension will pollute the name space with the final element in pattern, and you won't get the generators you intended. Check StackOverflow "Python generator conflicting with list comprehension"
+        ptrs = [peekable((lambda p: (InterNoteVector(p, pattern, s, source) for s in source))(note)) for note in pattern[1:]]
+
+        for s in source:
+            possible_shift = InterNoteVector(pattern[0], pattern, s, source)
+            if is_pure_occurrence(ptrs, possible_shift):
+                yield [possible_shift] + map(lambda x: x.peek(), ptrs)
+
+
+    def algorithm2(self):
         """
         POLYPHONIC BEHAVIOUR:
             P1 can find exact melodic occurrences through many voices. It will only find multiple matches if the first note of the pattern can match more than one identical note in the source, while all the rest of the notes find possibly non-unique matches. THIS should be changed.
         """
+        self.pattern_line_segments = [LineSegment(note.getOffsetBySite(self.pattern.flat.notes), note.pitch.ps, note.duration.quarterLength, note_link=note) for note in self.pattern.flat.notes]
+        self.source_line_segments = [LineSegment(note.getOffsetBySite(self.source.flat.notes), note.pitch.ps, note.duration.quarterLength, note_link=note) for note in self.source.flat.notes]
         source = self.source_line_segments
         pattern = self.pattern_line_segments
         settings = self.settings
