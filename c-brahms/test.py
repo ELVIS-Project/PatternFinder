@@ -70,3 +70,16 @@ pattern.insert([0, notes[0], 1, notes[1], 2, notes[2]])
 # Music21 Objects
 G = music21.note.Note('G')
 B = music21.note.Note('B')
+D = music21.note.Note('D')
+Gmaj = music21.chord.Chord([G, B, D])
+
+#Sorting test
+sortPattern = music21.stream.Stream()
+sortPattern.insert(0, G.transpose('M2'))
+sortPattern.insert(0, G)
+sortPattern.insert(1, B)
+sortedPattern = NoteSegment.NotePointSet(sortPattern)
+
+#Chord test
+chordPattern = music21.stream.Stream()
+chordPattern.insert([0, G, 1, Gmaj])

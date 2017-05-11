@@ -76,12 +76,6 @@ class NoteVector2(music21.interval.Interval):
         """
         A lexicographic comparison function. For example, [1,42] < [2,3] and [2,1] < [3,22]
         """
-        # TODO add piano roll duration comparison here?
-        #if pianoRoll == True:
-        #    self.duration = larry.getOffsetBySite(larrySite) - ralph.getOffsetbySite(ralphSite)
-        #else:
-        #    self.duration = 0
-
         if (self.x, self.y) < (other_vector.x, other_vector.y):
             return -1
         elif (self.x, self.y) > (other_vector.x, other_vector.y):
@@ -138,6 +132,60 @@ class NoteVector():
     def __repr__(self):
         return "NoteVector({0}, {1}, #{2}: {3} -> #{4}: {5})".format(str(self.x), str(self.y), self.site.index(self.start), self.start, self.site.index(self.end), self.end)
 
+class NotePointSet(music21.stream.Stream):
+    """
+    A container for the notes of a music21 parsed score.
+    Pre-processes the data by flattening the chords and sorting the notes.
+    """
+    def __init__(self, stream):
+        # Calling super() seems to erase the input. This is how they subclass Stream in music21 source code
+        music21.stream.Stream.__init__(self)
+        note_stream = stream.flat.notes
+
+        for n in note_stream:
+            ## COPY MUSICNOTE OR GENERATE MUSICNOTES FROM CHORD
+            # NOTE optionally create Geometric Note objects here
+            if n.isChord:
+                new_notes = self.music21Chord_to_music21Notes(n, note_stream)
+            else:
+                new_notes = [n.offset, copy.deepcopy(n)]
+
+            ## INSERT SO IT IS SORTED BY <OFFSET, PITCH>
+            for n in new_notes[1::2]:
+                # Use frequency as it is the most fine-grained pitch quantity.
+                # Any subsequent equivalence classes on note pitch (such as enharmonic equivalency or pitch classes) will preserve the sorting.
+                n.priority = int(n.pitch.frequency)
+            self.insert(new_notes)
+
+        # Set the derivation
+        self.derivation.origin = stream
+        self.derivation.method = 'NotePointSet'
+
+    def music21Chord_to_music21Notes(self, chord, site):
+        """
+        CHORD TO LIST OF NOTES FOR USE IN music21.stream.inser()
+        For serious flattening of the score into a 2-d plane of horizontal line segments.
+        music21.note.Note and music21.chord.Chord subclass the same bases, so in theory it shoud look something like this...
+
+        NOTE: this will screw up the coloring since music21 doesn't support coloring just one note of a chord (i don't think?), so as compromise i'll just color the whole chord.
+        """
+        note_list = []
+        for pitch in chord.pitches:
+            note = music21.note.Note(pitch)
+
+            # Music21Object.mergeAttributes gets the 'id' and 'group' attributes
+            note.mergeAttributes(chord)
+
+            # note essentials
+            note.duration = chord.duration
+
+            # music21.stream.insert() expects [offset #1, note #1, offset #2, ...]
+            note_list.append(chord.getOffsetBySite(site))
+            note_list.append(note)
+
+            note.derivation.origin = chord
+            note.derivation.method = 'chord_to_notes'
+        return note_list
 
 class NoteSegments(music21.stream.Stream):
     # TODO make this a top level stream with a pattern and a source sub stream. would make so much more sense..
@@ -161,7 +209,7 @@ class NoteSegments(music21.stream.Stream):
         self.autoSort = True
 
     def flatten_chords(self):
-        def music21Chord_to_music21Notes(chordy, site):
+        def music21Chord_to_music21Notes(chord, site):
             """
             CHORD TO LIST OF NOTES FOR USE IN music21.stream.inser()
             For serious flattening of the score into a 2-d plane of horizontal line segments.
@@ -170,15 +218,15 @@ class NoteSegments(music21.stream.Stream):
             NOTE: this will screw up the coloring since music21 doesn't support coloring one note of a chord (i don't think?), so as compromise i'll just color the whole chord.
             """
             note_list = []
-            for pitch in chordy.pitches:
+            for pitch in chord.pitches:
                 note = music21.note.Note(pitch)
 
                 # note essentials
-                note.offset = chordy.getOffsetBySite(site)
-                note.duration = chordy.duration
+                note.offset = chord.getOffsetBySite(site)
+                note.duration = chord.duration
 
                 # our modifications
-                note.link = chordy.link
+                note.link = chord.link
                 note.didBelongToAChord = True
 
                 # music21.stream.insert() expects [offset #1, note #1, offset #2, ...]
