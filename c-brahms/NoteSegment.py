@@ -137,9 +137,13 @@ class NotePointSet(music21.stream.Stream):
     A container for the notes of a music21 parsed score.
     Pre-processes the data by flattening the chords and sorting the notes.
     """
-    def __init__(self, stream):
+    # TODO running into errors using an __init__. "cannot have required arguments
+    # sol'n : just make this a function that returns a new stream
+    # or, make it so that every instantiation needs to call an additional init(stream) function
+    def __init__(self, stream, *args, **kwargs):
         # Calling super() seems to erase the input. This is how they subclass Stream in music21 source code
-        music21.stream.Stream.__init__(self)
+        # NOTE in earlier code, you used a .part within a stream. Not sure if this will break the code.
+        music21.stream.Stream.__init__(self, *args, **kwargs)
         note_stream = stream.flat.notes
 
         for n in note_stream:

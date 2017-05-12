@@ -1,6 +1,7 @@
 from collections import namedtuple #for .scores immutable tuple
 from pprint import pformat #for repr
 from LineSegment import LineSegment
+from NoteSegment import NotePointSet
 import NoteSegment
 import copy
 import music21
@@ -20,79 +21,56 @@ DEFAULT_SETTINGS = {
         'parsed_input' : False,
         'runOnInit' : True}
 
-def get_notesegments_from_score(source_score):
-    #original_pattern = music21.converter.parse(pattern_score) already passed by get_pattern_from_fugue
-    #original_pattern = pattern_score
-    original_source = music21.converter.parse(source_score)
-
-    ### Get rid of the chords but keep the original score
-    #pattern = music21.stream.Stream(music21.stream.Part())
-    source = music21.stream.Stream(music21.stream.Part())
-
-    print("GeoAlgorithm: removing chords...")
-    #use .flat.notes instead of .recurse() because note.getOffsetByHierarchy is only in music 21 version 3
-    i = 0
-    for element in original_source.flat.notes:
-        print(element)
-        if element.isChord:
-            for pitch in element.pitches:
-                note = music21.note.Note(pitch)
-                note.offset = element.getOffsetBySite(original_source.flat.notes)
-                note.duration = element.duration
-                note.didBelongToAChord = True
-                note.original = element
-
-                # Index
-                note.index = i
-                i += 1
-                source.insert(note)
-        else:
-            # Index
-            element.index = i
-            i += 1
-
-            element.didBelongToAChord = False
-            element.original = element
-            source.insert(element.getOffsetBySite(original_source.flat.notes), element)
-    return ((original_source, source))
-
-def music21Chord_to_music21Notes(chordy):
-    """
-    CHORD TO NOTE GENERATOR
-    For serious flattening of the score into a 2-d plane of horizontal line segments.
-    music21.note.Note and music21.chord.Chord have the same bases, so in theory it shoud look something like this...
-
-    NOTE: this will screw up the coloring since music21 doesn't support coloring one note of a chord (i don't think?), so as compromise i'll just color the whole chord.
-
-    N.T.S.: it does not seem you can do music21.insert(<generator expression>). think of a slick way?
-    """
-    note_list = []
-    for pitch in chordy.pitches:
-        note = music21.note.Note(pitch)
-        note.offset = element.getOffsetBySite(stream[0])
-        note.duration = element.duration
-        note.didBelongToAChord = True
-        note.original = element
-
-        note_list.append(offset)
-        note_list.append(note)
-    return note_list
-
 class geoAlgorithm(object):
     """
     Generic base class to manage execution of P, S, and W algorithms
     """
-    def __init__(self, pattern_score, source_score, settings = DEFAULT_SETTINGS):
+    def __init__(self, pattern_input, source_input, settings = DEFAULT_SETTINGS):
+
+        # Update the default settings with user-specified ones so that the user only has to specify non-default parameters.
         self.settings = DEFAULT_SETTINGS
-        self.settings.update(settings) # So that not all keywords must be specified on call
-        self.scores = namedtuple("Scores", ['pattern', 'source'])._make((pattern_score, source_score))
+        self.settings.update(settings)
 
-        print("GeoAlgorithm: preprocessing...")
+        # Defines self.pattern and self.source
+        # If file paths were given, they are stored in the stream derivations
+        self.parse_scores(pattern_input, source_input)
+
+        # Defines self.patternPointSet and self.sourcePointSet
         self.pre_process()
-        print("GeoAlgorithm: done preprocessing")
 
-        if self.settings['runOnInit']:
-            self.run()
+        # Define a result generator
+        #self.results = self.algorithm()
+
+    def parse_scores(self, pattern_input, source_input):
+        """
+        Defines self.pattern and self.source
+        Tests to see if the input is a file path or something else (possibly already parsed scores)
+        """
+        try:
+            self.pattern = music21.converter.parse(pattern_input)
+            self.pattern.derivation.origin = pattern_input
+            self.pattern.derivation.method = 'music21.converter.parse()'
+        except (music21.converter.ConverterException, AttributeError):
+            self.pattern = pattern_input
+            self.pattern.derivation.method = 'manual'
+
+        try:
+            self.source = music21.converter.parse(source_input)
+            self.source.derivation.origin = source_input
+            self.source.derivation.method = 'music21.converter.parse()'
+        except(music21.converter.ConverterException, AttributeError):
+            self.source = source_input
+            self.source.derivation.method = 'manual'
+
+
+    def pre_process(self):
+        """
+        Defines self.alg_input
+        Runs all necessary pre-processing common to every algorithm (lexicographic sorting and chord flattening)
+        """
+        # NotePointSet sets the derivations of new streams on init
+        self.patternPointSet = NotePointSet(self.pattern)
+        self.sourcePointSet = NotePointSet(self.source)
 
     def run(self):
         print("Running algorithm " + str(self)) # Run the algorithm
@@ -104,6 +82,7 @@ class geoAlgorithm(object):
         #    self.occurrences = music21.stream.Stream()
 
         # Processing results is necessary as long as output format is non-constant
+        # TODO add try except so empty results doesn't crash? Also add an empty-result test case
         self.occurrences = self.process_results()
 
         if self.__class__.__name__ == "P3":
@@ -111,59 +90,8 @@ class geoAlgorithm(object):
         else:
             self.occurrencesAsShifts = [o.shift for o in self.occurrences]
 
-        self.post_process()
+        #self.post_process()
 
-
-    def pre_process(self):
-        print("GeoAlgorithm: parsing...")
-        if self.settings['parsed_input'] is False:
-            self.original_pattern = music21.converter.parse(self.scores.pattern)
-            self.original_source = music21.converter.parse(self.scores.source)
-        else:
-            self.original_pattern = self.scores.pattern
-            self.original_source = self.scores.source
-
-        ### Get rid of the chords but keep the original score
-        self.source = music21.stream.Stream(music21.stream.Part())
-        self.pattern = music21.stream.Stream(music21.stream.Part())
-
-        print("GeoAlgorithm: removing chords...")
-        for stream in ((self.original_source.flat.notes, self.source), (self.original_pattern.flat.notes, self.pattern)):
-            #use .flat.notes instead of .recurse() because note.getOffsetByHierarchy is only in music 21 version 3
-            i = 0
-            for element in stream[0]:
-                if element.isChord:
-                    for pitch in element.pitches:
-                        note = music21.note.Note(pitch)
-                        note.offset = element.getOffsetBySite(stream[0])
-                        note.duration = element.duration
-                        note.didBelongToAChord = True
-                        note.original = element
-
-                        # Index
-                        note.index = i
-                        i += 1
-                        stream[1].insert(note)
-                else:
-                    # Index
-                    element.index = i
-                    i += 1
-
-                    element.didBelongToAChord = False
-                    element.original = element
-                    stream[1].insert(element.getOffsetBySite(stream[0]), element)
-
-        # TODO use two streams one for orig, one for not, have notes point back to their respective chords?
-        # Now we can make note sets
-        print("GeoAlgorithm: making NoteSegments...")
-        self.pattern = NoteSegment.NoteSegments(self.pattern)
-        self.source = NoteSegment.NoteSegments(self.source)
-
-        # Sort source and pattern 
-        # Should sort another way other than changing the priorities. what a waste of computation
-        print("GeoAlgorithm: sorting...")
-        self.pattern.lexicographic_sort()
-        self.source.lexicographic_sort()
 
     def algorithm(self):
         pass
@@ -184,14 +112,14 @@ class geoAlgorithm(object):
 
 
     def __repr__(self):
-        return "{0}\npattern = {1},\nsource = {2},\nsettings = {3}".format(self.__class__.__name__, self.scores.pattern, self.scores.source, self.settings)
+        return "{0}\npattern = {1},\nsource = {2},\nsettings = {3}".format(self.__class__.__name__, self.pattern.derivation, self.source.derivation, self.settings)
 
 class P(geoAlgorithm):
 
     def pre_process(self):
         super(P, self).pre_process()
-        self.pattern_line_segments = [LineSegment(note.getOffsetBySite(self.pattern.flat.notes), note.pitch.ps, note.duration.quarterLength, note_link=note) for note in self.pattern.flat.notes]
-        self.source_line_segments = [LineSegment(note.getOffsetBySite(self.source.flat.notes), note.pitch.ps, note.duration.quarterLength, note_link=note) for note in self.source.flat.notes]
+        #self.pattern_line_segments = [LineSegment(note.getOffsetBySite(self.pattern.flat.notes), note.pitch.ps, note.duration.quarterLength, note_link=note) for note in self.pattern.flat.notes]
+        #self.source_line_segments = [LineSegment(note.getOffsetBySite(self.source.flat.notes), note.pitch.ps, note.duration.quarterLength, note_link=note) for note in self.source.flat.notes]
 
     def process_results(self):
         """
@@ -205,14 +133,17 @@ class P(geoAlgorithm):
 class SW(geoAlgorithm):
     def pre_process(self):
         super(SW, self).pre_process()
-        self.pattern.compute_intra_vectors(self.settings['pattern_window'])
-        self.source.compute_intra_vectors(self.settings['source_window'])
+        self.pattern.compute_intra_vectors(window = self.settings['pattern_window'])
+        self.source.compute_intra_vectors(window = self.settings['source_window'])
         self.pattern.initialize_Ktables(self.source)
 
         if isinstance(self.settings['mismatches'], (int, long)):
             ## TODO make it so you can't have threshold and mismatches set
             ## TODO make it so threshold refers to number of notes (add at +1 in alg)
             self.settings['threshold'] = len(self.pattern.flat.notes) - self.settings['mismatches'] - 1 #recall threshold refers to # of pattern vectors matched
+        # If threshold has been passed in and intends to be 'max'..
+        if self.settings['threshold'] == len(self.pattern.flat.notes):
+            self.settings['threshold'] = self.settings['threshold'] - 1
 
     def process_results(self):
         #TODO clean up chain flattening

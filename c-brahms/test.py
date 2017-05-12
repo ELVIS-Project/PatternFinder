@@ -83,3 +83,4 @@ sortedPattern = NoteSegment.NotePointSet(sortPattern)
 #Chord test
 chordPattern = music21.stream.Stream()
 chordPattern.insert([0, G, 1, Gmaj])
+flatPattern = NoteSegment.NotePointSet(chordPattern)
