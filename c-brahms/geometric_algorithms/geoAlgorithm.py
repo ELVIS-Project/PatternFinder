@@ -39,28 +39,40 @@ class geoAlgorithm(object):
         self.pre_process()
 
         # Define a result generator
-        #self.results = self.algorithm()
+        self.results = self.algorithm()
+
+        # Define an occurrences generator
+        self.occurrences = (self.process_result(r) for r in self.results)
+
+        # Do something with the occurrences
+        self.post_process()
 
     def parse_scores(self, pattern_input, source_input):
         """
         Defines self.pattern and self.source
         Tests to see if the input is a file path or something else (possibly already parsed scores)
+
+        Stores input file path in the derivation as a music21Object.
+        We can run contextSites() on elements within the parsed score stream. It's a generator which finds context sites, but also follows derivation chains!
+        So each element in a derivation chain has to implement contextSites() - so use music21Objects in derivation chains!
         """
         try:
             self.pattern = music21.converter.parse(pattern_input)
-            self.pattern.derivation.origin = pattern_input
+            self.pattern.derivation.origin = music21.text.TextBox(pattern_input)
             self.pattern.derivation.method = 'music21.converter.parse()'
         except (music21.converter.ConverterException, AttributeError):
             self.pattern = pattern_input
             self.pattern.derivation.method = 'manual'
+        self.pattern.id = 'pattern'
 
         try:
             self.source = music21.converter.parse(source_input)
-            self.source.derivation.origin = source_input
+            self.source.derivation.origin = music21.text.TextBox(source_input)
             self.source.derivation.method = 'music21.converter.parse()'
         except(music21.converter.ConverterException, AttributeError):
             self.source = source_input
             self.source.derivation.method = 'manual'
+        self.source.id = 'source'
 
 
     def pre_process(self):
@@ -70,7 +82,22 @@ class geoAlgorithm(object):
         """
         # NotePointSet sets the derivations of new streams on init
         self.patternPointSet = NotePointSet(self.pattern)
+        self.patternPointSet.id = 'patternPointSet'
         self.sourcePointSet = NotePointSet(self.source)
+        self.sourcePointSet.id = 'sourcePointSet'
+
+    def process_result(self, result):
+        return result
+
+    def post_process(self):
+        # Colour the score
+        for occurrence in self.occurrences:
+            for inter_vec in occurrence:
+                inter_vec.noteEnd.derivation.origin.color = self.settings['colour']
+
+        # Name the score
+        self.source.metadata = music21.metadata.Metadata()
+        self.source.metadata.title = str(self)
 
     def run(self):
         print("Running algorithm " + str(self)) # Run the algorithm
@@ -99,16 +126,6 @@ class geoAlgorithm(object):
     def process_results(self):
         pass
 
-    def post_process(self):
-        # Colour the score
-        if self.occurrences is None:
-            return
-        for n in self.occurrences.flat.notes:
-            n.original.color = self.settings['colour']
-
-        # Name the score
-        self.original_source.metadata = music21.metadata.Metadata()
-        self.original_source.metadata.title = str(self)
 
 
     def __repr__(self):
@@ -125,10 +142,11 @@ class P(geoAlgorithm):
         """
         Expects a stream of occurrence streams
         """
+        pass
         # Find the shifts
-        for r in self.results:
-            r.shift = (r[0].offset - self.pattern.flat.notes[0].offset, r[0].pitch.ps - self.pattern.flat.notes[0].pitch.ps)
-        return self.results
+        #for r in self.results:
+        #    r.shift = (r[0].offset - self.pattern.flat.notes[0].offset, r[0].pitch.ps - self.pattern.flat.notes[0].pitch.ps)
+        #return self.results
 
 class SW(geoAlgorithm):
     def pre_process(self):

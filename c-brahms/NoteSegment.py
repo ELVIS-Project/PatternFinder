@@ -136,15 +136,21 @@ class NotePointSet(music21.stream.Stream):
     """
     A container for the notes of a music21 parsed score.
     Pre-processes the data by flattening the chords and sorting the notes.
+
+    Takes one optional argument: a Score object. Copies the note of each score and links the derivation of the note copies to their original instances in the score. This way, we can access / colour the score notes with note.derivation.origin
+    music21.stream.Stream does not allow any required arguments in the __init__, so this argument must be optional.
     """
-    # TODO running into errors using an __init__. "cannot have required arguments
-    # sol'n : just make this a function that returns a new stream
-    # or, make it so that every instantiation needs to call an additional init(stream) function
-    def __init__(self, stream, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         # Calling super() seems to erase the input. This is how they subclass Stream in music21 source code
-        # NOTE in earlier code, you used a .part within a stream. Not sure if this will break the code.
-        music21.stream.Stream.__init__(self, *args, **kwargs)
-        note_stream = stream.flat.notes
+        # NOTE in earlier code, you used a .part within the stream construction. Not sure if this will break the algorithms
+        music21.stream.Stream.__init__(self)
+        self.derivation.method = 'NotePointSet()'
+        # Try to process a given score, and if there is no argument, return an empty stream.
+        try:
+            note_stream = args[0].flat.notes # doesn't make copy of note objects. make sure that stream.part.firstNote is stream.flat.notes.firstNote
+            self.derivation.origin = args[0]
+        except IndexError:
+            return
 
         for n in note_stream:
             ## COPY MUSICNOTE OR GENERATE MUSICNOTES FROM CHORD
@@ -161,13 +167,10 @@ class NotePointSet(music21.stream.Stream):
                 n.priority = int(n.pitch.frequency)
             self.insert(new_notes)
 
-        # Set the derivation
-        self.derivation.origin = stream
-        self.derivation.method = 'NotePointSet'
 
     def music21Chord_to_music21Notes(self, chord, site):
         """
-        CHORD TO LIST OF NOTES FOR USE IN music21.stream.inser()
+        CHORD TO LIST OF NOTES FOR USE IN music21.stream.insert()
         For serious flattening of the score into a 2-d plane of horizontal line segments.
         music21.note.Note and music21.chord.Chord subclass the same bases, so in theory it shoud look something like this...
 

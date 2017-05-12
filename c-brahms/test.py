@@ -84,3 +84,5 @@ sortedPattern = NoteSegment.NotePointSet(sortPattern)
 chordPattern = music21.stream.Stream()
 chordPattern.insert([0, G, 1, Gmaj])
 flatPattern = NoteSegment.NotePointSet(chordPattern)
+
+lem = P1(LEM_PATH_P('a'), LEM_PATH_S)
