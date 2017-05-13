@@ -1,24 +1,43 @@
 from itertools import groupby # for use in initializing K tables
 from fractions import Fraction
-from collections import namedtuple
+from collections import namedtuple # to make a custom Priority Queue
 from pprint import pprint, pformat #for K_enry __repr__
+import Queue # to make a custom Priority Queue
 import copy # for link_and_create
 import numpy as np
 import pandas as pd
 import music21
 import pdb
 
-def link_and_create(ralph):
+class CmpItQueue(Queue.PriorityQueue):
     """
-    For copying a stream, linking its notes to the new stream, and returning the new copy
+    A subclass of PriorityQueue which implements iteration and custom comparators
     """
-    larry = copy.deepcopy(ralph)
-    # Used .recurse() instead of .flat because I'm paranoid that .flat creates a new temp stream and that the references will point to the temp stream instead of the original one
-    for n in zip(larry.recurse().notes, ralph.recurse().notes):
-        n[0].link = n[1]
-        n[1].link = n[0]
-    return larry
 
+    queue_item = namedtuple('queue_item', ['sortTuple', 'item'])
+
+    def __init__(self, keyfunc, *args, **kwargs):
+        Queue.PriorityQueue.__init__(self, *args, **kwargs)
+        # We expect that keyfunc(item) returns a sortTuple to sort the elements
+        self.keyfunc = keyfunc
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        try:
+            return self.get_nowait()
+        except Queue.Empty:
+            raise StopIteration
+
+    def put(self, item, block=False, timeout=None):
+        # Every item in the queue is a tuple (sortTuple, item)
+        ralph = self.queue_item(self.keyfunc(item), item)
+        Queue.PriorityQueue.put(self, ralph, block, timeout)
+
+    def get(self, block=False, timeout=None):
+        # Return only the item so that PQ covers up the inconvenience of dealing with the sortTuple
+        return Queue.PriorityQueue.get(self, block, timeout).item
 
 #K_entry = namedtuple('K_entry', ['a', 'b', 'y', 'c', 's', 'e', 'w', 'z', 'source_vector', 'pattern_vector'])
 #TODO make a K_entry just an extended NoteVector?

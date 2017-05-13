@@ -3,6 +3,11 @@ from pprint import pprint as pp
 from collections import namedtuple
 from parse_fugue_truth import parse_truth
 from fractions import Fraction
+
+# Testing CmpItQueue
+from NoteSegment import CmpItQueue
+from collections import namedtuple
+
 import pandas as pd
 import numpy as np
 import pickle
@@ -86,3 +91,9 @@ chordPattern.insert([0, G, 1, Gmaj])
 flatPattern = NoteSegment.NotePointSet(chordPattern)
 
 lem = P1(LEM_PATH_P('a'), LEM_PATH_S)
+
+# Testing CmpItQueue
+customQueue = CmpItQueue(lambda x: x.y)
+point = namedtuple('point', ['x', 'y'])
+point1 = point(2, 3)
+point2 = point(3, 4)
