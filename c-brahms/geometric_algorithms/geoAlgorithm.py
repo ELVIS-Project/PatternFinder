@@ -93,7 +93,8 @@ class geoAlgorithm(object):
         # Colour the score
         for occurrence in self.occurrences:
             for inter_vec in occurrence:
-                inter_vec.noteEnd.derivation.origin.color = self.settings['colour']
+                if self.source.derivation.method != 'manual':
+                    inter_vec.noteEnd.derivation.origin.color = self.settings['colour']
 
         # Name the score
         self.source.metadata = music21.metadata.Metadata()
