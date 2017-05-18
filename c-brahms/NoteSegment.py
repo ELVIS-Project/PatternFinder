@@ -12,12 +12,14 @@ import pdb
 class CmpItQueue(Queue.PriorityQueue):
     """
     A subclass of PriorityQueue which implements iteration and custom comparators
+
+    Wraps .put(item, False) and .get(False) so that the PQ does not block. This is not a multi-threading application so we want PQ's to throw Full or Empty exceptions rather than blocking.
     """
 
     queue_item = namedtuple('queue_item', ['sortTuple', 'item'])
 
-    def __init__(self, keyfunc, *args, **kwargs):
-        Queue.PriorityQueue.__init__(self, *args, **kwargs)
+    def __init__(self, keyfunc, maxsize = 0):
+        Queue.PriorityQueue.__init__(self, maxsize)
         # We expect that keyfunc(item) returns a sortTuple to sort the elements
         self.keyfunc = keyfunc
 
@@ -26,18 +28,18 @@ class CmpItQueue(Queue.PriorityQueue):
 
     def next(self):
         try:
-            return self.get_nowait()
+            return self.get()
         except Queue.Empty:
             raise StopIteration
 
-    def put(self, item, block=False, timeout=None):
+    def put(self, item):
         # Every item in the queue is a tuple (sortTuple, item)
         ralph = self.queue_item(self.keyfunc(item), item)
-        Queue.PriorityQueue.put(self, ralph, block, timeout)
+        Queue.PriorityQueue.put(self, ralph, False)
 
-    def get(self, block=False, timeout=None):
+    def get(self):
         # Return only the item so that PQ covers up the inconvenience of dealing with the sortTuple
-        return Queue.PriorityQueue.get(self, block, timeout).item
+        return Queue.PriorityQueue.get(self, False).item
 
 #K_entry = namedtuple('K_entry', ['a', 'b', 'y', 'c', 's', 'e', 'w', 'z', 'source_vector', 'pattern_vector'])
 #TODO make a K_entry just an extended NoteVector?
@@ -103,16 +105,31 @@ class NoteVector2(music21.interval.Interval):
 
 
 class InterNoteVector(NoteVector2):
-    def __init__(self, ralph, ralphSite, larry, larrySite):
+    def __init__(self, ralph, ralphSite, larry, larrySite, tp_type=1):
         super(InterNoteVector, self).__init__(noteStart=ralph, noteEnd=larry)
-        self.x = larry.getOffsetBySite(larrySite) - ralph.getOffsetBySite(ralphSite)
+        if tp_type == 0:
+            # source.onset - pattern.offset
+            self.x = larry.getOffsetBySite(larrySite) - (ralph.getOffsetBySite(ralphSite) + ralph.duration.quarterLength)
+        elif tp_type == 1:
+            # source.onset - pattern.onset
+            self.x = larry.getOffsetBySite(larrySite) - ralph.getOffsetBySite(ralphSite)
+        elif tp_type == 2:
+            # source.offset - pattern.offset
+            self.x = (larry.getOffsetBySite(larrySite) + larry.duration.quarterLength) - (ralph.getOffsetBySite(ralphSite) + ralph.duration.quarterLength)
+        elif tp_type == 3:
+            # source.offset - pattern.onset
+            self.x = (larry.getOffsetBySite(larrySite) + larry.duration.quarterLength) - ralph.getOffsetBySite(ralphSite)
+        else:
+            raise ValueError("InterNoteVector tp_type must be 0, 1, 2, or 3")
+
+        self.tp_type = tp_type
         self.noteStartSite = ralphSite
         self.noteStartIndex = ralphSite.index(ralph)
         self.noteEndIndex = larrySite.index(larry)
         self.noteEndSite = larrySite
 
     def __repr__(self):
-        return super(InterNoteVector, self).__repr__() + " (x={0}, y={1}) ".format(self.x, self.y) + " #{0}: {1} --> #{2}: {3}".format(self.noteStartIndex, self.noteStart, self.noteEndIndex, self.noteEnd)
+        return super(InterNoteVector, self).__repr__() + " TYPE {0} (x={1}, y={2}) ".format(self.tp_type, self.x, self.y) + " #{0}: {1} --> #{2}: {3}".format(self.noteStartIndex, self.noteStart, self.noteEndIndex, self.noteEnd)
 
 class IntraNoteVector(InterNoteVector):
     def __init__(self, ralph, larry, site):
