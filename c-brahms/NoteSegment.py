@@ -173,36 +173,30 @@ class NotePointSet(music21.stream.Stream):
     A container for the notes of a music21 parsed score.
     Pre-processes the data by flattening the chords and sorting the notes.
 
-    Takes one optional argument: a Score object. Copies the note of each score and links the derivation of the note copies to their original instances in the score. This way, we can access / colour the score notes with note.derivation.origin
-    music21.stream.Stream does not allow any required arguments in the __init__, so this argument must be optional.
+    Expects a stream to process
+    Optionally can be flagged to sort by offset (note release) rather than the default onset (note attack)
+
+    music21.stream.Stream does not allow any required arguments in its __init__, so every argument must be optional.
     """
-    def __init__(self, *args, **kwargs):
-        # Calling super() seems to erase the input. This is how they subclass Stream in music21 source code
-        # NOTE in earlier code, you used a .part within the stream construction. Not sure if this will break the algorithms
-        music21.stream.Stream.__init__(self)
+    def __init__(self, stream=music21.stream.Stream(), offsetSort=False, *args, **kwargs):
+        super(NotePointSet, self).__init__()
         self.derivation.method = 'NotePointSet()'
-        # Try to process a given score, and if there is no argument, return an empty stream.
-        try:
-            note_stream = args[0].flat.notes # doesn't make copy of note objects. make sure that stream.part.firstNote is stream.flat.notes.firstNote
-            self.derivation.origin = args[0]
-        except IndexError:
-            return
+        self.derivation.origin = stream
 
-        for n in note_stream:
-            ## COPY MUSICNOTE OR GENERATE MUSICNOTES FROM CHORD
-            # NOTE optionally create Geometric Note objects here
-            if n.isChord:
-                new_notes = self.music21Chord_to_music21Notes(n, note_stream)
-            else:
-                new_notes = [n.offset, copy.deepcopy(n)]
+        note_stream = stream.flat.notes
 
-            ## INSERT SO IT IS SORTED BY <OFFSET, PITCH>
-            for n in new_notes[1::2]:
-                # Use frequency as it is the most fine-grained pitch quantity.
-                # Any subsequent equivalence classes on note pitch (such as enharmonic equivalency or pitch classes) will preserve the sorting.
-                n.priority = int(n.pitch.frequency)
-            self.insert(new_notes)
+        # Sorting key for the NotePointSet: sort lexicographicaly by tuples
+        # 1) either note onset (attack) or note offset (release)
+        # 2) note frequency. Since this is the most finely-grained pitch information possible, the list will still be sorted under any subsequent pitch equivalence (such as pitch class or enharmonic equivalence)
+        sort_keyfunc = lambda n: (n.offset + n.duration.quarterLength, n.pitch.frequency) if offsetSort else (n.offset, n.pitch.frequency)
 
+        # Get each note or chord, convert it to a tuple of notes, and sort them by the keyfunc
+        new_notes = sorted([note for note_list in [self.music21Chord_to_music21Notes(n, note_stream) if n.isChord else (n,) for n in note_stream] for note in note_list], key=sort_keyfunc)
+
+        # Make sure to turn off stream.autoSort, since streams automatically sort on insert by an internal sortTuple which prioritizes note onset (attack)
+        self.autoSort = False
+        for n in new_notes:
+            self.insert(n)
 
     def music21Chord_to_music21Notes(self, chord, site):
         """
@@ -221,9 +215,8 @@ class NotePointSet(music21.stream.Stream):
 
             # note essentials
             note.duration = chord.duration
+            note.activeSite = chord.activeSite
 
-            # music21.stream.insert() expects [offset #1, note #1, offset #2, ...]
-            note_list.append(chord.getOffsetBySite(site))
             note_list.append(note)
 
             note.derivation.origin = chord
