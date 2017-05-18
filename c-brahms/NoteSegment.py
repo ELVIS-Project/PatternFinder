@@ -215,7 +215,6 @@ class NotePointSet(music21.stream.Stream):
 
             # note essentials
             note.duration = chord.duration
-            note.activeSite = chord.activeSite
 
             note_list.append(note)
 
