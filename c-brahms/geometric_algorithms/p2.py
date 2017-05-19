@@ -10,26 +10,49 @@ import pdb
 
 
 class P2(geo_algorithms.P):
+    """
+    P2 returns "pure" and "partial" occurrences of the pattern within the source.
+
+    Filters:
+        threshold value : indicates the minimum number of matching pairs that
+        a shift must yield to be considered an occurrence
+
+
+    Summary of implementation: count the multiplicity of each possible vector
+
+    Each intervector represents a matching pair between the pattern and source
+    Since they come out of the PQ in increasing order (and the generators also
+    will yield intervectors in increasing order), we can use groupby() to
+    pop the PQ until there is a change (indicating that it has found all
+    of the matching pairs corresponding to the current candidate shift)
+    """
 
     def algorithm(self):
-        pattern = self.patternPointSet
-        source = self.sourcePointSet
-        settings = self.settings
 
-        # Priority Queue of pattern note to source pointer generators, sorted by the induced shift.
+        # Priority Queue of pattern note to source note vector pointers
         shifts = CmpItQueue(lambda x: (x.peek(),), len(pattern))
 
+        # We use generators to implement line-sweeping the pointers through
+        # the score. Use a lambda expression to avoid bugs caused by scope-bleeding
+        # from generator comprehensions
+        # NOTE possibly a generator comprehension would work fine in python3
         for note in pattern:
-            shifts.put(peekable((lambda p: (InterNoteVector(p, pattern, s, source) for s in source))(note)))
+            shifts.put(peekable((lambda p:
+                (InterNoteVector(p, self.patternPointSet, s, self.sourcePointSet)
+                    for s in self.sourcePointSet))
+                (note)))
 
-        # Summary: grab the matching pairs until the shift changes, then return that occurrence
-        # groupby() will pop the PQ until there is a change
-        # NOTE this may break since groupby can break up the following group while pushing a smaller group
+        # NOTE this may break since groupby can break up the following group while pushing a smaller group?
         for k, ptr_group in groupby(shifts, key=lambda gen: gen.peek()):
             occ_ptrs = list(ptr_group) # save the group
             yield [ptr.next() for ptr in occ_ptrs] # return the occurrence
 
-            # Put the ptr generators back into the PQ. By waiting until now to put them back in, we ensure that each pattern note can only be used once to count the multiplicity of the shift in question. Otherwise, we might have a single pattern note with many matching pairs in the source which wrongfully suggests a high-multiplicity shift
+            ## Put the ptr generators back into the PQ
+            # By waiting until now to put them back in, we ensure that
+            # each pattern note can only be used once to count the multiplicity
+            # of the shift in question. Otherwise, we might have a single
+            # pattern note matching with many identical notes in the source
+            # wrongfully suggesting a high-multiplicity shift
             for ptr in occ_ptrs:
                 shifts.put(ptr)
 
