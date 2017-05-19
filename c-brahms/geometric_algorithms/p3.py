@@ -1,26 +1,78 @@
 from LineSegment import TwoDVector, LineSegment, LineSegmentSet, TurningPoint, TwoDVector, Bucket
 from Queue import PriorityQueue
+from NoteSegment import CmpItQueue, NotePointSet, InterNoteVector
+from collections import namedtuple # container to hold sum of line segment intersection
+from more_itertools import peekable # for peekable InterNoteVector generators
 import music21
 import itertools
-import geoAlgorithm
+import geo_algorithms
 import NoteSegment
-import music21
+import copy
 import pdb
 
-class P3(geoAlgorithm.P):
+class P3(geo_algorithms.P):
 
     def pre_process(self):
         super(P3, self).pre_process()
-        if self.settings['threshold'] == 'all':
-            pass
+        self.sourcePointSet_offsetSort = NotePointSet(self.source, offsetSort=True)
+        #TODO merge overlapping notes using stream.getOverlaps()
 
-    def process_results(self):
-        return [(r.x, r.y) for r in self.results]
 
-    def post_process(self):
-        pass
+    def process_result(self, result):
+        return result['matching_pairs']
 
     def algorithm(self):
+        pattern = self.patternPointSet
+        source_onsetSort = self.sourcePointSet
+        source_offsetSort = self.sourcePointSet_offsetSort
+        settings = self.settings
+
+        shifts = CmpItQueue(lambda x: (x.peek(),), 4 * len(pattern))
+        bucket = namedtuple('bucket', ['value', 'slope', 'active_tps'])
+        score_buckets = {}
+
+        for note in pattern:
+            # Push four inter vectors generators for each pattern note, with varying tp_types (0, 1, 2, 3)
+            # tp_types 0, 1 iterate through a source sorted by onset (attack)
+            # while types 2, 3 iterate through a source sorted by offset (release)
+            shifts.put(peekable((lambda p: (InterNoteVector(p, pattern, s, source_onsetSort, tp_type=0) for s in source_onsetSort))(note)))
+            shifts.put(peekable((lambda p: (InterNoteVector(p, pattern, s, source_onsetSort, tp_type=1) for s in source_onsetSort))(note)))
+            shifts.put(peekable((lambda p: (InterNoteVector(p, pattern, s, source_offsetSort, tp_type=2) for s in source_offsetSort))(note)))
+            shifts.put(peekable((lambda p: (InterNoteVector(p, pattern, s, source_offsetSort, tp_type=3) for s in source_offsetSort))(note)))
+
+        for turning_point_generator in shifts:
+            inter_vec = turning_point_generator.next()
+
+            # Get the current bucket, or initialize it
+            cur_bucket = score_buckets.setdefault(inter_vec.y, {'value' : 0, 'last_value': 0, 'slope' : 0, 'prev_tp' : None, 'matching_pairs' : []})
+
+            # Each turning point dictates the behaviour (slope) of the score up until the next turning point. So the very first thing we need to do is update the score (especially before updating the slope!)
+            cur_bucket['value'] += cur_bucket['slope'] * (inter_vec.x - cur_bucket['prev_tp'].x) if cur_bucket['prev_tp'] else 0
+
+            # Update the slope after we update the value
+            cur_bucket['slope'] += 1 if inter_vec.tp_type in [0,3] else -1
+            # Save current turning point so other TP's know long it has been since the value has been updated
+            cur_bucket['prev_tp'] = inter_vec
+
+            # Keep track of the matching pairs
+            if inter_vec.tp_type == 0:
+                cur_bucket['matching_pairs'].append(inter_vec)
+            elif inter_vec.tp_type == 3:
+                cur_bucket['matching_pairs'].remove(
+                        InterNoteVector(inter_vec.noteStart, inter_vec.noteStartSite, inter_vec.noteEnd, inter_vec.noteEndSite, 0))
+
+            # Only return occurrences if the intersection is increasing
+            if cur_bucket['value'] > cur_bucket['last_value'] and cur_bucket['value'] > 0:
+                cur_bucket['last_value'] = cur_bucket['value']
+                yield cur_bucket
+
+            # The PQ will try to peek() the generator; if it has been exhausted, then don't put it back in!
+            try:
+                shifts.put(turning_point_generator)
+            except StopIteration:
+                pass
+
+    def algorithmOld(self):
         """
         Input: two lists of horizontal line segments. One is the 'pattern', which we are looking for in the larger 'source'
         Output: all shifts which result in the largest intersection (measured in length) between the two sets of line segments
