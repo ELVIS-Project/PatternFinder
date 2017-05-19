@@ -1,4 +1,5 @@
 from itertools import groupby # for use in initializing K tables
+from functools import total_ordering # for NoteVector comparison
 from fractions import Fraction
 from collections import namedtuple # to make a custom Priority Queue
 from pprint import pprint, pformat #for K_enry __repr__
@@ -87,22 +88,21 @@ class GeometricNote(music21.note.Note):
     def __add__(self, other_note):
         pass
 
+@total_ordering
 class NoteVector2(music21.interval.Interval):
     def __init__(self, *args, **kwargs):
         super(NoteVector2, self).__init__(*args, **kwargs)
         self.x = 0
         self.y = self.chromatic.semitones
 
-    def __cmp__(self, other_vector):
-        """
-        A lexicographic comparison function. For example, [1,42] < [2,3] and [2,1] < [3,22]
-        """
-        if (self.x, self.y) < (other_vector.x, other_vector.y):
-            return -1
-        elif (self.x, self.y) > (other_vector.x, other_vector.y):
-            return 1
-        return 0
+        self.sortTupleOrder = ['x', 'y']
+        self.sortTuple = lambda: tuple(getattr(self, attr) for attr in self.sortTupleOrder)
 
+    def __eq__(self, other):
+        return self.sortTuple() == other.sortTuple()
+
+    def __lt__(self, other):
+        return self.sortTuple() < other.sortTuple()
 
 class InterNoteVector(NoteVector2):
     def __init__(self, ralph, ralphSite, larry, larrySite, tp_type=1):
@@ -122,7 +122,10 @@ class InterNoteVector(NoteVector2):
         else:
             raise ValueError("InterNoteVector tp_type must be 0, 1, 2, or 3")
 
+
         self.tp_type = tp_type
+        self.sortTupleOrder.append('tp_type')
+
         self.noteStartSite = ralphSite
         self.noteStartIndex = ralphSite.index(ralph)
         self.noteEndIndex = larrySite.index(larry)
