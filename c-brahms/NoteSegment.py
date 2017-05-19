@@ -19,7 +19,7 @@ class CmpItQueue(Queue.PriorityQueue):
 
     queue_item = namedtuple('queue_item', ['sortTuple', 'item'])
 
-    def __init__(self, keyfunc, maxsize = 0):
+    def __init__(self, keyfunc=lambda p: p, maxsize = 0):
         Queue.PriorityQueue.__init__(self, maxsize)
         # We expect that keyfunc(item) returns a sortTuple to sort the elements
         self.keyfunc = keyfunc
@@ -98,15 +98,17 @@ class NoteVector2(music21.interval.Interval):
         self.sortTupleOrder = ['x', 'y']
         self.sortTuple = lambda: tuple(getattr(self, attr) for attr in self.sortTupleOrder)
 
+    # Rich comparisons. Should also make comparisons with ints/floats/tuples possible
     def __eq__(self, other):
-        return self.sortTuple() == other.sortTuple()
+        return self.sortTuple() == other
 
     def __lt__(self, other):
-        return self.sortTuple() < other.sortTuple()
+        return self.sortTuple() < other
 
 class InterNoteVector(NoteVector2):
     def __init__(self, ralph, ralphSite, larry, larrySite, tp_type=1):
         super(InterNoteVector, self).__init__(noteStart=ralph, noteEnd=larry)
+        #TODO make all tp_types attributes or functions, freely accessible?
         if tp_type == 0:
             # source.onset - pattern.offset
             self.x = larry.getOffsetBySite(larrySite) - (ralph.getOffsetBySite(ralphSite) + ralph.duration.quarterLength)
@@ -120,7 +122,7 @@ class InterNoteVector(NoteVector2):
             # source.offset - pattern.onset
             self.x = (larry.getOffsetBySite(larrySite) + larry.duration.quarterLength) - ralph.getOffsetBySite(ralphSite)
         else:
-            raise ValueError("InterNoteVector tp_type must be 0, 1, 2, or 3")
+            raise ValueError("InterNoteVector tp_type must be initialized with 0, 1, 2, or 3")
 
 
         self.tp_type = tp_type
