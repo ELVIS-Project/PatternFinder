@@ -19,7 +19,7 @@ class P3(geo_algorithms.P):
 
 
     def process_result(self, result):
-        return result['matching_pairs']
+        return sorted(result['matching_pairs'], key=lambda x: x.noteStartIndex)
 
     def algorithm(self):
         pattern = self.patternPointSet
@@ -61,10 +61,10 @@ class P3(geo_algorithms.P):
                 cur_bucket['matching_pairs'].remove(
                         InterNoteVector(inter_vec.noteStart, inter_vec.noteStartSite, inter_vec.noteEnd, inter_vec.noteEndSite, 0))
 
-            # Only return occurrences if the intersection is increasing
-            if cur_bucket['value'] > cur_bucket['last_value'] and cur_bucket['value'] > 0:
-                cur_bucket['last_value'] = cur_bucket['value']
+            # Only return occurrences if the intersection is increasing (necesasrily must return non-zero intersections since 'last_value' starts at 0
+            if cur_bucket['value'] > cur_bucket['last_value']:
                 yield cur_bucket
+                cur_bucket['last_value'] = cur_bucket['value']
 
             # The PQ will try to peek() the generator; if it has been exhausted, then don't put it back in!
             try:
