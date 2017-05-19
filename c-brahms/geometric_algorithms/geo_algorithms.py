@@ -7,13 +7,18 @@ import copy
 import music21
 import pdb
 
+# TODO measure total runtime with timeit (as a ratio of # of notes), store in an attribute like self.algorithmRunTime?
+
+# TODO maybe have separate user and algorithm settings. this would allow for translations like..
+# pattern_accuracy : 'all' --> threshold : len(pattern)
+# pattern_accuracy : 'max' --> threshold = len(max(self.results, key=lambda x: len(x)))
 DEFAULT_SETTINGS = {
         'pattern_window' : 1,
         '%pattern_window' : 1,
         'source_window' : 5,
         'scale' : "all",
         'colour' : "red",
-        'threshold' : 'max',
+        'threshold' : 'all',
         '%threshold' : 1,
         'mismatches' : 'min',
         'segment' : False,
@@ -21,7 +26,7 @@ DEFAULT_SETTINGS = {
         'parsed_input' : False,
         'runOnInit' : True}
 
-class geoAlgorithm(object):
+class GeoAlgorithm(object):
     """
     Generic base class to manage execution of P, S, and W algorithms
     """
@@ -38,14 +43,11 @@ class geoAlgorithm(object):
         # Defines self.patternPointSet and self.sourcePointSet
         self.pre_process()
 
-        # Define a result generator
-        self.results = self.algorithm()
-
-        # Define an occurrences generator
-        self.occurrences = (self.process_result(r) for r in self.results)
+        # Run the algorithm, filter the occurrences, define an occurrence generator.
+        self.occurrences = (self.process_result(r) for r in self.algorithm() if self.filter_occurrence(self.process_result(r)))
 
         # Do something with the occurrences
-        self.post_process()
+        #self.post_process()
 
     def parse_scores(self, pattern_input, source_input):
         """
@@ -62,16 +64,21 @@ class geoAlgorithm(object):
             self.pattern.derivation.method = 'music21.converter.parse()'
         except (music21.converter.ConverterException, AttributeError):
             self.pattern = pattern_input
-            self.pattern.derivation.method = 'manual'
+            self.pattern.derivation.method = 'pre-parsed'
         self.pattern.id = 'pattern'
 
         try:
+            # Parse
             self.source = music21.converter.parse(source_input)
+            # Set the derivation
             self.source.derivation.origin = music21.text.TextBox(source_input)
             self.source.derivation.method = 'music21.converter.parse()'
+            # Set the score title
+            self.source.metadata = music21.metadata.Metadata()
+            self.source.metadata.title = source_input
         except(music21.converter.ConverterException, AttributeError):
             self.source = source_input
-            self.source.derivation.method = 'manual'
+            self.source.derivation.method = 'pre-parsed'
         self.source.id = 'source'
 
 
@@ -86,70 +93,35 @@ class geoAlgorithm(object):
         self.sourcePointSet = NotePointSet(self.source)
         self.sourcePointSet.id = 'sourcePointSet'
 
-    def process_result(self, result):
-        return result
+    def process_result(self, r):
+        return r
+
+    def filter_occurrence(self, occurrence):
+        if self.settings['threshold'] == 'all':
+            threshold = len(self.patternPointSet)
+        else:
+            threshold = self.settings['threshold']
+        return len(occurrence) >= threshold
 
     def post_process(self):
         # Colour the score
-        for occurrence in self.occurrences:
-            for inter_vec in occurrence:
-                if self.source.derivation.method != 'manual':
-                    inter_vec.noteEnd.derivation.origin.color = self.settings['colour']
-
-        # Name the score
-        self.source.metadata = music21.metadata.Metadata()
-        self.source.metadata.title = str(self)
-
-    def run(self):
-        print("Running algorithm " + str(self)) # Run the algorithm
-        self.results = self.algorithm()
-
-        #TODO not necessary? necessary?
-        # If no results, return empty stream
-        #if len(self.results) == 0:
-        #    self.occurrences = music21.stream.Stream()
-
-        # Processing results is necessary as long as output format is non-constant
-        # TODO add try except so empty results doesn't crash? Also add an empty-result test case
-        self.occurrences = self.process_results()
-
-        if self.__class__.__name__ == "P3":
-            self.occurrencesAsShifts = self.occurrences
-        else:
-            self.occurrencesAsShifts = [o.shift for o in self.occurrences]
-
-        #self.post_process()
-
-
-    def algorithm(self):
-        pass
-
-    def process_results(self):
-        pass
-
-
+        self.check = []
+        if self.source.derivation.method != 'manual':
+            for occurrence in self.occurrences:
+                self.check.append(occurrence)
+                for inter_vec in occurrence:
+                    if inter_vec.noteEnd.derivation.origin:
+                        inter_vec.noteEnd.derivation.origin.color = self.settings['colour']
+                    else:
+                        inter_vec.noteEnd.color = self.settings['colour']
 
     def __repr__(self):
         return "{0}\npattern = {1},\nsource = {2},\nsettings = {3}".format(self.__class__.__name__, self.pattern.derivation, self.source.derivation, self.settings)
 
-class P(geoAlgorithm):
+class P(GeoAlgorithm):
+    pass
 
-    def pre_process(self):
-        super(P, self).pre_process()
-        #self.pattern_line_segments = [LineSegment(note.getOffsetBySite(self.pattern.flat.notes), note.pitch.ps, note.duration.quarterLength, note_link=note) for note in self.pattern.flat.notes]
-        #self.source_line_segments = [LineSegment(note.getOffsetBySite(self.source.flat.notes), note.pitch.ps, note.duration.quarterLength, note_link=note) for note in self.source.flat.notes]
-
-    def process_results(self):
-        """
-        Expects a stream of occurrence streams
-        """
-        pass
-        # Find the shifts
-        #for r in self.results:
-        #    r.shift = (r[0].offset - self.pattern.flat.notes[0].offset, r[0].pitch.ps - self.pattern.flat.notes[0].pitch.ps)
-        #return self.results
-
-class SW(geoAlgorithm):
+class SW(GeoAlgorithm):
     def pre_process(self):
         super(SW, self).pre_process()
         self.pattern.compute_intra_vectors(window = self.settings['pattern_window'])

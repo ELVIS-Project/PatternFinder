@@ -3,32 +3,13 @@ from NoteSegment import InterNoteVector, CmpItQueue
 from collections import namedtuple
 from more_itertools import peekable
 from itertools import groupby
-import geoAlgorithm
+import geo_algorithms
 import NoteSegment
 import music21
 import pdb
 
 
-class P2(geoAlgorithm.P):
-
-    def process_result(self, result):
-        if len(result) > settings['threshold']:
-            return result
-        else:
-            return # TODO handle the filtering of results in the generator context. throw an exception? how do you go back to the runtime of the algorithm from here? should this be handled in the GeoAlgorithm __init__()?
-        if self.settings['threshold'] == 0:
-            return result
-        elif self.settings['threshold'] == "max":
-            # Default: minimize the mismatches
-            temp_threshold = len(max(self.results, key=lambda x: len(x)))
-        else:
-            # Return shifts with more than or equal to settings['threshold'] matches
-            temp_threshold = int(self.settings['threshold'])
-        for r in self.results:
-            if len(r) < temp_threshold:
-                self.results.remove(r)
-
-        return super(P2, self).process_results()
+class P2(geo_algorithms.P):
 
     def algorithm(self):
         pattern = self.patternPointSet
@@ -36,14 +17,14 @@ class P2(geoAlgorithm.P):
         settings = self.settings
 
         # Priority Queue of pattern note to source pointer generators, sorted by the induced shift.
-        shifts = CmpItQueue(lambda x: x.peek(), len(pattern))
+        shifts = CmpItQueue(lambda x: (x.peek(),), len(pattern))
 
         for note in pattern:
             shifts.put(peekable((lambda p: (InterNoteVector(p, pattern, s, source) for s in source))(note)))
 
-        # NOTE possibly the best code you've ever written
         # Summary: grab the matching pairs until the shift changes, then return that occurrence
         # groupby() will pop the PQ until there is a change
+        # NOTE this may break since groupby can break up the following group while pushing a smaller group
         for k, ptr_group in groupby(shifts, key=lambda gen: gen.peek()):
             occ_ptrs = list(ptr_group) # save the group
             yield [ptr.next() for ptr in occ_ptrs] # return the occurrence
