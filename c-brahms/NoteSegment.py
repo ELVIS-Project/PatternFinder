@@ -1,8 +1,8 @@
 from itertools import groupby # for use in initializing K tables
-from functools import total_ordering # for NoteVector comparison
 from fractions import Fraction
 from collections import namedtuple # to make a custom Priority Queue
 from pprint import pprint, pformat #for K_enry __repr__
+import itertools # take() for ComputeIntraVector()
 import Queue # to make a custom Priority Queue
 import copy # for link_and_create
 import numpy as np
@@ -85,13 +85,16 @@ class K_entry():
 
 class GeometricNote(music21.note.Note):
 
+    # Override music21 sort tuple so that it sorts by offset rather than onset?
+    def sortTuple():
+        pass
+
     def __add__(self, other_note):
         pass
 
-@total_ordering
-class NoteVector2(music21.interval.Interval):
+class NoteVector(music21.interval.Interval):
     def __init__(self, *args, **kwargs):
-        super(NoteVector2, self).__init__(*args, **kwargs)
+        super(NoteVector, self).__init__(*args, **kwargs)
         self.x = 0
         self.y = self.chromatic.semitones
 
@@ -99,16 +102,29 @@ class NoteVector2(music21.interval.Interval):
         self.sortTuple = lambda: tuple(getattr(self, attr) for attr in self.sortTupleOrder)
 
     # Rich comparisons. Should also make comparisons with ints/floats/tuples possible
+    # functools.total_ordering didn't work for some reason. I had vec1 == vec2, and vec1 != vec2 both be true.
     def __eq__(self, other):
         return self.sortTuple() == other
+
+    def __ne__(self, other):
+        return self.sortTuple() != other
+
+    def __ge__(self, other):
+        return self.sortTuple() >= other
+
+    def __le__(self, other):
+        return self.sortTuple() <= other
+
+    def __gt__(self, other):
+        return self.sortTuple() > other
 
     def __lt__(self, other):
         return self.sortTuple() < other
 
-class InterNoteVector(NoteVector2):
+class InterNoteVector(NoteVector):
     def __init__(self, ralph, ralphSite, larry, larrySite, tp_type=1):
         super(InterNoteVector, self).__init__(noteStart=ralph, noteEnd=larry)
-        #TODO make all tp_types attributes or functions, freely accessible?
+        #TODO make all tp_types attributes or functions, freely accessible? (necesasrily must return non-zero intersections since 'last_value' starts at 0
         if tp_type == 0:
             # source.onset - pattern.offset
             self.x = larry.getOffsetBySite(larrySite) - (ralph.getOffsetBySite(ralphSite) + ralph.duration.quarterLength)
@@ -138,40 +154,7 @@ class InterNoteVector(NoteVector2):
 
 class IntraNoteVector(InterNoteVector):
     def __init__(self, ralph, larry, site):
-        super(IntraNoteVector, self).__init__(self, ralph, site, larry, site)
-
-class NoteVector():
-    #TODO make this a subclass of music21.Music21Object? or maybe even music21.interval.chromaticInterval, with duration != 0?
-    """
-    A vector from note 'carl' to note 'ralph'. The two note references should be in the same stream 'site'.
-
-    N.T.S: I don't think these NoteVectors ever undergo addition or subtraction, only comparison
-    """
-    def __init__(self, carl, ralph, site):
-        self.start = carl
-        self.end = ralph
-        self.site = site
-        self.x = ralph.getOffsetBySite(site) - carl.getOffsetBySite(site)
-        # TODO The papers use base-12 semitones, but I think base 40 would work around this for more precise music retrieval.
-        self.y = music21.interval.notesToChromatic(carl, ralph).semitones
-
-    def __cmp__(self, other_vector):
-        """
-        A lexicographic comparison function. For example, [1,42] < [2,3] and [2,1] < [3,22]
-        """
-        if (self.x, self.y) < (other_vector.x, other_vector.y):
-            return -1
-        elif (self.x, self.y) > (other_vector.x, other_vector.y):
-            return 1
-        return 0
-
-    ##
-    # This would work, but you'd need to use __eq__ and others to.
-    #def __cmp__(self, other_vector):
-        #return (self.x, self.y).__cmp__((other_vector.x, other_vector.y))
-
-    def __repr__(self):
-        return "NoteVector({0}, {1}, #{2}: {3} -> #{4}: {5})".format(str(self.x), str(self.y), self.site.index(self.start), self.start, self.site.index(self.end), self.end)
+        super(IntraNoteVector, self).__init__(ralph, site, larry, site)
 
 class NotePointSet(music21.stream.Stream):
     """
@@ -226,6 +209,66 @@ class NotePointSet(music21.stream.Stream):
             note.derivation.origin = chord
             note.derivation.method = 'chord_to_notes'
         return note_list
+
+    def compute_intra_vectors(self, window = 1):
+        """
+        Computes the set of IntraSetVectors in a NotePointSet.
+
+        :int: source_window limits the search space
+        :int: pattern_window = 1 for S1 & W1 while in S2 & W2 it can act as a tolerance variable to limit the distance of skipped notes in the pattern
+        """
+        # NOTE would be nice to use iterators instead of indices, couldn't get it to work
+        self.intra_vectors = [IntraNoteVector(self[i], end, self)
+                for i in range(len(self))
+                for end in self[i+1 : i+1+window]]
+
+        """
+        NOTE my failed attempt at using iterators...
+        it = iter(self)
+        self.intra_vectors = [IntraNoteVector(start, end, self)
+                for start in [iter(self[i:]) for i in range(len(self))] # ugh..
+                for sliding_window in it.islice(it, window)
+                for end in sliding_window
+
+                for iter(self[1:] in self
+                for end in itertools.islice(it, window)
+
+        self.ivs = sorted([NoteVectorOld(note_stream[i], v_j, note_stream) for i in range(len(note_stream)) for v_j in note_stream[i+1 : i+1+window]], key = lambda x: (x.y, x.x))
+        """
+
+class NoteVectorOld():
+    #TODO make this a subclass of music21.Music21Object? or maybe even music21.interval.chromaticInterval, with duration != 0?
+    """
+    A vector from note 'carl' to note 'ralph'. The two note references should be in the same stream 'site'.
+
+    N.T.S: I don't think these NoteVectors ever undergo addition or subtraction, only comparison
+    """
+    def __init__(self, carl, ralph, site):
+        self.start = carl
+        self.end = ralph
+        self.site = site
+        self.x = ralph.getOffsetBySite(site) - carl.getOffsetBySite(site)
+        # TODO The papers use base-12 semitones, but I think base 40 would work around this for more precise music retrieval.
+        self.y = music21.interval.notesToChromatic(carl, ralph).semitones
+
+    def __cmp__(self, other_vector):
+        """
+        A lexicographic comparison function. For example, [1,42] < [2,3] and [2,1] < [3,22]
+        """
+        if (self.x, self.y) < (other_vector.x, other_vector.y):
+            return -1
+        elif (self.x, self.y) > (other_vector.x, other_vector.y):
+            return 1
+        return 0
+
+    ##
+    # This would work, but you'd need to use __eq__ and others to.
+    #def __cmp__(self, other_vector):
+        #return (self.x, self.y).__cmp__((other_vector.x, other_vector.y))
+
+    def __repr__(self):
+        return "NoteVector({0}, {1}, #{2}: {3} -> #{4}: {5})".format(str(self.x), str(self.y), self.site.index(self.start), self.start, self.site.index(self.end), self.end)
+
 
 class NoteSegments(music21.stream.Stream):
     # TODO make this a top level stream with a pattern and a source sub stream. would make so much more sense..
@@ -301,6 +344,8 @@ class NoteSegments(music21.stream.Stream):
 ##
         """
 
+        if window == 0:
+            window = len(self) # TODO see if you can't put this in the argument as a default
         # There is one K table per note in the pattern
         # TODO make the K table a class so you can have a PQ in it; this will make the algorithm code cleaner (no need to index PQ's)
         self.K = [[] for note in self.flat.notes]
@@ -321,7 +366,6 @@ class NoteSegments(music21.stream.Stream):
             self.K[K_index].sort(key = lambda x : (x.a, x.b, x.s))
 
 
-
     def compute_intra_vectors(self, source_window = 0, pattern_window = 1, window = 10):
         """
         Computes intra set vectors.
@@ -335,7 +379,7 @@ class NoteSegments(music21.stream.Stream):
         note_stream = self.flat.notes
         if window == 0:
             window = len(self) # TODO see if you can't put this in the argument as a default
-        self.ivs = sorted([NoteVector(note_stream[i], v_j, note_stream) for i in range(len(note_stream)) for v_j in note_stream[i+1 : i+1+window]], key = lambda x: (x.y, x.x))
+        self.ivs = sorted([NoteVectorOld(note_stream[i], v_j, note_stream) for i in range(len(note_stream)) for v_j in note_stream[i+1 : i+1+window]], key = lambda x: (x.y, x.x))
 
 
     def report_Ktable_occurrences(self, results, source):
