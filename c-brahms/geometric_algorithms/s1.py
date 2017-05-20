@@ -1,19 +1,59 @@
 from Queue import PriorityQueue # Lemstrom's choice of data structure
-from geometric_algorithms import geoAlgorithm
+from geometric_algorithms import geo_algorithms
+from NoteSegment import InterNoteVector # to create occurrence chains
 from LineSegment import LineSegmentSet
 from pprint import pprint, pformat
 import copy
 import pdb
 
 
-class S1(geoAlgorithm.SW):
+class S1(geo_algorithms.SW):
 
-    def process_results(self):
-        if (self.settings['scale'] != "all"):
-            self.results = filter(lambda x: x.s == self.settings['scale'], self.results)
-        return super(S1, self).process_results()
+    def process_result(self, K_entry, matching_pairs=[]):
+        if K_entry.y is None:
+            return [InterNoteVector(K_entry.patternVec.noteStart, self.patternPointSet,
+                    K_entry.sourceVec.noteStart, self.sourcePointSet)] + matching_pairs
+        else:
+            return self.process_result(K_entry.y,
+                    [InterNoteVector(K_entry.patternVec.noteEnd, self.patternPointSet,
+                        K_entry.sourceVec.noteEnd, self.sourcePointSet)] + matching_pairs)
+
+        #            yield K_entry.y
+        #        K_entry = K_entry.y
+        #    yield K_entry
+        #if (self.settings['scale'] != "all"):
+        #    self.results = filter(lambda x: x.s == self.settings['scale'], self.results)
+        #return super(S1, self).process_results()
 
     def algorithm(self):
+        ##
+        # Linesweep through the pattern. Remember that the final pattern note
+        # does not have a K table since K tables correspond to intra_vectors 
+        # starting at a particular pattern note (and vectors starting at
+        # the last pattern note have nowhere to go!)
+        #
+        # Similarly, since at each iteration we are trying to extend chains
+        # stored in PQ's referencing antecedent K_tables, we start with the
+        # second table since that's the first one with an associated PQ
+        ##
+        for p in self.patternPointSet[1:-1]:
+            q = p.PQ.get()
+            for K_row in p.K_table:
+                # Look for an antecedent of the binding
+                while ((q.sourceVec.noteEndIndex, q.scale)
+                        < (K_row.sourceVec.noteStartIndex, K_row.scale)):
+                    p.PQ.get()
+
+                # Binding of extension
+                if ((q.sourceVec.noteEndIndex, q.scale)
+                        == (K_row.sourceVec.noteStartIndex, q.scale)):
+                    K_row.w = q.w + 1
+                    K_row.y = q
+                    K_row.patternVec.noteEnd.PQ.put(K_row)
+                    pdb.set_trace()
+                    yield K_row
+
+    def algorithmOld(self):
         """
         Input: Two NoteSegments streams: one called the pattern, which we are looking for occurrences within the larger source.
         Output: all shifts which result in a time-scaled occurrence of the pattern
