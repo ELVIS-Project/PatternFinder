@@ -124,31 +124,102 @@ class P(GeoAlgorithm):
     pass
 
 class SW(GeoAlgorithm):
+    """
+    Implements algorithms S1, S2, W1, and W2 from Lemstrom's 2010 and 2011 papers
+
+    These algorithms find "time-scaled" and "time-warped", "partial" occurrences
+    of the pattern within the source. These four algorithms are so similar that
+    they can be implemented identically in this one class.
+    Algorithm SW finds every "time-warped" "partial" occurrence before being filtered by:
+        1) the occurrence length (satisfying the "partial" vs. "exact" aspects of the
+            original four algorithms)
+        2) time-scaling (representing the S1, S2 algorithms from the 2010 paper)
+    So the only difference between (S1, S2) and (W1, W2) is that the S algorithms
+    override filter_result() to make sure it has a consistent time scaling. Otherwise
+    they are identical and have the same runtime.
+
+    Filters:
+        'scale' : Only accepts occurrences of a particular scale
+        'source_window' : Limits the search space by limiting the number
+            of intervening notes allowed between any two source notes
+            within the occurrence
+            e.g. we do not want to match the first and last notes of the
+                source and call that a sensible occurrence. Also, that would
+                require an enormous search space depending on the score.
+        'pattern_window' : Similar to 'source_window' but applies to the
+            number of missing notes between any two matched pattern notes.
+
+    Runtime
+    It's shown in Lemstrom's paper that the runtime works out to:
+        O(m * n * pattern_window * source_window * log(n))
+
+    Summary of Implementation:
+    Precompute all of the possible IntraNoteVectors in both the pattern and source.
+    Then try to match them based on their vertical height (pitch difference)
+
+    If an intra database vector and an intra pattern vector have the same height,
+    then there is a horizontal shift which yields two matching pairs (the starting
+    note of the intra pattern vector matches with the starting note of the intra
+    database vector, and likewise with the ending note)
+    So we pre_compute all those intra vector matches, and then form chains with them.
+
+    Notes:
+    Since ALL of the queues are initialized in pre_process, rather than
+    just the first one (as in the pseudocode of S1), I think this algorithm
+    will be able to find suffixes of perfect matches. But that's ok because
+    we'll end up using Antti Laaksonen's faster version anyways.
+
+    Since we yield every extension, the chain can be outputted as it is built.
+    e.g. with a pattern of size 5 and a threshold of 4, we'll return all of the
+    length-4 subsequences of the perfect match as well. (I think..)
+    """
+
 
     def pre_process(self):
         """
         Initialize K tables
+
+        Preprocessing:
+            1) Precompute all possible intra database and intra pattern vectors.
+            2) For each pattern note, keep:
+                p.PQ:
+                - a Priority Queue of antecedent chains, formed of intra database vectors.
+                The queue is sorted lexicographically by the last vector's <ending note, starting note>
+                This queue represents all possible chains which end at the current pattern note.
+
+                p.K_table:
+                - a Priority Queue of postcedents (one single intra database vector). The queue is
+                sorted lexicographically by the database vector's <starting note, ending note>.
+                This queue holds all the possible database vectors which can extend chains ending
+                at the current pattern note.
+
+                ** By using priority queues, we can process each of these antecedent and postcedent
+                elements exactly once, and keep the run time down.
+            3) Every intra vector match can constitute either the beginning of an antecedent chain,
+            or a possible postcedent to an existing chain. So we push each one to the priority queues.
         """
         super(SW, self).pre_process()
         self.patternPointSet.compute_intra_vectors(self.settings['pattern_window'])
         self.sourcePointSet.compute_intra_vectors(self.settings['source_window'])
 
         for p in self.patternPointSet:
-            # K table ordered by <a, b, s>
+            # K table ordered by <a, b>
             p.K_table = CmpItQueue(lambda row: (
-                row.sourceVec.noteStartIndex,
-                row.sourceVec.noteEndIndex,
-                row.scale))
+                row.noteStartIndex,
+                row.noteEndIndex))
 
-            # PQ ordered by <b, s> (encourages compact chains)
+            # PQ ordered by <b, a>
             p.PQ = CmpItQueue(lambda row: (
-                row.sourceVec.noteEndIndex,
-                row.scale))
+                row.noteEndIndex,
+                row.noteStartIndex))
 
         self.sourcePointSet.intra_vectors.sort(key=lambda vec: vec.y)
         database_vectors = {key : list(g)
                 for key, g in groupby(self.sourcePointSet.intra_vectors, lambda x: x.y)}
 
+        # NOTE actually i'm note sure about this. I think we can just have generators
+        # and when the binding condition is satisfied, we extend it.
+        #
         # we pre-initialize without generators because the algorithms sweepline across
         # the increasing intra_vectors, processing each element only once. otherwise,
         # if we generated them on the fly, we'd have to search through each K table for
@@ -169,16 +240,58 @@ class SW(GeoAlgorithm):
             Tail recursively extracts the matching pairs from the final K_entry of an occurrence
             """
             end_note = [InterNoteVector(K_entry.patternVec.noteEnd, self.patternPointSet,
-                    K_entry.sourceVec.noteEnd, self.sourcePointSet)]
+                    K_entry.noteEnd, self.sourcePointSet)]
             if K_entry.y is None:
                 return ([InterNoteVector(K_entry.patternVec.noteStart, self.patternPointSet,
-                        K_entry.sourceVec.noteStart, self.sourcePointSet)]
+                        K_entry.noteStart, self.sourcePointSet)]
                         + end_note
                         + matching_pairs)
             else:
                 return extract_matching_pairs(K_entry.y, end_note + matching_pairs)
 
         return extract_matching_pairs(result, [])
+
+    def algorithm(self):
+        """
+        Algorithm:
+            1) Linesweep through the pattern[1:-1] (ignoring the first and last notes)
+                - skipping the first note:
+                    Recall that the antecedent chains and postcedents are intra database vectors.
+                    They have a start and an end note. So we only to consider extending vectors
+                    ending at the second note of the pattern, since this vector starts at the first.
+                - skipping the last note:
+                    similarly, the last note doesn't have any postcedents to extend chains with.
+            2) For each postcedent associated with an intra pattern vector starting at this pattern
+            note, look for antecedents to extend it with!
+            3) When we find an antecedent to extend, we create a backlink with the K_entry constructor
+            and then push it back into the appropriate PQ (the PQ of the pattern note at which this
+            new antecedent chain ends)
+            4) We return each new antecedent chain. filter_result will take user_settings into
+            account and decide if it should be returned.
+        """
+        for p in self.patternPointSet[1:-1]:
+            for K_row in p.K_table:
+                antecedent = lambda: p.PQ.queue[0].item.noteEndIndex
+                binding = K_row.noteStartIndex
+
+                # Use peek so that the first intra_vec to break this K_row can still be used for the next one
+                while (p.PQ.qsize() > 0) and (antecedent() < binding):
+                    p.PQ.next()
+
+                # Modification to pseudocode: use "while" instead of "if" so that
+                # you can chain many possible identical notes
+                while (p.PQ.qsize() > 0) and (antecedent() == binding):
+                    q = p.PQ.next()
+                    new_entry = K_entry(K_row.patternVec, K_row, w = q.w + 1, y = q)
+                    new_entry.patternVec.noteEnd.PQ.put(new_entry)
+                    yield new_entry
+
+class S(SW):
+
+    def filter_result(self, result):
+        return ((result.scale == result.y.scale)
+                and (super(S, self).filter_result(result)))
+
 
 class SWOld(GeoAlgorithm):
 

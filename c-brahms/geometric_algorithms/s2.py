@@ -4,9 +4,9 @@ import music21
 import copy
 import pdb
 
-class S2(geo_algorithms.SW):
+class S2(geo_algorithms.S):
 
-    def algorithm(self):
+    def algorithmAlsoOld(self):
         """
         Algorithm S2 returns "time-scaled" and "partial" occurrences of the pattern
         within the source.

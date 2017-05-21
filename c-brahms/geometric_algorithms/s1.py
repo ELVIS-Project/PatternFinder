@@ -7,36 +7,14 @@ import copy
 import pdb
 
 
-class S1(geo_algorithms.SW):
+class S1(geo_algorithms.S):
 
-    def algorithm(self):
-        """
-        Linesweep through the pattern. Remember that the final pattern note
-        does not have a K table since K tables correspond to intra_vectors
-        starting at a particular pattern note (and vectors starting at
-        the last pattern note have nowhere to go!)
+    def algorithmAlsoOld(self):
 
-        Similarly, since at each iteration we are trying to extend chains
-        stored in PQ's referencing antecedent K_tables, we start with the
-        second table since that's the first one with an associated PQ
-
-        We hold onto each PQ element until it no longer can usefully extend
-        any relevant K table entries. This way, even duplicated notes can
-        still return multiple chains through them.
-
-        Don't push a K_table entry to a later PQ if it didn't extend a chain.
-        Remember that you already initialized all the PQ's and K table entries
-        with length-one chains! Here we are looking for longer ones.
-
-        Since ALL of the queues are initialized in pre_process, rather than
-        just the first one (as in the pseudocode of S1), I think this algorithm
-        will be able to find suffixes of perfect matches. But that's ok because
-        we'll end up using Antti Laaksonen's faster version anyways.
-        """
         for p in self.patternPointSet[1:-1]:
             for K_row in p.K_table:
-                antecedent = lambda: (p.PQ.queue[0].item.sourceVec.noteEndIndex, p.PQ.queue[0].item.scale)
-                binding = (K_row.sourceVec.noteStartIndex, K_row.scale)
+                antecedent = lambda: p.PQ.queue[0].item.noteEndIndex
+                binding = K_row.noteStartIndex
 
                 # Use peek so that the first intra_vec to break this K_row can still be used for the next one
                 while (p.PQ.qsize() > 0) and (antecedent() < binding):
@@ -46,10 +24,9 @@ class S1(geo_algorithms.SW):
                 # you can chain many possible identical notes
                 while (p.PQ.qsize() > 0) and (antecedent() == binding):
                     q = p.PQ.next()
-                    new_entry = K_entry(K_row.patternVec, K_row.sourceVec, w = q.w + 1, y = q)
+                    new_entry = K_entry(K_row.patternVec, K_row, w = q.w + 1, y = q)
                     new_entry.patternVec.noteEnd.PQ.put(new_entry)
                     yield new_entry
-
     def algorithmOld(self):
         """
         Input: Two NoteSegments streams: one called the pattern, which we are looking for occurrences within the larger source.

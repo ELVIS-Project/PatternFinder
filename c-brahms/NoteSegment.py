@@ -53,6 +53,8 @@ class GeometricNote(music21.note.Note):
     def __add__(self, other_note):
         pass
 
+#TODO make this a generic SortVector class which InterNoteVector inherits?
+# Or just get rid of it all together. we only use note vectors within a site
 class NoteVector(music21.interval.Interval):
     def __init__(self, *args, **kwargs):
         super(NoteVector, self).__init__(*args, **kwargs)
@@ -111,14 +113,63 @@ class InterNoteVector(NoteVector):
         self.noteEndSite = larrySite
 
     def __repr__(self):
-        return  (str(self.__class__)
+        return  ('<'+ str(self.__class__.__name__) + '>'
                 + " TYPE {0} (x={1}, y={2}) ".format(self.tp_type, self.x, self.y)
                 + " #{0}: {1} --> #{2}: {3}".format(
                     self.noteStartIndex, self.noteStart, self.noteEndIndex, self.noteEnd))
 
 class IntraNoteVector(InterNoteVector):
     def __init__(self, ralph, larry, site):
+        self.site = site
         super(IntraNoteVector, self).__init__(ralph, site, larry, site)
+
+class K_entry(IntraNoteVector):
+    def __init__(self, intra_pattern_vector, intra_database_vector, w=1, y=None, e=0, z=0):
+        super(K_entry, self).__init__(
+                intra_database_vector.noteStart,
+                intra_database_vector.noteEnd,
+                intra_database_vector.site)
+        self.patternVec = intra_pattern_vector
+
+        if (intra_database_vector.x == 0) and (intra_pattern_vector.x == 0):
+            scale = 1
+        # NOTE here we can decide on the behaviour of note-to-chord and
+        # chord-to-note scaling. Should we allow a chord to expand, or a
+        # pattern flatten to a chord?
+        elif (intra_database_vector.x == 0) or (intra_pattern_vector.x == 0):
+            scale = None
+        else:
+            scale = Fraction(Fraction(intra_database_vector.x), Fraction(intra_pattern_vector.x))
+
+        self.scale = scale # For S1, S2
+        self.w = w # length of occurrence
+        self.y = y # backlink for building occurrences
+        # Optionally we can give occurrences an ID so that as they gradually build,
+        # we can more easily replace the shorter yields with their longer ones
+        self.z = z # occurrence ID
+
+        # TODO save matching_pairs here rather than computing them in process_result
+        """
+        throws TypeError: "InterNoteVector object is not callable"
+        matching_pairs = namedtuple('matching_pairs', ['start', 'end'])._make(
+                InterNoteVector(self.patternVec.noteStart, self.patternVec.site,
+                    self.noteStart, self.site),
+                InterNoteVector(self.patternVec.noteEnd, self.patternVec.site,
+                    self.noteEnd, self.site))
+        """
+
+
+    def __repr__(self):
+        return ("<NoteSegment.K_entry> with s={0}, w={1}, ".format(self.scale, self.w)
+                + "is an intra database vector associated with an intra pattern vector \n"
+                + "INTRA DATABASE VECTOR: "
+                + "<IntraNoteVector> TYPE {0} (x={1}, y={2}) ".format(
+                    self.tp_type, self.x, self.y)
+                + " #{0}: {1} --> #{2}: {3}\n".format(
+                    self.noteStartIndex, self.noteStart, self.noteEndIndex, self.noteEnd)
+                + "INTRA PATTERN VECTOR: {0}\n".format(self.patternVec)
+            # Indent the backlink so it's more readable
+            + "WITH BACKLINK:\n    {0}".format(str(self.y).replace('\n', '\n    ')))
 
 class NotePointSet(music21.stream.Stream):
     """
@@ -248,33 +299,6 @@ class NotePointSet(music21.stream.Stream):
             result_stream.shift = (first_note.offset - self.flat.notes[0].offset, first_note.pitch.ps - self.flat.notes[0].pitch.ps)
             occurrences.append(result_stream)
         return occurrences
-
-class K_entry(object):
-    def __init__(self, intra_pattern_vector, intra_database_vector, w=1, y=None, e=0, z=0):
-        if (intra_database_vector.x == 0) and (intra_pattern_vector.x == 0):
-            scale = 1
-        # NOTE here we can decide on the behaviour of note-to-chord and
-        # chord-to-note scaling. Should we allow a chord to expand, or a
-        # pattern flatten to a chord?
-        elif (intra_database_vector.x == 0) or (intra_pattern_vector.x == 0):
-            scale = None
-        else:
-            scale = Fraction(Fraction(intra_database_vector.x), Fraction(intra_pattern_vector.x))
-
-        self.patternVec = intra_pattern_vector
-        self.sourceVec = intra_database_vector
-        self.scale = scale # For S1, S2
-        self.w = w # length of occurrence
-        self.y = y # backlink for building occurrences
-        self.e = e # For W1, W2
-        self.z = z # partial occurrence
-
-    def __repr__(self):
-        return ("<NoteSegment.K_entry> with s={0}, w={1}\n".format(self.scale, self.w)
-            + "INTRA PATTERN VECTOR {0} ====>\n".format(self.patternVec)
-            + "INTRA DATABASE VECTOR {0}\n".format(self.sourceVec)
-            # Indent the backlink so it's more readable
-            + "WITH BACKLINK:\n    {0}".format(str(self.y).replace('\n', '\n    ')))
 
 #K_entry = namedtuple('K_entry', ['a', 'b', 'y', 'c', 's', 'e', 'w', 'z', 'source_vector', 'pattern_vector'])
 #TODO make a K_entry just an extended NoteVector?
