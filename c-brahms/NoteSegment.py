@@ -42,12 +42,11 @@ class CmpItQueue(Queue.PriorityQueue):
         # Return only the item so that PQ covers up the inconvenience of dealing with the sortTuple
         return Queue.PriorityQueue.get(self, False).item
 
-    def peek(self):
-        return peekable(self).peek()
-
 class GeometricNote(music21.note.Note):
 
     # Override music21 sort tuple so that it sorts by offset rather than onset?
+    # This would also help to avoid using indices in algorithms SW. 'a' and 'b'
+    # could be replaced by the note itself
     def sortTuple():
         pass
 
@@ -112,7 +111,10 @@ class InterNoteVector(NoteVector):
         self.noteEndSite = larrySite
 
     def __repr__(self):
-        return super(InterNoteVector, self).__repr__() + " TYPE {0} (x={1}, y={2}) ".format(self.tp_type, self.x, self.y) + " #{0}: {1} --> #{2}: {3}".format(self.noteStartIndex, self.noteStart, self.noteEndIndex, self.noteEnd)
+        return  (str(self.__class__)
+                + " TYPE {0} (x={1}, y={2}) ".format(self.tp_type, self.x, self.y)
+                + " #{0}: {1} --> #{2}: {3}".format(
+                    self.noteStartIndex, self.noteStart, self.noteEndIndex, self.noteEnd))
 
 class IntraNoteVector(InterNoteVector):
     def __init__(self, ralph, larry, site):
@@ -248,7 +250,7 @@ class NotePointSet(music21.stream.Stream):
         return occurrences
 
 class K_entry(object):
-    def __init__(self, intra_pattern_vector, intra_database_vector):
+    def __init__(self, intra_pattern_vector, intra_database_vector, w=1, y=None, e=0, z=0):
         if (intra_database_vector.x == 0) and (intra_pattern_vector.x == 0):
             scale = 1
         # NOTE here we can decide on the behaviour of note-to-chord and
@@ -262,14 +264,17 @@ class K_entry(object):
         self.patternVec = intra_pattern_vector
         self.sourceVec = intra_database_vector
         self.scale = scale # For S1, S2
-        self.w = 1 # length of occurrence
-        self.y = None # backlink for building occurrences
-        self.e = 0 # For W1, W2
-        self.z = 0 # partial occurrence
+        self.w = w # length of occurrence
+        self.y = y # backlink for building occurrences
+        self.e = e # For W1, W2
+        self.z = z # partial occurrence
 
     def __repr__(self):
-        return "K_entry(pattern {0} ===> source {1} with s={2}, w={3}, y={4})".format(
-                self.patternVec, self.sourceVec, self.scale, self.w, self.y)
+        return ("<NoteSegment.K_entry> with s={0}, w={1}\n".format(self.scale, self.w)
+            + "INTRA PATTERN VECTOR {0} ====>\n".format(self.patternVec)
+            + "INTRA DATABASE VECTOR {0}\n".format(self.sourceVec)
+            # Indent the backlink so it's more readable
+            + "WITH BACKLINK:\n    {0}".format(str(self.y).replace('\n', '\n    ')))
 
 #K_entry = namedtuple('K_entry', ['a', 'b', 'y', 'c', 's', 'e', 'w', 'z', 'source_vector', 'pattern_vector'])
 #TODO make a K_entry just an extended NoteVector?

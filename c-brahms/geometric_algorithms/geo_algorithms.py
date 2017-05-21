@@ -1,7 +1,9 @@
 from collections import namedtuple #for .scores immutable tuple
 from pprint import pformat #for repr
 from LineSegment import LineSegment
-from NoteSegment import NotePointSet
+from NoteSegment import NotePointSet, K_entry, CmpItQueue, InterNoteVector
+from bisect import insort # to insert while maintaining a sorted list
+from itertools import groupby # for K table initialization
 import NoteSegment
 import copy
 import music21
@@ -33,7 +35,7 @@ class GeoAlgorithm(object):
     def __init__(self, pattern_input, source_input, settings = DEFAULT_SETTINGS):
 
         # Update the default settings with user-specified ones so that the user only has to specify non-default parameters.
-        self.settings = DEFAULT_SETTINGS
+        self.settings = {key : val for key, val in DEFAULT_SETTINGS.items()}
         self.settings.update(settings)
 
         # Defines self.pattern and self.source
@@ -44,7 +46,8 @@ class GeoAlgorithm(object):
         self.pre_process()
 
         # Run the algorithm, filter the occurrences, define an occurrence generator.
-        self.occurrences = (self.process_result(r) for r in self.algorithm() if self.filter_occurrence(self.process_result(r)))
+        #TODO make occurrence objects for easier processing and testing
+        self.occurrences = (self.process_result(r) for r in self.algorithm() if self.filter_result(r))
 
         # Do something with the occurrences
         #self.post_process()
@@ -93,27 +96,26 @@ class GeoAlgorithm(object):
         self.sourcePointSet = NotePointSet(self.source)
         self.sourcePointSet.id = 'sourcePointSet'
 
+        # TODO implement 'threshold' == max
+        # TODO implement 'mismatch'?
+        if self.settings['threshold'] == 'all':
+            self.settings['threshold'] = len(self.patternPointSet)
+
     def process_result(self, r):
         return r
-
-    def filter_occurrence(self, occurrence):
-        if self.settings['threshold'] == 'all':
-            threshold = len(self.patternPointSet)
-        else:
-            threshold = self.settings['threshold']
-        return len(occurrence) >= threshold
 
     def post_process(self):
         # Colour the score
         self.check = []
-        if self.source.derivation.method != 'manual':
-            for occurrence in self.occurrences:
-                self.check.append(occurrence)
-                for inter_vec in occurrence:
-                    if inter_vec.noteEnd.derivation.origin:
-                        inter_vec.noteEnd.derivation.origin.color = self.settings['colour']
-                    else:
-                        inter_vec.noteEnd.color = self.settings['colour']
+        if self.source.derivation.method == 'manual':
+            return
+        for occurrence in self.occurrences:
+            self.check.append(occurrence)
+            for inter_vec in occurrence:
+                if inter_vec.noteEnd.derivation.origin:
+                    inter_vec.noteEnd.derivation.origin.color = self.settings['colour']
+                else:
+                    inter_vec.noteEnd.color = self.settings['colour']
 
     def __repr__(self):
         return "{0}\npattern = {1},\nsource = {2},\nsettings = {3}".format(self.__class__.__name__, self.pattern.derivation, self.source.derivation, self.settings)
@@ -122,11 +124,71 @@ class P(GeoAlgorithm):
     pass
 
 class SW(GeoAlgorithm):
+
+    def pre_process(self):
+        """
+        Initialize K tables
+        """
+        super(SW, self).pre_process()
+        self.patternPointSet.compute_intra_vectors(self.settings['pattern_window'])
+        self.sourcePointSet.compute_intra_vectors(self.settings['source_window'])
+
+        for p in self.patternPointSet:
+            # K table ordered by <a, b, s>
+            p.K_table = CmpItQueue(lambda row: (
+                row.sourceVec.noteStartIndex,
+                row.sourceVec.noteEndIndex,
+                row.scale))
+
+            # PQ ordered by <b, s> (encourages compact chains)
+            p.PQ = CmpItQueue(lambda row: (
+                row.sourceVec.noteEndIndex,
+                row.scale))
+
+        self.sourcePointSet.intra_vectors.sort(key=lambda vec: vec.y)
+        database_vectors = {key : list(g)
+                for key, g in groupby(self.sourcePointSet.intra_vectors, lambda x: x.y)}
+
+        # we pre-initialize without generators because the algorithms sweepline across
+        # the increasing intra_vectors, processing each element only once. otherwise,
+        # if we generated them on the fly, we'd have to search through each K table for
+        # antecedents to the binding.
+        for pattern_vec in self.patternPointSet.intra_vectors:
+            for database_vec in database_vectors[pattern_vec.y]:
+                new_entry = K_entry(pattern_vec, database_vec)
+                if new_entry.scale:
+                    pattern_vec.noteStart.K_table.put(new_entry)
+                    pattern_vec.noteEnd.PQ.put(new_entry)
+
+    def filter_result(self, result):
+        return ((result.w + 1) >= self.settings['threshold'])
+
+    def process_result(self, result):
+        def extract_matching_pairs(K_entry, matching_pairs):
+            """
+            Tail recursively extracts the matching pairs from the final K_entry of an occurrence
+            """
+            end_note = [InterNoteVector(K_entry.patternVec.noteEnd, self.patternPointSet,
+                    K_entry.sourceVec.noteEnd, self.sourcePointSet)]
+            if K_entry.y is None:
+                return ([InterNoteVector(K_entry.patternVec.noteStart, self.patternPointSet,
+                        K_entry.sourceVec.noteStart, self.sourcePointSet)]
+                        + end_note
+                        + matching_pairs)
+            else:
+                return extract_matching_pairs(K_entry.y, end_note + matching_pairs)
+
+        return extract_matching_pairs(result, [])
+
+class SWOld(GeoAlgorithm):
+
+    """
     def pre_process(self):
         super(SW, self).pre_process()
         self.pattern.compute_intra_vectors(window = self.settings['pattern_window'])
         self.source.compute_intra_vectors(window = self.settings['source_window'])
         self.pattern.initialize_Ktables(self.source)
+        #TODO if window == 0 or maybe "max"? set window to len(pattern)
 
         if isinstance(self.settings['mismatches'], (int, long)):
             ## TODO make it so you can't have threshold and mismatches set
@@ -135,6 +197,7 @@ class SW(GeoAlgorithm):
         # If threshold has been passed in and intends to be 'max'..
         if self.settings['threshold'] == len(self.pattern.flat.notes):
             self.settings['threshold'] = self.settings['threshold'] - 1
+    """
 
     def process_results(self):
         #TODO clean up chain flattening

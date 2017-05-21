@@ -1,57 +1,107 @@
-from Queue import PriorityQueue # Lemstrom's choice of data structure
 from geometric_algorithms import geo_algorithms
-from NoteSegment import InterNoteVector # to create occurrence chains
+from NoteSegment import InterNoteVector, K_entry # to create occurrence chains
 from LineSegment import LineSegmentSet
 from pprint import pprint, pformat
+from itertools import groupby
 import copy
 import pdb
 
 
 class S1(geo_algorithms.SW):
 
-    def process_result(self, K_entry, matching_pairs=[]):
-        if K_entry.y is None:
-            return [InterNoteVector(K_entry.patternVec.noteStart, self.patternPointSet,
-                    K_entry.sourceVec.noteStart, self.sourcePointSet)] + matching_pairs
-        else:
-            return self.process_result(K_entry.y,
-                    [InterNoteVector(K_entry.patternVec.noteEnd, self.patternPointSet,
-                        K_entry.sourceVec.noteEnd, self.sourcePointSet)] + matching_pairs)
-
-        #            yield K_entry.y
-        #        K_entry = K_entry.y
-        #    yield K_entry
-        #if (self.settings['scale'] != "all"):
-        #    self.results = filter(lambda x: x.s == self.settings['scale'], self.results)
-        #return super(S1, self).process_results()
-
     def algorithm(self):
-        ##
-        # Linesweep through the pattern. Remember that the final pattern note
-        # does not have a K table since K tables correspond to intra_vectors 
-        # starting at a particular pattern note (and vectors starting at
-        # the last pattern note have nowhere to go!)
-        #
-        # Similarly, since at each iteration we are trying to extend chains
-        # stored in PQ's referencing antecedent K_tables, we start with the
-        # second table since that's the first one with an associated PQ
-        ##
+        """
+        Linesweep through the pattern. Remember that the final pattern note
+        does not have a K table since K tables correspond to intra_vectors
+        starting at a particular pattern note (and vectors starting at
+        the last pattern note have nowhere to go!)
+
+        Similarly, since at each iteration we are trying to extend chains
+        stored in PQ's referencing antecedent K_tables, we start with the
+        second table since that's the first one with an associated PQ
+
+        We hold onto each PQ element until it no longer can usefully extend
+        any relevant K table entries. This way, even duplicated notes can
+        still return multiple chains through them.
+
+        Don't push a K_table entry to a later PQ if it didn't extend a chain.
+        Remember that you already initialized all the PQ's and K table entries
+        with length-one chains! Here we are looking for longer ones.
+
+        Since ALL of the queues are initialized in pre_process, rather than
+        just the first one (as in the pseudocode of S1), I think this algorithm
+        will be able to find suffixes of perfect matches. But that's ok because
+        we'll end up using Antti Laaksonen's faster version anyways.
+        """
         for p in self.patternPointSet[1:-1]:
-            q = p.PQ.get()
             for K_row in p.K_table:
+
+                antecedent = lambda: (p.PQ.queue[0].item.sourceVec.noteEndIndex, p.PQ.queue[0].item.scale)
+                binding = (K_row.sourceVec.noteStartIndex, K_row.scale)
+
+                # Use peek so that the first intra_vec to break this K_row can still be used for the next one
+                while (p.PQ.qsize() > 0) and (antecedent() < binding):
+                    p.PQ.next()
+
+                # Modification to pseudocode: use "while" instead of "if" so that
+                # you can chain many possible identical notes
+                while (p.PQ.qsize() > 0) and (antecedent() == binding):
+                    q = p.PQ.next()
+                    new_entry = K_entry(K_row.patternVec, K_row.sourceVec, w = q.w + 1, y = q)
+                    new_entry.patternVec.noteEnd.PQ.put(new_entry)
+                    yield new_entry
+                """
+                for q_end, group in groupby(p.PQ, lambda x: (x.sourceVec.noteEndIndex, x.scale)):
+                    pdb.set_trace()
+                    if q_end < (K_row.sourceVec.noteStartIndex, K_row.scale):
+                        continue
+                    if q_end == (K_row.sourceVec.noteStartIndex, K_row.scale):
+                        for q in group:
+                            new_entry = K_entry(K_row.patternVec, K_row.sourceVec)
+                            new_entry.w = q.w + 1
+                            new_entry.y = q
+                            new_entry.patternVec.noteEnd.PQ.put(new_entry)
+                            yield new_entry
+                """
                 # Look for an antecedent of the binding
+                """
+                try:
+                    # Peek rather than get here so that this intra_vec can be
+                    # compared to subsequent K_rows. This means that duplicated
+                    # notes will each generate a separate chain (I think..)
+                    #
+                    # Or maybe not, since only only one chain ultimately gets
+                    # extended. Could be that's why the output can be random
+                    # since it depends on the balancing of the priority queue
+                    q = p.PQ.queue[0].item
+                except IndexError:
+                    continue
+                pdb.set_trace()
                 while ((q.sourceVec.noteEndIndex, q.scale)
                         < (K_row.sourceVec.noteStartIndex, K_row.scale)):
-                    p.PQ.get()
+                    try:
+                        q = p.PQ.next()
+                    except StopIteration:
+                        break
 
                 # Binding of extension
                 if ((q.sourceVec.noteEndIndex, q.scale)
-                        == (K_row.sourceVec.noteStartIndex, q.scale)):
-                    K_row.w = q.w + 1
-                    K_row.y = q
-                    K_row.patternVec.noteEnd.PQ.put(K_row)
+                        == (K_row.sourceVec.noteStartIndex, K_row.scale)):
                     pdb.set_trace()
-                    yield K_row
+                    new_entry = K_entry(K_row.patternVec, K_row.sourceVec)
+                    new_entry.w = q.w + 1
+                    new_entry.y = q
+                    new_entry.patternVec.noteEnd.PQ.put(new_entry)
+                    yield new_entry
+                    #K_row.w = q.w + 1
+                    #K_row.y = q
+                    #K_row.patternVec.noteEnd.PQ.put(new_entry)
+                    #yield K_row
+                    try:
+                        q = p.PQ.next()
+                    except StopIteration:
+                        break
+                """
 
     def algorithmOld(self):
         """
