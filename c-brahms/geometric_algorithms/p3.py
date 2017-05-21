@@ -19,7 +19,12 @@ class P3(geo_algorithms.P):
 
 
     def process_result(self, result):
+        # TODO insert sort (using bisect_insort) vectors to matching_pairs rather than sorting them after
         return sorted(result['matching_pairs'], key=lambda x: x.noteStartIndex)
+
+    def filter_result(self, result):
+        total_pattern_value = sum(map(lambda x: x.duration.quarterLength, self.patternPointSet))
+        return (result['value'] >= self.settings['%threshold'] * total_pattern_value)
 
     def algorithm(self):
         pattern = self.patternPointSet
@@ -61,7 +66,7 @@ class P3(geo_algorithms.P):
                 cur_bucket['matching_pairs'].remove(
                         InterNoteVector(inter_vec.noteStart, inter_vec.noteStartSite, inter_vec.noteEnd, inter_vec.noteEndSite, 0))
 
-            # Only return occurrences if the intersection is increasing (necesasrily must return non-zero intersections since 'last_value' starts at 0
+            # Only return occurrences if the intersection is increasing (necessarily must return non-zero intersections since 'last_value' starts at 0
             if cur_bucket['value'] > cur_bucket['last_value']:
                 yield cur_bucket
                 cur_bucket['last_value'] = cur_bucket['value']

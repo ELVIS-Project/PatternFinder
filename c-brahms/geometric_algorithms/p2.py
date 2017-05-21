@@ -26,17 +26,19 @@ class P2(geo_algorithms.P):
     pop the PQ until there is a change (indicating that it has found all
     of the matching pairs corresponding to the current candidate shift)
     """
+    def filter_result(self, result):
+        return (len(result) >= self.settings['threshold'])
 
     def algorithm(self):
 
         # Priority Queue of pattern note to source note vector pointers
-        shifts = CmpItQueue(lambda x: (x.peek(),), len(pattern))
+        shifts = CmpItQueue(lambda x: (x.peek(),), len(self.patternPointSet))
 
         # We use generators to implement line-sweeping the pointers through
         # the score. Use a lambda expression to avoid bugs caused by scope-bleeding
         # from generator comprehensions
         # NOTE possibly a generator comprehension would work fine in python3
-        for note in pattern:
+        for note in self.patternPointSet:
             shifts.put(peekable((lambda p:
                 (InterNoteVector(p, self.patternPointSet, s, self.sourcePointSet)
                     for s in self.sourcePointSet))

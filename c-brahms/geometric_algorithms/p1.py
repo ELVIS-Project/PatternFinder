@@ -19,33 +19,36 @@ class P1(geo_algorithms.P):
     POLYPHONIC BEHAVIOUR:
         P1 can find exact melodic occurrences through many voices. It will only find multiple matches if the first note of the pattern can match more than one identical note in the source, while all the rest of the notes find possibly non-unique matches. THIS should be changed.
     """
-    def algorithm(self):
-        source = self.sourcePointSet
-        pattern = self.patternPointSet
+    def filter_result(self, result):
+        return True
 
-        def is_pure_occurrence(ptrs, cur_shift):
-            for inter_vector_gen in ptrs:
-                # Take the first intervec that's too big
+    def algorithm(self):
+        def is_pure_occurrence(ptrs):
+            for inter_vector_gen in ptrs[1:]:
+                # Take the first intervec that's too big. if you use itertools.takewhile, it will consume the first one that's too big, but you want to keep it in the generator for subsequent cur_shifts.
                 try:
-                    cndt_inter_vector = inter_vector_gen.peek()
-                    while inter_vector_gen.peek() < cur_shift:
-                        inter_vector_gen.next()
-                        cndt_inter_vector = inter_vector_gen.peek()
+                    while inter_vector_gen.peek() < cur_shift: inter_vector_gen.next()
 
                     # TODO add if cndt_intr_vector.peek() == cur_shift, take it. Then make is_pure_occurrence a generator, so we can find multiple matches if there are duplicated notes
-                    if cndt_inter_vector != cur_shift:
+                    if inter_vector_gen.peek() != cur_shift:
                         return False
                 except StopIteration:
                     return False
+            # If we've gotten down here, then there are enough matching pairs to constitute a pure, exact match!
             return True
 
-        # Remember you need lambda p: ()(note) or else the list comprehension will pollute the name space with the final element in pattern, and you won't get the generators you intended. Check StackOverflow "Python generator conflicting with list comprehension"
-        ptrs = [peekable((lambda p: (InterNoteVector(p, pattern, s, source) for s in source))(note)) for note in pattern[1:]]
+        source = self.sourcePointSet
+        pattern = self.patternPointSet
 
-        for s in source:
-            possible_shift = InterNoteVector(pattern[0], pattern, s, source)
-            if is_pure_occurrence(ptrs, possible_shift):
-                yield [possible_shift] + map(lambda x: x.peek(), ptrs)
+        ptrs = [peekable((lambda p: (InterNoteVector(p, pattern, s, source) for s in source))(note)) for note in pattern]
+
+        # At the very least, p_0 must match, so we use this shift as a candidate
+        for cur_shift in ptrs[0]:
+            # Then we look at the rest of the pointers to see if they also can form a matching pair with this shift
+            if is_pure_occurrence(ptrs):
+                yield [cur_shift] + map(lambda x: x.peek(), ptrs[1:])
+
+
 
     def algorithmOld(self):
         """
