@@ -1,4 +1,3 @@
-from LineSegment import LineSegmentSet
 from Queue import PriorityQueue
 from geometric_algorithms import geoAlgorithm
 import music21
@@ -7,15 +6,73 @@ import pdb
 
 class S2(geoAlgorithm.SW):
 
-    def process_results(self):
-        self.results = self.results[1:]
-        if self.settings['threshold'] == 'max':
-            max_length = max(self.results, key=lambda x: x.w).w
-            self.results = filter(lambda x: x.w == max_length, self.results)
-        return super(S2, self).process_results()
-
-
     def algorithm(self):
+        """
+        Algorithm S2 returns "scaled" and "partial" occurrences of the pattern
+        within the source.
+
+        Filters:
+            'scale' : Only accepts occurrences of a particular scale
+            'source_window' : Limits the search space by limiting the number
+                of intervening notes allowed between any two source notes
+                within the occurrence
+                e.g. we do not want to match the first and last notes of the
+                    source and call that a sensible occurrence. Also, that would
+                    require an enormous search space depending on the score.
+            'pattern_window' : Similar to 'source_window' but applies to the
+                number of missing notes between any two matched pattern notes.
+
+        Runtime
+        It's shown in Lemstrom's paper that the runtime works out to:
+            O(m * n * pattern_window * source_window * log(n))
+
+        Summary of Implementation: precompute all of the possible IntraNoteVectors
+        in both the pattern and source. Then try to match them and form chains.
+
+        Linesweep through the pattern. Remember that the final pattern note
+        does not have a K table since K tables correspond to intra_vectors
+        starting at a particular pattern note (and vectors starting at
+        the last pattern note have nowhere to go!)
+
+        Similarly, since at each iteration we are trying to extend chains
+        stored in PQ's referencing antecedent K_tables, we start with the
+        second table since that's the first one with an associated PQ
+
+        Don't push a K_table entry to a later PQ if it didn't extend a chain.
+        Remember that you already initialized all the PQ's and K table entries
+        with length-one chains! Here we are looking for longer ones.
+
+        The PQ's represent all of the current chains which END at the corresponding
+        pattern note. That's why we push new extensions to K_entry.noteEnd.PQ
+
+        Since ALL of the queues are initialized in pre_process, rather than
+        just the first one (as in the pseudocode of S1), I think this algorithm
+        will be able to find suffixes of perfect matches. But that's ok because
+        we'll end up using Antti Laaksonen's faster version anyways.
+
+        Since we yield every extension, the chain can be outputted as it is built.
+        e.g. with a pattern of size 5 and a threshold of 4, we'll return all of the
+        length-4 subsequences of the perfect match as well. (I think..)
+        """
+        for p in self.patternPointSet[1:-1]:
+            for K_row in p.K_table:
+                antecedent = lambda: (p.PQ.queue[0].item.sourceVec.noteEndIndex, p.PQ.queue[0].item.scale)
+                binding = (K_row.sourceVec.noteStartIndex, K_row.scale)
+
+                # Use peek so that the first intra_vec to break this K_row can still be used for the next one
+                while (p.PQ.qsize() > 0) and (antecedent() < binding):
+                    p.PQ.next()
+
+                # Modification to pseudocode: use "while" instead of "if" so that
+                # you can chain many possible identical notes
+                while (p.PQ.qsize() > 0) and (antecedent() == binding):
+                    q = p.PQ.next()
+                    new_entry = K_entry(K_row.patternVec, K_row.sourceVec, w = q.w + 1, y = q)
+                    new_entry.patternVec.noteEnd.PQ.put(new_entry)
+                    yield new_entry
+
+
+    def algorithmOld(self):
         ## TODO pass this stuff in, or rename in code?
         pattern = self.pattern
         source = self.source
