@@ -35,7 +35,6 @@ class S1(geo_algorithms.SW):
         """
         for p in self.patternPointSet[1:-1]:
             for K_row in p.K_table:
-
                 antecedent = lambda: (p.PQ.queue[0].item.sourceVec.noteEndIndex, p.PQ.queue[0].item.scale)
                 binding = (K_row.sourceVec.noteStartIndex, K_row.scale)
 
@@ -50,58 +49,6 @@ class S1(geo_algorithms.SW):
                     new_entry = K_entry(K_row.patternVec, K_row.sourceVec, w = q.w + 1, y = q)
                     new_entry.patternVec.noteEnd.PQ.put(new_entry)
                     yield new_entry
-                """
-                for q_end, group in groupby(p.PQ, lambda x: (x.sourceVec.noteEndIndex, x.scale)):
-                    pdb.set_trace()
-                    if q_end < (K_row.sourceVec.noteStartIndex, K_row.scale):
-                        continue
-                    if q_end == (K_row.sourceVec.noteStartIndex, K_row.scale):
-                        for q in group:
-                            new_entry = K_entry(K_row.patternVec, K_row.sourceVec)
-                            new_entry.w = q.w + 1
-                            new_entry.y = q
-                            new_entry.patternVec.noteEnd.PQ.put(new_entry)
-                            yield new_entry
-                """
-                # Look for an antecedent of the binding
-                """
-                try:
-                    # Peek rather than get here so that this intra_vec can be
-                    # compared to subsequent K_rows. This means that duplicated
-                    # notes will each generate a separate chain (I think..)
-                    #
-                    # Or maybe not, since only only one chain ultimately gets
-                    # extended. Could be that's why the output can be random
-                    # since it depends on the balancing of the priority queue
-                    q = p.PQ.queue[0].item
-                except IndexError:
-                    continue
-                pdb.set_trace()
-                while ((q.sourceVec.noteEndIndex, q.scale)
-                        < (K_row.sourceVec.noteStartIndex, K_row.scale)):
-                    try:
-                        q = p.PQ.next()
-                    except StopIteration:
-                        break
-
-                # Binding of extension
-                if ((q.sourceVec.noteEndIndex, q.scale)
-                        == (K_row.sourceVec.noteStartIndex, K_row.scale)):
-                    pdb.set_trace()
-                    new_entry = K_entry(K_row.patternVec, K_row.sourceVec)
-                    new_entry.w = q.w + 1
-                    new_entry.y = q
-                    new_entry.patternVec.noteEnd.PQ.put(new_entry)
-                    yield new_entry
-                    #K_row.w = q.w + 1
-                    #K_row.y = q
-                    #K_row.patternVec.noteEnd.PQ.put(new_entry)
-                    #yield K_row
-                    try:
-                        q = p.PQ.next()
-                    except StopIteration:
-                        break
-                """
 
     def algorithmOld(self):
         """

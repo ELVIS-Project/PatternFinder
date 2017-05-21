@@ -1,14 +1,14 @@
 from Queue import PriorityQueue
-from geometric_algorithms import geoAlgorithm
+from geometric_algorithms import geo_algorithms
 import music21
 import copy
 import pdb
 
-class S2(geoAlgorithm.SW):
+class S2(geo_algorithms.SW):
 
     def algorithm(self):
         """
-        Algorithm S2 returns "scaled" and "partial" occurrences of the pattern
+        Algorithm S2 returns "time-scaled" and "partial" occurrences of the pattern
         within the source.
 
         Filters:

@@ -1,20 +1,36 @@
 from LineSegment import LineSegmentSet
 from Queue import PriorityQueue
-from geometric_algorithms import geoAlgorithm
+from geometric_algorithms import geo_algorithms
+from NoteSegment import K_entry
 import music21
 import copy
 import pdb
 
-class W2(geoAlgorithm.SW):
-
-    def process_results(self):
-        self.results = self.results[1:]
-        if self.settings['threshold'] == 'max':
-            max_length = max(self.results, key=lambda x: x.w).w
-            self.results = filter(lambda x: x.w == max_length, self.results)
-        return super(W2, self).process_results()
+class W2(geo_algorithms.SW):
 
     def algorithm(self):
+        """
+        Algorithm W2 returns "time-warped" and "partial" occurrences of the pattern
+        within the source.
+        """
+        for p in self.patternPointSet[1:-1]:
+            for K_row in p.K_table:
+                antecedent = lambda: p.PQ.queue[0].item.sourceVec.noteEndIndex
+                binding = K_row.sourceVec.noteStartIndex
+
+                # Use peek so that the first intra_vec to break this K_row can still be used for the next one
+                while (p.PQ.qsize() > 0) and (antecedent() < binding):
+                    p.PQ.next()
+
+                # Modification to pseudocode: use "while" instead of "if" so that
+                # you can chain many possible identical notes
+                while (p.PQ.qsize() > 0) and (antecedent() == binding):
+                    q = p.PQ.next()
+                    new_entry = K_entry(K_row.patternVec, K_row.sourceVec, w = q.w + 1, y = q)
+                    new_entry.patternVec.noteEnd.PQ.put(new_entry)
+                    yield new_entry
+
+    def algorithmOld(self):
         pattern = self.pattern
         source = self.source
         settings = self.settings
