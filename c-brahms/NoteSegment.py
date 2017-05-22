@@ -191,15 +191,25 @@ class NotePointSet(music21.stream.Stream):
         # music21Object.getoffsetInHierarchy(), but for now use stream.flat
         note_stream = stream.flat.notes
 
-        # Sorting key for the NotePointSet: sort lexicographicaly by tuples
-        # 1) either note onset (attack) or note offset (release)
-        # 2) note frequency. Since this is the most finely-grained pitch information possible, the list will still be sorted under any subsequent pitch equivalence (such as pitch class or enharmonic equivalence)
-        sort_keyfunc = lambda n: (n.offset + n.duration.quarterLength, n.pitch.frequency) if offsetSort else (n.offset, n.pitch.frequency)
+        # Sorting key for the NotePointSet: sort lexicographicaly by tuples of:
+        #    1) either note onset (attack) or note offset (release)
+        #    2) note frequency
+        #        -- Since this is the most finely-grained pitch information possible,
+        #        the list will still be sorted under any subsequent pitch equivalence
+        #        (such as pitch class or enharmonic equivalence)
+        sort_keyfunc = lambda n: ((n.offset + n.duration.quarterLength, n.pitch.frequency)
+                if offsetSort else (n.offset, n.pitch.frequency))
 
         # Get each note or chord, convert it to a tuple of notes, and sort them by the keyfunc
-        new_notes = sorted([note for note_list in [self.music21Chord_to_music21Notes(n, note_stream) if n.isChord else (n,) for n in note_stream] for note in note_list], key=sort_keyfunc)
+        new_notes = sorted(
+                [note for note_list in
+                    [self.music21Chord_to_music21Notes(n, note_stream) if n.isChord else (n,)
+                        for n in note_stream]
+                    for note in note_list],
+                key=sort_keyfunc)
 
-        # Make sure to turn off stream.autoSort, since streams automatically sort on insert by an internal sortTuple which prioritizes note onset (attack)
+        # Make sure to turn off stream.autoSort, since streams automatically sort on insert by
+        # an internal sortTuple which prioritizes note onset (attack)
         self.autoSort = False
         for n in new_notes:
             self.insert(n)
