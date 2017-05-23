@@ -14,7 +14,7 @@ class W1(geo_algorithms.W):
         self.settings['threshold'] = len(self.patternPointSet)
         self.settings['pattern_window'] = 1
 
-    def algorithm(self):
+    def algorithmOld(self):
         """
         Input: Two NoteSegments streams: one called the pattern, which we are looking for occurrences within the larger source.
         Output: all shifts which result in a time-scaled occurrence of the pattern
