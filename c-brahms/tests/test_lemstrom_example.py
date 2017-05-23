@@ -5,16 +5,20 @@ from nose_parameterized import parameterized, param
 from LineSegment import TwoDVector, LineSegmentSet
 from pprint import pformat # for pretty printing test error messages
 from geometric_algorithms import P1, P2, P3, S1, S2, W1, W2
+from NoteSegment import NotePointSet
 from fractions import Fraction # for scale settings
 import music21
 import NoteSegment
 import pdb
 
 
-lemstrom_pattern = lambda x: 'music_files/lemstrom2011_test/query_' + x + '.mid'
-lemstrom_score = 'music_files/lemstrom2011_test/leiermann.xml'
+LEM_PATH_PATTERN = lambda x: 'music_files/lemstrom2011_test/query_' + x + '.mid'
+LEM_PATH_SOURCE = 'music_files/lemstrom2011_test/leiermann.xml'
 
 class TestLemstromExample(TestCase):
+
+    pattern = lambda q: music21.converter.parse(LEM_PATH_PATTERN(q))
+    source = music21.converter.parse(LEM_PATH_SOURCE)
 
     ## QUERIES in dict form. Each query is a 3-tuple consiting of an algorithm, the expected result, and settings to pass in.
     # 'query_letter' : [(algorithm, [list of expected shifts], settings), ...]
@@ -27,30 +31,67 @@ class TestLemstromExample(TestCase):
             ## Pure exact match
             # P1 should find two duplicate occurrences since the first note (indices 12, 13) is duplicated (see behaviour of P1)
             ##
-            'a' : [(P1, [(3.0, -10), (3.0, -10)], {})] + [(alg, [(3.0, -10)], {'scale' : 1, 'threshold' : 5}) for alg in (P2, P3, S1, S2, W1, W2)],
+            'a' : [
+                (
+                    P1,
+                    [
+                        [(0,12), (1,14), (2,16), (3,17), (4,18), (5,21)],
+                        [(0,13), (1,14), (2,16), (3,17), (4,18), (5,21)]],
+                    {}),
+                (
+                    P2,
+                    [
+                        [(0,12), (1,14), (2,16), (3,17), (4,18), (5,21)]],
+                    {}),
+                (
+                    P3,
+                    [
+                        [(0,12), (0,13), (1,14), (2,16), (3,11), (3,17), (4,18), (5,21)]],
+                    {}),
+                (
+                    S1,
+                    [
+                        [(0,12), (1,14), (2,16), (3,17), (4,18), (5,21)]],
+                    {})],
+            'b' : [
+                (
+                    P2,
+                    [
+                        [(0,12), (1,14), (2,16), (4,18), (5,21)]],
+                    {'threshold' : 5})],
+            'c' : [
+                (
+                    S1,
+                    [
+                        [(0,12), (1,14), (2,16), (3,17), (4,18), (5,21)]],
+                    {})]
+
+
+
+                #(P1, [(3.0, -10), (3.0, -10)], {})] + [(alg, [(3.0, -10)], {'scale' : 1, 'threshold' : 5}) for alg in (P2, P3, S1, S2, W1, W2)],
 
             ## Pure partial match with one mismatch
-            'b' : [(alg, [(3.0, -10)], {}) for alg in (P2, S2, W2)],
+            #'b' : [(alg, [(3.0, -10)], {}) for alg in (P2, S2, W2)],
 
             ## Scaled exact match
-            'c' : [(alg, [(3.0, -10)], {'scale' : Fraction(1,3), 'threshold': 5}) for alg in (S1, S2, W1, W2)],
+            #'c' : [(alg, [(3.0, -10)], {'scale' : Fraction(1,3), 'threshold': 5}) for alg in (S1, S2, W1, W2)],
 
             ## Scaled partial match with one mismatch
-            'd' : [(alg, [(3.0, -10)], {'scale' : Fraction(1,3), 'threshold': 5}) for alg in (S1, S2, W1, W2)],
+            #'d' : [(alg, [(3.0, -10)], {'scale' : Fraction(1,3), 'threshold': 5}) for alg in (S1, S2, W1, W2)],
 
             ## Warped exact match
-            'e' : [(alg, [(3.0, -10)], {'threshold': 5}) for alg in (W1, W2)],
+            #'e' : [(alg, [(3.0, -10)], {'threshold': 5}) for alg in (W1, W2)],
 
             ## Warped partial match with one mismatch
-            'f' : [(alg, [(3.0, -10)], {'threshold': 5}) for alg in (W2,)]}
+            #'f' : [(alg, [(3.0, -10)], {'threshold': 5}) for alg in (W2,)]
+            }
 
-    # Reduce QUERIES into list of tests
+    ## Reduce QUERIES into list of tests
+    # List comprehension wasn't working, no idea why. (probably from list comprehension scope bleeding) # TESTS = [(key, algorithm, list_of_shifts, settings) for algorithm, list_of_shifts, settings in val for key, val in QUERIES.items()]
     TESTS = []
     for key, val in QUERIES.items():
         for algorithm, list_of_shifts, settings in val:
             TESTS.append((key, algorithm, list_of_shifts, settings))
-    # List comprehension wasn't working, no idea why.
-    #TESTS = [(key, algorithm, list_of_shifts, settings) for algorithm, list_of_shifts, settings in val for key, val in QUERIES.items()]
 
     def custom_test_name(testcase_func, param_num, param):
         return "%s_algorithm_%s_Query_%s" % (
@@ -59,19 +100,20 @@ class TestLemstromExample(TestCase):
                 param.args[0] # Query name
         )
 
-    @parameterized.expand([param(*case) for case in TESTS], testcase_func_name = custom_test_name)
+    @parameterized.expand([param(*case) for case in TESTS], name_func = custom_test_name)
     def test(self, query, algorithm, expected, settings={}):
-        carlos = algorithm(lemstrom_pattern(query), lemstrom_score, settings)
-        carlos.run()
-        #self.assertEqual(len(carlos.occurrences), len(expected))
-        self.assertEqual([x.shift for x in carlos.occurrences], expected)
+        self.longMessage = True
+        carlos = algorithm(LEM_PATH_PATTERN(query), LEM_PATH_SOURCE, settings)
+        for occurrence, exp in zip(carlos.occurrences, expected):
+            self.assertEqual(map(lambda vec: (vec.noteStartIndex, vec.noteEndIndex), occurrence), exp, msg =
+                    "\nFOUND:\n" + pformat(occurrence) +
+                    "\nEXPECTED\n" + pformat(exp))
 
     def test_intra_vectors_NOTESEGMENT(self):
         """
         Checks if the NoteSegments class can do the intra-vector work
-        """
-        source = NoteSegment.NoteSegments(music21.converter.parse(lemstrom_score))
-        pattern = NoteSegment.NoteSegments(music21.converter.parse(lemstrom_pattern('c')))
+        source = NoteSegment.NoteSegments(music21.converter.parse(LEM_PATH_SOURCE))
+        pattern = NoteSegment.NoteSegments(music21.converter.parse(LEM_PATH_PATTERN('c')))
 
         # Sort
         source.lexicographic_sort()
@@ -105,13 +147,14 @@ class TestLemstromExample(TestCase):
         # Assert and give an error message if false
         self.longMessage = True
         self.assertListEqual(result, expected, msg = "\nRESULT\n" + pformat(list(enumerate(sorted(source.ivs)))) + "\nACTUAL\n" + pformat(list(enumerate(sorted(expected)))))
+        """
 
     def test_intra_vectors_lemstrom(self):
         """
         Checks whether the LineSegmentSet Class can correctly identify the intra-database vectors as given in Lemstrom's paper
-        """
+
         # The paper writes a collection of intra-database vectors that are supposed to be generated from ignoring the first measure and setting a window size of 3
-        source = LineSegmentSet(tools.parse_source_from_score(lemstrom_score))
+        source = LineSegmentSet(tools.parse_source_from_score(LEM_PATH_SOURCE))
         # Get intra-database vectors: ignore first measure, set w=3
         source.compute_intra_vectors(window = 3, start = 10)
         lemstrom_vectors = [TwoDVector(float(v[0]) / 4, v[1]) for v in [
@@ -138,10 +181,10 @@ class TestLemstromExample(TestCase):
 
         #source.compute_intra_vectors(window = 3, start = 10)
         #pattern.initialize_Ktables(source, 3)
+        """
 
 
 LEMSTROM_EXAMPLE_SUITE = TestLoader().loadTestsFromTestCase(TestLemstromExample)
 
 if __name__ == "__main__":
-    #result = TextTestRunner(verbosity=2).run(LEMSTROM_EXAMPLE_SUITE)
-    LEMSTROM_EXAMPLE_SUITE.debug()
+    result = TextTestRunner(verbosity=2).run(LEMSTROM_EXAMPLE_SUITE)
