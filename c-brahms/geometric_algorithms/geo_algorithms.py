@@ -15,31 +15,61 @@ import pdb
 # pattern_accuracy : 'all' --> threshold : len(pattern)
 # pattern_accuracy : 'max' --> threshold = len(max(self.results, key=lambda x: len(x)))
 DEFAULT_SETTINGS = {
-        'pattern_window' : 1,
-        '%pattern_window' : 1,
+        'algorithm' : None,
+        'pattern_window' : 5,
         'source_window' : 5,
-        'scale' : "all",
-        'colour' : "red",
+        'scale' : 'pure',
         'threshold' : 'all',
+        '%pattern_window' : 1,
+        'colour' : "red",
         '%threshold' : 1,
         'mismatches' : 'min',
         'segment' : False,
         'overlap' : True,
         'parsed_input' : False,
+        'show_pattern' : True,
         'runOnInit' : True}
+
+def find(pattern, source, **kwargs):
+    # Update the default settings with user-specified ones so that the user only has to specify non-default parameters.
+    settings = {key : val for key, val in DEFAULT_SETTINGS.items()}
+    settings.update(kwargs)
+
+    if settings['scale'] == 'pure':
+        cls = 'P'
+    elif settings['scale'] == 'warped':
+        cls = 'W'
+    else:
+        cls = 'S'
+
+    if settings['threshold'] == 'all':
+        tp = '1'
+    else:
+        tp = '2'
+
+    if settings['algorithm']:
+        algorithm_name = settings['algorithm']
+    else:
+        algorithm_name = cls + tp
+
+    import geometric_algorithms
+    algorithm = getattr(geometric_algorithms, algorithm_name)
+    return algorithm(pattern, source, **kwargs)
+
 
 class GeoAlgorithm(object):
     """
     Generic base class to manage execution of P, S, and W algorithms
     """
-    def __init__(self, pattern_input, source_input, settings = DEFAULT_SETTINGS):
+    def __init__(self, pattern_input, source_input, **kwargs):
 
         # Update the default settings with user-specified ones so that the user only has to specify non-default parameters.
         self.settings = {key : val for key, val in DEFAULT_SETTINGS.items()}
-        self.settings.update(settings)
+        self.settings.update(kwargs)
 
         # Defines self.pattern and self.source
         # If file paths were given, they are stored in the stream derivations
+        # Catches converter exception to allow for pre-parsed input
         self.parse_scores(pattern_input, source_input)
 
         # Defines self.patternPointSet and self.sourcePointSet
@@ -49,8 +79,15 @@ class GeoAlgorithm(object):
         #TODO make occurrence objects for easier processing and testing
         self.occurrences = (self.process_result(r) for r in self.algorithm() if self.filter_result(r))
 
+        self.output = (self.process_occurrence(occ) for occ in self.occurrences)
         # Do something with the occurrences
         #self.post_process()
+
+    def __iter__(self):
+        return self.output
+
+    def next(self):
+        return self.output.next()
 
     def parse_scores(self, pattern_input, source_input):
         """
@@ -87,7 +124,7 @@ class GeoAlgorithm(object):
 
     def pre_process(self):
         """
-        Defines self.alg_input
+        Defines self.patternPointSet and self.sourcePointSet
         Runs all necessary pre-processing common to every algorithm (lexicographic sorting and chord flattening)
         """
         # NotePointSet sets the derivations of new streams on init
