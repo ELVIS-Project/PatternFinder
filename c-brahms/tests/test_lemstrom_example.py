@@ -5,7 +5,7 @@ from nose_parameterized import parameterized, param
 from LineSegment import TwoDVector, LineSegmentSet
 from pprint import pformat # for pretty printing test error messages
 from geometric_algorithms import P1, P2, P3, S1, S2, W1, W2
-from NoteSegment import NotePointSet
+from NoteSegment import NotePointSet, InterNoteVector
 from fractions import Fraction # for scale settings
 import music21
 import NoteSegment
@@ -15,10 +15,17 @@ import pdb
 LEM_PATH_PATTERN = lambda x: 'music_files/lemstrom2011_test/query_' + x + '.mid'
 LEM_PATH_SOURCE = 'music_files/lemstrom2011_test/leiermann.xml'
 
-class TestLemstromExample(TestCase):
+PATTERN = {query : NotePointSet(music21.converter.parse(LEM_PATH_PATTERN(query))) for query in ['a', 'b', 'c', 'd', 'e', 'f']}
+SOURCE = NotePointSet(music21.converter.parse(LEM_PATH_SOURCE))
 
-    pattern = lambda q: music21.converter.parse(LEM_PATH_PATTERN(q))
-    source = music21.converter.parse(LEM_PATH_SOURCE)
+MATCHING_INDICES = [
+        [(0,12), (1,14), (2,16), (3,17), (4,18), (5,21)],
+        [(0,13), (1,14), (2,16), (3,17), (4,18), (5,21)]]
+
+MATCHING_PAIRS = lambda q : [[InterNoteVector(PATTERN[q][i], PATTERN[q], SOURCE[j], SOURCE) for i, j in lst]
+        for lst in MATCHING_INDICES]
+
+class TestLemstromExample(TestCase):
 
     ## QUERIES in dict form. Each query is a 3-tuple consiting of an algorithm, the expected result, and settings to pass in.
     # 'query_letter' : [(algorithm, [list of expected shifts], settings), ...]
@@ -102,10 +109,22 @@ class TestLemstromExample(TestCase):
 
     @parameterized.expand([param(*case) for case in TESTS], name_func = custom_test_name)
     def test(self, query, algorithm, expected, settings={}):
+
+        pattern = NotePointSet(music21.converter.parse(LEM_PATH_PATTERN(query)))
+        source = NotePointSet(music21.converter.parse(LEM_PATH_SOURCE))
+
+        matching_pairs = lambda q : [
+                InterNoteVector(pattern[0], pattern, source[12], source),
+                InterNoteVector(pattern[1], pattern, source[14], source),
+                InterNoteVector(pattern[2], pattern, source[16], source),
+                InterNoteVector(pattern[3], pattern, source[17], source),
+                InterNoteVector(pattern[4], pattern, source[18], source),
+                InterNoteVector(pattern[5], pattern, source[21], source)]
+
         self.longMessage = True
-        carlos = algorithm(LEM_PATH_PATTERN(query), LEM_PATH_SOURCE, settings)
-        for occurrence, exp in zip(carlos.occurrences, expected):
-            self.assertEqual(map(lambda vec: (vec.noteStartIndex, vec.noteEndIndex), occurrence), exp, msg =
+        carlos = algorithm(LEM_PATH_PATTERN(query), LEM_PATH_SOURCE, **settings)
+        for occurrence, exp in zip(carlos.occurrences, MATCHING_PAIRS(query)):
+            self.assertEqual(occurrence, exp, msg =
                     "\nFOUND:\n" + pformat(occurrence) +
                     "\nEXPECTED\n" + pformat(exp))
 
