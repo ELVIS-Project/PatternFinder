@@ -138,8 +138,58 @@ class GeoAlgorithm(object):
         if self.settings['threshold'] == 'all':
             self.settings['threshold'] = len(self.patternPointSet)
 
-    def process_result(self, r):
-        return r
+    # TODO What if you find nothing? How to ensure len(occ) > 0?
+    def filter_result(self, result):
+        """
+        Decide whether the algorithm output is worth outputting
+        """
+        return True
+
+    def process_result(self, result):
+        """
+        Given algorithm output, returns an occurrence
+        """
+        return result
+
+    def process_occurrence(self, occ):
+        """
+        Given an occurrence, process it and produce output
+        """
+
+        #occurence_ids = [vec.noteEnd.id if not vec.noteEnd.derivation.origin
+        #        else vec.noteEnd.derivation.origin.id for vec in occ]
+
+        # The notes in the score corresponding to this occurrence
+        # TODO colour pattern notes too
+        original_notes = [vec.noteEnd if not vec.noteEnd.derivation.origin
+                else vec.noteEnd.derivation.origin for vec in occ]
+
+        for note in original_notes:
+            note.groups.append('occurrence')
+
+        excerpt = copy.deepcopy(self.source.measures(
+                numberStart = original_notes[0].getContextByClass('Measure').number,
+                numberEnd = original_notes[-1].getContextByClass('Measure').number))
+
+        for original_note, excerpt_note in zip(original_notes, excerpt.flat.getElementsByGroup('occurrence')):
+            excerpt_note.color = 'red'
+            original_note.groups.remove('occurrence')
+
+        if self.settings['show_pattern']:
+            output = music21.stream.Opus([self.pattern, excerpt])
+        else:
+            output = excerpt
+        output.metadata = music21.metadata.Metadata()
+        output.metadata.title = "Transposed by " + str(occ[0].y)
+
+        #Save the pdf file as wtc-i-##_alg.pdf
+        #temp_file = output.write('lily')
+        # rename tmp.ly.pdf to file_name_base.pdf
+        #os.rename(temp_file, ".".join(['output', 'pdf']))
+        # rename tmp.ly to file_name_base.ly
+        #os.rename(temp_file[:-4], ".".join(['output', 'ly']))
+
+        return output
 
     def post_process(self):
         # Colour the score
