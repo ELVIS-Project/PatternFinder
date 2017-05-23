@@ -1,12 +1,12 @@
-from geometric_algorithms import P1, P2, P3, S1, S2, W1, W2, DPW2
+from geometric_algorithms import P1, P2, P3, S1, S2, W1, W2, DPW2, Finder
 from pprint import pprint as pp
 from collections import namedtuple
 from parse_fugue_truth import parse_truth
 from fractions import Fraction
 
 # Testing CmpItQueue
-from NoteSegment import CmpItQueue
-from collections import namedtuple
+from NoteSegment import CmpItQueue, IntraNoteVector, InterNoteVector, NotePointSet
+from collections import namedtuple, Counter
 
 import pandas as pd
 import numpy as np
@@ -90,10 +90,43 @@ chordPattern = music21.stream.Stream()
 chordPattern.insert([0, G, 1, Gmaj])
 flatPattern = NoteSegment.NotePointSet(chordPattern)
 
-lem = P1(LEM_PATH_P('a'), LEM_PATH_S)
-
 # Testing CmpItQueue
 customQueue = CmpItQueue(lambda x: x.y)
 point = namedtuple('point', ['x', 'y'])
 point1 = point(2, 3)
 point2 = point(3, 4)
+
+# Testing algorithms
+lemP1 = P1(LEM_PATH_P('a'), LEM_PATH_S)
+lemP2a = P2(LEM_PATH_P('a'), LEM_PATH_S)
+lemP2b = P2(LEM_PATH_P('b'), LEM_PATH_S, **{'threshold' : 5})
+lemP3a = P3(LEM_PATH_P('a'), LEM_PATH_S)
+lemS1a = S1(LEM_PATH_P('a'), LEM_PATH_S)
+lemS1b = S1(LEM_PATH_P('b'), LEM_PATH_S, **{'pattern_window' : 5, 'threshold' : 5})
+lemS1c = S1(LEM_PATH_P('c'), LEM_PATH_S)
+lemS1d = S1(LEM_PATH_P('d'), LEM_PATH_S, **{'pattern_window' : 5, 'threshold' : 5})
+lemW2a = W2(LEM_PATH_P('a'), LEM_PATH_S)
+
+"""
+P3, S1, these are doing some weird things, like finding different matches after many trials.  results = {}
+for i in range(100):
+    lemP3a = P3(LEM_PATH_P('a'), LEM_PATH_S)
+    for o in lemP3a.occurrences:
+        foo = tuple(vec for vec in o)
+        counter.update(foo)
+        print(i)
+
+"""
+
+
+
+import SimpleHTTPServer
+import SocketServer
+
+PORT = 8000
+
+Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
+httpd = SocketServer.TCPServer(("", PORT), Handler)
+
+print("ready to serve at port use 'httpd.serve_forever()'" + str(PORT))
+

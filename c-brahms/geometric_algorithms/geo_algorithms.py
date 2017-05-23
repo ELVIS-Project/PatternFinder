@@ -18,7 +18,7 @@ DEFAULT_SETTINGS = {
         'algorithm' : None,
         'pattern_window' : 5,
         'source_window' : 5,
-        'scale' : 'pure',
+        'scale' : 'all',
         'threshold' : 'all',
         '%pattern_window' : 1,
         'colour' : "red",
@@ -176,7 +176,7 @@ class GeoAlgorithm(object):
             original_note.groups.remove('occurrence')
 
         if self.settings['show_pattern']:
-            output = music21.stream.Opus([self.pattern, excerpt])
+            output = music21.stream.Opus([self.pattern, excerpt, self.source])
         else:
             output = excerpt
         output.metadata = music21.metadata.Metadata()
@@ -412,7 +412,7 @@ class W(S, GeoAlgorithm):
         return ( # Results are intra-vectors, not notes, so we need one less
                 ((result.w + 1) >= self.settings['threshold'])
                 # Also filter with other non-algorithm specific user settings
-                and super(GeoAlgorithm, self).filter_result(result))
+                and GeoAlgorithm.filter_result(self, result))
 
 
 class SWOld(GeoAlgorithm):
