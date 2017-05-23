@@ -1,5 +1,5 @@
 from Queue import PriorityQueue # Lemstrom's choice of data structure
-from geometric_algorithms import geoAlgorithm
+from geometric_algorithms import geo_algorithms
 from LineSegment import LineSegmentSet
 from pprint import pprint, pformat
 import traceback
@@ -7,7 +7,12 @@ import copy
 import pdb
 
 
-class W1(geoAlgorithm.SW):
+class W1(geo_algorithms.W):
+
+    def pre_process(self):
+        super(W1, self).pre_process()
+        self.settings['threshold'] = len(self.patternPointSet)
+        self.settings['pattern_window'] = 1
 
     def algorithm(self):
         """

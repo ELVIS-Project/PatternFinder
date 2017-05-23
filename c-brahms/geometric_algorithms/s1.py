@@ -9,6 +9,11 @@ import pdb
 
 class S1(geo_algorithms.S):
 
+    def pre_process(self):
+        super(S1, self).pre_process()
+        self.settings['threshold'] = len(self.patternPointSet)
+        self.settings['pattern_window'] = 1
+
     def algorithmAlsoOld(self):
 
         for p in self.patternPointSet[1:-1]:

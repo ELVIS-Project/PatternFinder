@@ -6,9 +6,9 @@ import music21
 import copy
 import pdb
 
-class W2(geo_algorithms.SW):
+class W2(geo_algorithms.W):
 
-    def algorithm(self):
+    def algorithmAlsoOld(self):
         """
         Algorithm W2 returns "time-warped" and "partial" occurrences of the pattern
         within the source.
