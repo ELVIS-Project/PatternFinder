@@ -210,7 +210,7 @@ class GeoAlgorithm(object):
 class P(GeoAlgorithm):
     pass
 
-class SW(GeoAlgorithm):
+class S(GeoAlgorithm):
     """
     Implements algorithms S1, S2, W1, and W2 from Lemstrom's 2010 and 2011 papers
 
@@ -285,20 +285,22 @@ class SW(GeoAlgorithm):
             3) Every intra vector match can constitute either the beginning of an antecedent chain,
             or a possible postcedent to an existing chain. So we push each one to the priority queues.
         """
-        super(SW, self).pre_process()
+        super(S, self).pre_process()
         self.patternPointSet.compute_intra_vectors(self.settings['pattern_window'])
         self.sourcePointSet.compute_intra_vectors(self.settings['source_window'])
 
         for p in self.patternPointSet:
             # K table ordered by <a, b>
-            p.K_table = CmpItQueue(lambda row: (
-                row.noteStartIndex,
-                row.noteEndIndex))
+            #p.K_table = CmpItQueue(lambda row: (
+            #    row.sourceVec.noteStartIndex,
+            #    row.sourceVec.noteEndIndex))
+            p.K_table = []
+            p.PQ = {}
 
             # PQ ordered by <b, a>
-            p.PQ = CmpItQueue(lambda row: (
-                row.noteEndIndex,
-                row.noteStartIndex))
+            #p.PQ = CmpItQueue(lambda row: (
+            #    row.sourceVec.noteEndIndex,
+            #    row.sourceVec.noteStartIndex))
 
         self.sourcePointSet.intra_vectors.sort(key=lambda vec: vec.y)
         database_vectors = {key : list(g)
@@ -306,6 +308,9 @@ class SW(GeoAlgorithm):
 
         # NOTE actually i'm note sure about this. I think we can just have generators
         # and when the binding condition is satisfied, we extend it.
+        # if it's not sorted, for each K_row you need to find all the chains it can extend
+        # so maybe you'd want to hash the chains to their ending notes, then for each antecedent
+        # we can just check the hash table of the antecedent's starting note
         #
         # we pre-initialize without generators because the algorithms sweepline across
         # the increasing intra_vectors, processing each element only once. otherwise,
@@ -315,11 +320,22 @@ class SW(GeoAlgorithm):
             for database_vec in database_vectors[pattern_vec.y]:
                 new_entry = K_entry(pattern_vec, database_vec)
                 if new_entry.scale:
-                    pattern_vec.noteStart.K_table.put(new_entry)
-                    pattern_vec.noteEnd.PQ.put(new_entry)
+                    #TODO use bisect.insort() to keep it sorted
+                    pattern_vec.noteStart.K_table.append(new_entry)
+                    pattern_vec.noteEnd.PQ.setdefault(database_vec.noteEndIndex, []).append(new_entry)
+                    #pattern_vec.noteStart.K_table.put(new_entry)
+                    #pattern_vec.noteEnd.PQ.put(new_entry)
+
+        # TODO use bisect.insort() instead
+        for p in self.patternPointSet:
+            p.K_table.sort(key=lambda x: (x.sourceVec.noteStartIndex, x.sourceVec.noteEndIndex))
 
     def filter_result(self, result):
-        return ((result.w + 1) >= self.settings['threshold'])
+        return ((result.scale == result.y.scale) # Consistent scaling
+                # Results are intra-vectors, not notes, so we need one less
+                and ((result.w + 1) >= self.settings['threshold'])
+                # Also filter with other non-algorithm specific user settings
+                and super(S, self).filter_result(result))
 
     def process_result(self, result):
         def extract_matching_pairs(K_entry, matching_pairs):
@@ -327,10 +343,10 @@ class SW(GeoAlgorithm):
             Tail recursively extracts the matching pairs from the final K_entry of an occurrence
             """
             end_note = [InterNoteVector(K_entry.patternVec.noteEnd, self.patternPointSet,
-                    K_entry.noteEnd, self.sourcePointSet)]
+                    K_entry.sourceVec.noteEnd, self.sourcePointSet)]
             if K_entry.y is None:
                 return ([InterNoteVector(K_entry.patternVec.noteStart, self.patternPointSet,
-                        K_entry.noteStart, self.sourcePointSet)]
+                        K_entry.sourceVec.noteStart, self.sourcePointSet)]
                         + end_note
                         + matching_pairs)
             else:
@@ -355,11 +371,11 @@ class SW(GeoAlgorithm):
             new antecedent chain ends)
             4) We return each new antecedent chain. filter_result will take user_settings into
             account and decide if it should be returned.
-        """
+
         for p in self.patternPointSet[1:-1]:
             for K_row in p.K_table:
-                antecedent = lambda: p.PQ.queue[0].item.noteEndIndex
-                binding = K_row.noteStartIndex
+                antecedent = lambda: p.PQ.queue[0].item.sourceVec.noteEndIndex
+                binding = K_row.sourceVec.noteStartIndex
 
                 # Use peek so that the first intra_vec to break this K_row can still be used for the next one
                 while (p.PQ.qsize() > 0) and (antecedent() < binding):
@@ -369,15 +385,34 @@ class SW(GeoAlgorithm):
                 # you can chain many possible identical notes
                 while (p.PQ.qsize() > 0) and (antecedent() == binding):
                     q = p.PQ.next()
-                    new_entry = K_entry(K_row.patternVec, K_row, w = q.w + 1, y = q)
+                    new_entry = K_entry(K_row.patternVec, K_row.sourceVec, w = q.w + 1, y = q)
                     new_entry.patternVec.noteEnd.PQ.put(new_entry)
                     yield new_entry
+        """
+        for p in self.patternPointSet[1:-1]:
+            for binding, K_row_group in groupby(p.K_table, lambda row: row.sourceVec.noteStartIndex):
+                antecedent = lambda: p.PQ.queue[0].item.sourceVec.noteEndIndex
 
-class S(SW):
+                # Modification to pseudocode: use "while" instead of "if" so that
+                # you can chain many possible identical notes
+                for K_row in K_row_group:
+                    for antecedent in p.PQ.get(binding, []):
+                        new_entry = K_entry(K_row.patternVec, K_row.sourceVec, w = antecedent.w + 1, y = antecedent)
+                        # Hash the end of this new source chain to its subsequent PQ
+                        new_entry.patternVec.noteEnd.PQ.get(K_row.sourceVec.noteEndIndex, []).append(new_entry)
+                        yield new_entry
+
+class W(S, GeoAlgorithm):
+    """
+    Wrapper class for W-class algorithm.
+    Almost identical to S except for the filter.
+    """
 
     def filter_result(self, result):
-        return ((result.scale == result.y.scale)
-                and (super(S, self).filter_result(result)))
+        return ( # Results are intra-vectors, not notes, so we need one less
+                ((result.w + 1) >= self.settings['threshold'])
+                # Also filter with other non-algorithm specific user settings
+                and super(GeoAlgorithm, self).filter_result(result))
 
 
 class SWOld(GeoAlgorithm):
