@@ -123,14 +123,8 @@ class IntraNoteVector(InterNoteVector):
         self.site = site
         super(IntraNoteVector, self).__init__(ralph, site, larry, site)
 
-class K_entry(IntraNoteVector):
+class K_entry(object):
     def __init__(self, intra_pattern_vector, intra_database_vector, w=1, y=None, e=0, z=0):
-        super(K_entry, self).__init__(
-                intra_database_vector.noteStart,
-                intra_database_vector.noteEnd,
-                intra_database_vector.site)
-        self.patternVec = intra_pattern_vector
-
         if (intra_database_vector.x == 0) and (intra_pattern_vector.x == 0):
             scale = 1
         # NOTE here we can decide on the behaviour of note-to-chord and
@@ -141,6 +135,8 @@ class K_entry(IntraNoteVector):
         else:
             scale = Fraction(Fraction(intra_database_vector.x), Fraction(intra_pattern_vector.x))
 
+        self.patternVec = intra_pattern_vector
+        self.sourceVec = intra_database_vector
         self.scale = scale # For S1, S2
         self.w = w # length of occurrence
         self.y = y # backlink for building occurrences
@@ -160,8 +156,13 @@ class K_entry(IntraNoteVector):
 
 
     def __repr__(self):
+        return ("<NoteSegment.K_entry> with s={0}, w={1}\n".format(self.scale, self.w)
+            + "INTRA PATTERN VECTOR {0} ====>\n".format(self.patternVec)
+            + "INTRA DATABASE VECTOR {0}\n".format(self.sourceVec)
+            # Indent the backlink so it's more readable
+            + "WITH BACKLINK:\n    {0}".format(str(self.y).replace('\n', '\n    ')))
+        """
         return ("<NoteSegment.K_entry> with s={0}, w={1}, ".format(self.scale, self.w)
-                + "is an intra database vector associated with an intra pattern vector \n"
                 + "INTRA DATABASE VECTOR: "
                 + "<IntraNoteVector> TYPE {0} (x={1}, y={2}) ".format(
                     self.tp_type, self.x, self.y)
@@ -170,6 +171,13 @@ class K_entry(IntraNoteVector):
                 + "INTRA PATTERN VECTOR: {0}\n".format(self.patternVec)
             # Indent the backlink so it's more readable
             + "WITH BACKLINK:\n    {0}".format(str(self.y).replace('\n', '\n    ')))
+        """
+
+class Occurrence(object):
+    """
+    Wrapper class for occurrences
+    """
+    pass
 
 class NotePointSet(music21.stream.Stream):
     """
@@ -182,6 +190,31 @@ class NotePointSet(music21.stream.Stream):
     music21.stream.Stream does not allow any required arguments in its __init__, so every argument must be optional.
     """
     def __init__(self, stream=music21.stream.Stream(), offsetSort=False, *args, **kwargs):
+        # TODO use stream.mergeElements and then stream.sort(), overriding sortTuples
+        def music21Chord_to_music21Notes(chord, site):
+            """
+            CHORD TO LIST OF NOTES FOR USE IN music21.stream.insert()
+            For serious flattening of the score into a 2-d plane of horizontal line segments.
+            music21.note.Note and music21.chord.Chord subclass the same bases, so in theory it shoud look something like this...
+
+            NOTE: this will screw up the coloring since music21 doesn't support coloring just one note of a chord (i don't think?), so as compromise i'll just color the whole chord.
+            """
+            note_list = []
+            for pitch in chord.pitches:
+                note = music21.note.Note(pitch)
+
+                # Music21Object.mergeAttributes gets the 'id' and 'group' attributes
+                note.mergeAttributes(chord)
+
+                # note essentials
+                note.duration = chord.duration
+
+                note_list.append(note)
+
+                note.derivation.origin = chord
+                note.derivation.method = 'chord_to_notes'
+            return note_list
+
         super(NotePointSet, self).__init__()
         self.derivation.method = 'NotePointSet()'
         self.derivation.origin = stream
@@ -203,8 +236,9 @@ class NotePointSet(music21.stream.Stream):
         # Get each note or chord, convert it to a tuple of notes, and sort them by the keyfunc
         new_notes = sorted(
                 [note for note_list in
-                    [self.music21Chord_to_music21Notes(n, note_stream) if n.isChord else (n,)
-                        for n in note_stream]
+                    [music21Chord_to_music21Notes(n, note_stream) if n.isChord
+                        # Don't use copy.deepcopy(n) or else it will lose the offset info
+                        else (n,) for n in note_stream]
                     for note in note_list],
                 key=sort_keyfunc)
 
@@ -214,36 +248,12 @@ class NotePointSet(music21.stream.Stream):
         for n in new_notes:
             self.insert(n)
 
-    def music21Chord_to_music21Notes(self, chord, site):
-        """
-        CHORD TO LIST OF NOTES FOR USE IN music21.stream.insert()
-        For serious flattening of the score into a 2-d plane of horizontal line segments.
-        music21.note.Note and music21.chord.Chord subclass the same bases, so in theory it shoud look something like this...
-
-        NOTE: this will screw up the coloring since music21 doesn't support coloring just one note of a chord (i don't think?), so as compromise i'll just color the whole chord.
-        """
-        note_list = []
-        for pitch in chord.pitches:
-            note = music21.note.Note(pitch)
-
-            # Music21Object.mergeAttributes gets the 'id' and 'group' attributes
-            note.mergeAttributes(chord)
-
-            # note essentials
-            note.duration = chord.duration
-
-            note_list.append(note)
-
-            note.derivation.origin = chord
-            note.derivation.method = 'chord_to_notes'
-        return note_list
-
     def compute_intra_vectors(self, window = 1):
         """
         Computes the set of IntraSetVectors in a NotePointSet.
 
-        :int: source_window limits the search space
-        :int: pattern_window = 1 for S1 & W1 while in S2 & W2 it can act as a tolerance variable to limit the distance of skipped notes in the pattern
+        :int: window refers to the "reach" of any intra vector. It is the maximum
+        number of intervening notes inbetween the start and end of an intra-vector.
         """
         # NOTE would be nice to use iterators instead of indices, couldn't get it to work
         self.intra_vectors = [IntraNoteVector(self[i], end, self)
