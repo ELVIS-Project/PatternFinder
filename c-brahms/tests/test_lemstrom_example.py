@@ -18,9 +18,9 @@ LEM_PATH_SOURCE = 'music_files/lemstrom2011_test/leiermann.xml'
 PATTERN = {query : NotePointSet(music21.converter.parse(LEM_PATH_PATTERN(query))) for query in ['a', 'b', 'c', 'd', 'e', 'f']}
 SOURCE = NotePointSet(music21.converter.parse(LEM_PATH_SOURCE))
 
-MATCHING_INDICES = [
-        [(0,12), (1,14), (2,16), (3,17), (4,18), (5,21)],
-        [(0,13), (1,14), (2,16), (3,17), (4,18), (5,21)]]
+MATCHING_INDICES = (
+        ((0,12), (1,14), (2,16), (3,17), (4,18), (5,21)),
+        ((0,13), (1,14), (2,16), (3,17), (4,18), (5,21)))
 
 MATCHING_PAIRS = lambda q : [[InterNoteVector(PATTERN[q][i], PATTERN[q], SOURCE[j], SOURCE) for i, j in lst]
         for lst in MATCHING_INDICES]
@@ -41,30 +41,41 @@ class TestLemstromExample(TestCase):
             'a' : [
                 (
                     P1,
-                    [
-                        [(0,12), (1,14), (2,16), (3,17), (4,18), (5,21)],
-                        [(0,13), (1,14), (2,16), (3,17), (4,18), (5,21)]],
+                    MATCHING_PAIRS('a'),
                     {}),
                 (
                     P2,
-                    [
-                        [(0,12), (1,14), (2,16), (3,17), (4,18), (5,21)]],
+                    MATCHING_PAIRS('a')[1:2],
                     {}),
                 (
                     P3,
                     [
-                        [(0,12), (0,13), (1,14), (2,16), (3,11), (3,17), (4,18), (5,21)]],
+                        [InterNoteVector(PATTERN['a'][i], PATTERN['a'], SOURCE[j], SOURCE) for i, j in ((0,12), (0,13), (1,14), (2,16), (3,11), (3,17), (4,18), (5,21))]],
                     {}),
                 (
                     S1,
+                    MATCHING_PAIRS('a'),
+                    {}),
+                (
+                    S2,
+                    MATCHING_PAIRS('a'),
+                    {'threshold' : 6, 'pattern_window' : 1}),
+                (
+                    W1,
                     [
-                        [(0,12), (1,14), (2,16), (3,17), (4,18), (5,21)]],
-                    {})],
+                        [InterNoteVector(PATTERN['a'][i], PATTERN['a'], SOURCE[j], SOURCE) for i, j in ((0,2), (1,6), (2,8), (3,11), (4,16), (5,21))],
+                        [InterNoteVector(PATTERN['a'][i], PATTERN['a'], SOURCE[j], SOURCE) for i, j in ((0,3), (1,6), (2,8), (3,11), (4,16), (5,21))]] + MATCHING_PAIRS('a'),
+                    {}),
+                (
+                    W2,
+                    [
+                        [InterNoteVector(PATTERN['a'][i], PATTERN['a'], SOURCE[j], SOURCE) for i, j in ((0,2), (1,6), (2,8), (3,11), (4,16), (5,21))],
+                        [InterNoteVector(PATTERN['a'][i], PATTERN['a'], SOURCE[j], SOURCE) for i, j in ((0,3), (1,6), (2,8), (3,11), (4,16), (5,21))]] + MATCHING_PAIRS('a'),
+                    {'threshold' : 6, 'pattern_window' : 1})],
             'b' : [
                 (
                     P2,
-                    [
-                        [(0,12), (1,14), (2,16), (4,18), (5,21)]],
+                    MATCHING_PAIRS('b')[1:2][:3] + MATCHING_PAIRS('b')[1:2][4:],
                     {'threshold' : 5})],
             'c' : [
                 (
@@ -123,7 +134,7 @@ class TestLemstromExample(TestCase):
 
         self.longMessage = True
         carlos = algorithm(LEM_PATH_PATTERN(query), LEM_PATH_SOURCE, **settings)
-        for occurrence, exp in zip(carlos.occurrences, MATCHING_PAIRS(query)):
+        for occurrence, exp in zip(carlos.occurrences, expected):
             self.assertEqual(occurrence, exp, msg =
                     "\nFOUND:\n" + pformat(occurrence) +
                     "\nEXPECTED\n" + pformat(exp))
