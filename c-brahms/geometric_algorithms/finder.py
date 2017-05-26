@@ -1,4 +1,5 @@
 from geometric_algorithms.geo_algorithms import DEFAULT_SETTINGS
+from builtins import object
 import geometric_algorithms
 
 class Finder(object):
@@ -28,7 +29,7 @@ class Finder(object):
         self.algorithm = algorithm(pattern, source, **kwargs)
 
     def __iter__(self):
-        return self.algorithm
+        return self
 
     def __next__(self):
         return next(self.algorithm)

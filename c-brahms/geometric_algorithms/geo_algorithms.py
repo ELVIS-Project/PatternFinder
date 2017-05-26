@@ -4,6 +4,7 @@ from LineSegment import LineSegment
 from NoteSegment import NotePointSet, K_entry, CmpItQueue, InterNoteVector
 from bisect import insort # to insert while maintaining a sorted list
 from itertools import groupby # for K table initialization
+from builtins import object #Python 2 and 3 next() compatibility
 import NoteSegment
 import copy
 import music21
@@ -87,7 +88,7 @@ class GeoAlgorithm(object):
         #self.post_process()
 
     def __iter__(self):
-        return self.output
+        return self
 
     def __next__(self):
         return next(self.output)
