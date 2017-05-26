@@ -77,7 +77,9 @@ class GeoAlgorithm(object):
 
         # Run the algorithm, filter the occurrences, define an occurrence generator.
         #TODO make occurrence objects for easier processing and testing
-        self.occurrences = (self.process_result(r) for r in self.algorithm() if self.filter_result(r))
+        self.results = (r for r in self.algorithm() if self.filter_result(r))
+        self.occurrences = (self.process_result(r) for r in self.results)
+        #self.occurrences = (self.process_result(r) for r in self.algorithm() if self.filter_result(r))
 
         self.output = (self.process_occurrence(occ) for occ in self.occurrences)
         # Do something with the occurrences
@@ -285,9 +287,14 @@ class S(GeoAlgorithm):
             3) Every intra vector match can constitute either the beginning of an antecedent chain,
             or a possible postcedent to an existing chain. So we push each one to the priority queues.
         """
+        # Define self.patternPointSet and self.sourcePointSet. Also processes settings
         super(S, self).pre_process()
+
         self.patternPointSet.compute_intra_vectors(self.settings['pattern_window'])
         self.sourcePointSet.compute_intra_vectors(self.settings['source_window'])
+
+        self.antecedentKey = lambda row: (row.sourceVec.noteEndIndex, row.scale)
+        self.postcedentKey = lambda row: (row.sourceVec.noteStartIndex, row.scale)
 
         for p in self.patternPointSet:
             # K table ordered by <a, b>
@@ -306,31 +313,25 @@ class S(GeoAlgorithm):
         database_vectors = {key : list(g)
                 for key, g in groupby(self.sourcePointSet.intra_vectors, lambda x: x.y)}
 
-        # NOTE actually i'm note sure about this. I think we can just have generators
-        # and when the binding condition is satisfied, we extend it.
-        # if it's not sorted, for each K_row you need to find all the chains it can extend
-        # so maybe you'd want to hash the chains to their ending notes, then for each antecedent
-        # we can just check the hash table of the antecedent's starting note
-        #
-        # we pre-initialize without generators because the algorithms sweepline across
-        # the increasing intra_vectors, processing each element only once. otherwise,
-        # if we generated them on the fly, we'd have to search through each K table for
-        # antecedents to the binding.
         for pattern_vec in self.patternPointSet.intra_vectors:
             for database_vec in database_vectors[pattern_vec.y]:
                 new_entry = K_entry(pattern_vec, database_vec)
                 if new_entry.scale:
                     #TODO use bisect.insort() to keep it sorted
                     pattern_vec.noteStart.K_table.append(new_entry)
-                    pattern_vec.noteEnd.PQ.setdefault(database_vec.noteEndIndex, []).append(new_entry)
+                    pattern_vec.noteEnd.PQ.setdefault(self.antecedentKey(new_entry), []).append(new_entry)
+                    #pattern_vec.noteEnd.PQ.setdefault(database_vec.noteEndIndex, []).append(new_entry)
                     #pattern_vec.noteStart.K_table.put(new_entry)
                     #pattern_vec.noteEnd.PQ.put(new_entry)
 
         # TODO use bisect.insort() instead
+        # To keep K_rows in consistent order so algorithm output is not random
         for p in self.patternPointSet:
-            p.K_table.sort(key=lambda x: (x.sourceVec.noteStartIndex, x.sourceVec.noteEndIndex))
+            #p.K_table.sort(key=lambda x: (x.sourceVec.noteStartIndex, x.sourceVec.noteEndIndex))
+            p.K_table.sort(key=lambda x: self.postcedentKey(x) + (x.sourceVec.noteEndIndex,))
 
     def filter_result(self, result):
+        # TODO not enough. We shouldn't push stuff back into the priority queue if it doesn't scale correctly
         return ((result.scale == result.y.scale) # Consistent scaling
                 # Results are intra-vectors, not notes, so we need one less
                 and ((result.w + 1) >= self.settings['threshold'])
@@ -390,16 +391,16 @@ class S(GeoAlgorithm):
                     yield new_entry
         """
         for p in self.patternPointSet[1:-1]:
-            for binding, K_row_group in groupby(p.K_table, lambda row: row.sourceVec.noteStartIndex):
-                antecedent = lambda: p.PQ.queue[0].item.sourceVec.noteEndIndex
+            #for binding, K_row_group in groupby(p.K_table, lambda row: (row.sourceVec.noteStartIndex, row.scale):
+            for postcedentKey, K_row_group in groupby(p.K_table, self.postcedentKey):
+                #antecedent = lambda: p.PQ.queue[0].item.sourceVec.noteEndIndex
 
-                # Modification to pseudocode: use "while" instead of "if" so that
-                # you can chain many possible identical notes
                 for K_row in K_row_group:
-                    for antecedent in p.PQ.get(binding, []):
+                    for antecedent in p.PQ.get(postcedentKey, []):
                         new_entry = K_entry(K_row.patternVec, K_row.sourceVec, w = antecedent.w + 1, y = antecedent)
                         # Hash the end of this new source chain to its subsequent PQ
-                        new_entry.patternVec.noteEnd.PQ.get(K_row.sourceVec.noteEndIndex, []).append(new_entry)
+                        #new_entry.patternVec.noteEnd.PQ.get(K_row.sourceVec.noteEndIndex, []).append(new_entry)
+                        new_entry.patternVec.noteEnd.PQ.get(self.antecedentKey(K_row), []).append(new_entry)
                         yield new_entry
 
 class W(S, GeoAlgorithm):
