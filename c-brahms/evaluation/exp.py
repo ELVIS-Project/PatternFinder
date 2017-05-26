@@ -161,7 +161,7 @@ def get_ground_truth_dataframe():
 
         for subject in FILTER_FOR_SUBJECT_LABELS(bach_truth[fugue_tag].keys()):
             # GET A GROUND TRUTH DATAFRAME
-            ground_truth_columns = ['fugue', 'subject', 'occ', 'measure', 'start']
+            ground_truth_columns = ['fug', 'sub', 'occ', 'measure', 'start']
             ground_truth = pd.DataFrame(
                     {key : val for key, val in zip(ground_truth_columns, [i, subject, 'n/a', 'n/a', 'n/a'])},
                     range(len(bach_truth[fugue_tag][subject]['occurrences'])),
@@ -176,10 +176,10 @@ def get_ground_truth_dataframe():
     return gt
 
 
-PATTERN_WINDOWS = [x * 0.1 for x in range(1,5)]
+
+PATTERN_WINDOWS = [1]
 SOURCE_WINDOWS = [4,5,6,7,8]
 THRESHOLDS = [x * 0.1 for x in range(6,11)] #proportional to length of pattern
-
 def run2(fugue_indices = range(1,24), algorithms = [P1, P2, P3, S1, S2, W1, W2], settings={}, pattern_windows = PATTERN_WINDOWS, source_windows = SOURCE_WINDOWS, thresholds = THRESHOLDS):
     data_frame = pd.DataFrame()
 
@@ -188,20 +188,20 @@ def run2(fugue_indices = range(1,24), algorithms = [P1, P2, P3, S1, S2, W1, W2],
     for i in fugue_indices:
         fugue_tag = 'wtc-i-' + str(i).zfill(2)
 
+        # Get the source and the pattern here so each algy gets a fresh score to color
+        source = music21.converter.parse(BACH_FUGUE_PATH(i))
         #source_notes_link, source_notes = geoAlgorithm.get_notesegments_from_score(BACH_FUGUE_PATH(i))
         for subject in FILTER_FOR_SUBJECT_LABELS(bach_truth[fugue_tag].keys()):
+            print("Fetching pattern " + subject + " from fugue " + fugue_tag)
+            pattern = get_pattern_from_fugue(bach_truth, fugue_tag, subject)
+            if len(pattern.flat.notes) == 0:
+                print("Pattern has no length.")
+                logging.warning("Pattern has no length")
+                continue
 
             ### LOOP THROUGH THE ALGORITHMS
             for algorithm, settings in algorithm_looper(algorithms, pattern_windows, source_windows, thresholds):
 
-                # Get the source and the pattern here so each algy gets a fresh score to color
-                source = music21.converter.parse(BACH_FUGUE_PATH(i))
-                print("Fetching pattern " + subject + " from fugue " + fugue_tag)
-                pattern = get_pattern_from_fugue(bach_truth, fugue_tag, subject)
-                if len(pattern.flat.notes) == 0:
-                    print("Pattern has no length.")
-                    logging.warning("Pattern has no length")
-                    continue
 
                 ## UPDATE SETTINGS
                 settings.update({
@@ -250,7 +250,7 @@ def run2(fugue_indices = range(1,24), algorithms = [P1, P2, P3, S1, S2, W1, W2],
             #data_frame.to_pickle('experiment/' + "_".join([str(i), subject] + '.pckl'))
         # Write one pickle per fugue
         print('Writing fugue dataframe...')
-        data_frame.to_pickle('experiment/' + str(i) + '.pckl')
+        data_frame.to_pickle('experiment2/' + str(i) + '.pckl')
 
         ## WRITE THE SCORE ##
         new_file_base = os.path.join(BACH_PATH, "_".join([fugue_tag, larry.__class__.__name__, "all"])) # with all subjects coloured at once
@@ -259,15 +259,42 @@ def run2(fugue_indices = range(1,24), algorithms = [P1, P2, P3, S1, S2, W1, W2],
 
     return data_frame
 
+def algy_table(df, alg, pw, sw, thresh):
+    return df[(df['alg'] == alg) & (df['%pw'] == pw) & (df['%thresh'] == thresh) & (df['sw'] == sw)]
+
+
+def precision(carl):
+    if len(carl) == 0:
+        return 0
+    return 100*float(len(carl[carl['gt'] == True]))/float(len(carl))
+
+def recall(carl):
+    return 100*float(len(carl[carl['gt'] == True]))/float(len(gt))
+
+def fscore(x):
+    if precision(x) == 0 and recall(x) == 0:
+        return 0
+    return 2 * (precision(x) * recall(x)) / (precision(x) + recall(x))
+
+pws = [x * 0.1 for x in range(1,5)]
+sws = [4,5,6,7,8]
+thresh = [x * 0.1 for x in range(6,11)] #proportional to length of pattern
 
 
 logging.basicConfig(filename='exp.log', level=logging.DEBUG)
 
-f = open('fugue_truth.pckl', 'rb')
+f = open('exps/fugue_truth.pckl', 'rb')
 bach_truth = pickle.load(f)
 f.close()
 
 gt = pd.read_pickle('experiment/ground_truth.pckl')
+
+all_df = []
+for f in os.walk('exps'):
+    for g in f[2]:
+        all_df.append(pd.read_pickle(f[0] + '/' + g))
+
+data = pd.concat(all_df, ignore_index = True).drop_duplicates()
 
 
 ### TAVERN
