@@ -1,4 +1,4 @@
-from geometric_algorithms import P1, P2, P3, S1, S2, W1, W2, DPW2, Finder
+from geometric_algorithms import P1, P2, P3, S1, S2, W1, W2, Finder
 from pprint import pprint as pp
 from collections import namedtuple
 from parse_fugue_truth import parse_truth
