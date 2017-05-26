@@ -32,33 +32,6 @@ DEFAULT_SETTINGS = {
         'show_pattern' : True,
         'runOnInit' : True}
 
-def find(pattern, source, **kwargs):
-    # Update the default settings with user-specified ones so that the user only has to specify non-default parameters.
-    settings = {key : val for key, val in DEFAULT_SETTINGS.items()}
-    settings.update(kwargs)
-
-    if settings['scale'] == 'pure':
-        cls = 'P'
-    elif settings['scale'] == 'warped':
-        cls = 'W'
-    else:
-        cls = 'S'
-
-    if settings['threshold'] == 'all':
-        tp = '1'
-    else:
-        tp = '2'
-
-    if settings['algorithm']:
-        algorithm_name = settings['algorithm']
-    else:
-        algorithm_name = cls + tp
-
-    import geometric_algorithms
-    algorithm = getattr(geometric_algorithms, algorithm_name)
-    return algorithm(pattern, source, **kwargs)
-
-
 class GeoAlgorithm(object):
     """
     Generic base class to manage execution of P, S, and W algorithms
