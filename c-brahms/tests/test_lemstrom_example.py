@@ -1,6 +1,6 @@
 from unittest import TestCase, TestLoader, TextTestRunner
 from functools import partial
-from nose_parameterized import parameterized, param
+from parameterized import parameterized, param
 from LineSegment import TwoDVector, LineSegmentSet
 from pprint import pformat # for pretty printing test error messages
 from geometric_algorithms import P1, P2, P3, S1, S2, W1, W2
