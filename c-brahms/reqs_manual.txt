@@ -1,0 +1,4 @@
+music21
+parameterized
+more_itertools
+future
