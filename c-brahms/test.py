@@ -8,14 +8,11 @@ from fractions import Fraction
 from NoteSegment import CmpItQueue, IntraNoteVector, InterNoteVector, NotePointSet
 from collections import namedtuple, Counter
 
-import pandas as pd
-import numpy as np
 import pickle
 import os # to cycle tavern folders
 import sys
 import tests.tools
 import music21
-import LineSegment
 import NoteSegment
 import pdb
 
@@ -70,8 +67,6 @@ source.repeatInsert(notes[0], [0 for i in range(1)])
 source.insert([1, notes[1], 2, notes[2]])
 pattern.insert([0, notes[0], 1, notes[1], 2, notes[2]])
 
-#df = pd.DataFrame({'notes' : source.flat.notes, 'offsets' : [x.offset for x in foo], 'P/S' : 'S'})
-
 # Music21 Objects
 G = music21.note.Note('G')
 B = music21.note.Note('B')
@@ -125,8 +120,8 @@ import SocketServer
 
 PORT = 8000
 
-Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
-httpd = SocketServer.TCPServer(("", PORT), Handler)
+#Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
+#httpd = SocketServer.TCPServer(("", PORT), Handler)
 
 print("ready to serve at port use 'httpd.serve_forever()'" + str(PORT))
 
