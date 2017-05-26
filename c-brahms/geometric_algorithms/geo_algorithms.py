@@ -12,6 +12,7 @@ import pdb
 # TODO measure total runtime with timeit (as a ratio of # of notes), store in an attribute like self.algorithmRunTime?
 
 # TODO maybe have separate user and algorithm settings. this would allow for translations like..
+# mismatches?
 # pattern_accuracy : 'all' --> threshold : len(pattern)
 # pattern_accuracy : 'max' --> threshold = len(max(self.results, key=lambda x: len(x)))
 DEFAULT_SETTINGS = {
@@ -212,7 +213,7 @@ class GeoAlgorithm(object):
 class P(GeoAlgorithm):
     pass
 
-class S(GeoAlgorithm):
+class SW(GeoAlgorithm):
     """
     Implements algorithms S1, S2, W1, and W2 from Lemstrom's 2010 and 2011 papers
 
@@ -288,26 +289,16 @@ class S(GeoAlgorithm):
             or a possible postcedent to an existing chain. So we push each one to the priority queues.
         """
         # Define self.patternPointSet and self.sourcePointSet. Also processes settings
-        super(S, self).pre_process()
+        super(SW, self).pre_process()
 
+        # Compute Intra vectors
         self.patternPointSet.compute_intra_vectors(self.settings['pattern_window'])
         self.sourcePointSet.compute_intra_vectors(self.settings['source_window'])
 
-        self.antecedentKey = lambda row: (row.sourceVec.noteEndIndex, row.scale)
-        self.postcedentKey = lambda row: (row.sourceVec.noteStartIndex, row.scale)
-
+        # Initialize antecedent and postcedent lists
         for p in self.patternPointSet:
-            # K table ordered by <a, b>
-            #p.K_table = CmpItQueue(lambda row: (
-            #    row.sourceVec.noteStartIndex,
-            #    row.sourceVec.noteEndIndex))
             p.K_table = []
             p.PQ = {}
-
-            # PQ ordered by <b, a>
-            #p.PQ = CmpItQueue(lambda row: (
-            #    row.sourceVec.noteEndIndex,
-            #    row.sourceVec.noteStartIndex))
 
         self.sourcePointSet.intra_vectors.sort(key=lambda vec: vec.y)
         database_vectors = {key : list(g)
@@ -317,26 +308,21 @@ class S(GeoAlgorithm):
             for database_vec in database_vectors[pattern_vec.y]:
                 new_entry = K_entry(pattern_vec, database_vec)
                 if new_entry.scale:
-                    #TODO use bisect.insort() to keep it sorted
                     pattern_vec.noteStart.K_table.append(new_entry)
                     pattern_vec.noteEnd.PQ.setdefault(self.antecedentKey(new_entry), []).append(new_entry)
-                    #pattern_vec.noteEnd.PQ.setdefault(database_vec.noteEndIndex, []).append(new_entry)
-                    #pattern_vec.noteStart.K_table.put(new_entry)
-                    #pattern_vec.noteEnd.PQ.put(new_entry)
 
-        # TODO use bisect.insort() instead
-        # To keep K_rows in consistent order so algorithm output is not random
+        # TODO use bisect.insort() instead? or a priority queue?
+        # We sort the K tables by <a, s, b> to keep them in a consistent order so that the
+        # order of the algorithm output remains consistent?
+        # Also they have to at least be sorted by selfpostcedentKey(x) for the algorithm to work.
         for p in self.patternPointSet:
-            #p.K_table.sort(key=lambda x: (x.sourceVec.noteStartIndex, x.sourceVec.noteEndIndex))
             p.K_table.sort(key=lambda x: self.postcedentKey(x) + (x.sourceVec.noteEndIndex,))
 
     def filter_result(self, result):
-        # TODO not enough. We shouldn't push stuff back into the priority queue if it doesn't scale correctly
-        return ((result.scale == result.y.scale) # Consistent scaling
-                # Results are intra-vectors, not notes, so we need one less
-                and ((result.w + 1) >= self.settings['threshold'])
+        return (# Results are intra-vectors, not notes, so we need one less
+                ((result.w + 1) >= self.settings['threshold'])
                 # Also filter with other non-algorithm specific user settings
-                and super(S, self).filter_result(result))
+                and super(SW, self).filter_result(result))
 
     def process_result(self, result):
         def extract_matching_pairs(K_entry, matching_pairs):
@@ -372,102 +358,39 @@ class S(GeoAlgorithm):
             new antecedent chain ends)
             4) We return each new antecedent chain. filter_result will take user_settings into
             account and decide if it should be returned.
-
-        for p in self.patternPointSet[1:-1]:
-            for K_row in p.K_table:
-                antecedent = lambda: p.PQ.queue[0].item.sourceVec.noteEndIndex
-                binding = K_row.sourceVec.noteStartIndex
-
-                # Use peek so that the first intra_vec to break this K_row can still be used for the next one
-                while (p.PQ.qsize() > 0) and (antecedent() < binding):
-                    p.PQ.next()
-
-                # Modification to pseudocode: use "while" instead of "if" so that
-                # you can chain many possible identical notes
-                while (p.PQ.qsize() > 0) and (antecedent() == binding):
-                    q = p.PQ.next()
-                    new_entry = K_entry(K_row.patternVec, K_row.sourceVec, w = q.w + 1, y = q)
-                    new_entry.patternVec.noteEnd.PQ.put(new_entry)
-                    yield new_entry
         """
+        # Linesweep the pattern
         for p in self.patternPointSet[1:-1]:
-            #for binding, K_row_group in groupby(p.K_table, lambda row: (row.sourceVec.noteStartIndex, row.scale):
-            for postcedentKey, K_row_group in groupby(p.K_table, self.postcedentKey):
-                #antecedent = lambda: p.PQ.queue[0].item.sourceVec.noteEndIndex
-
-                for K_row in K_row_group:
+            # Get groups of K_rows with identical binding keys
+            for postcedentKey, postcedents in groupby(p.K_table, self.postcedentKey):
+                # For this binding key, get every combination of K_row and chain, then bind them.
+                for K_row in postcedents:
+                    # The antecedent chains are hashed to the binding key
                     for antecedent in p.PQ.get(postcedentKey, []):
-                        new_entry = K_entry(K_row.patternVec, K_row.sourceVec, w = antecedent.w + 1, y = antecedent)
+                        # BINDING OF EXTENSION
+                        new_entry = K_entry(
+                                K_row.patternVec, K_row.sourceVec, w = antecedent.w + 1, y = antecedent)
                         # Hash the end of this new source chain to its subsequent PQ
-                        #new_entry.patternVec.noteEnd.PQ.get(K_row.sourceVec.noteEndIndex, []).append(new_entry)
                         new_entry.patternVec.noteEnd.PQ.get(self.antecedentKey(K_row), []).append(new_entry)
                         yield new_entry
 
-class W(S, GeoAlgorithm):
+class S(SW):
     """
-    Wrapper class for W-class algorithm.
-    Almost identical to S except for the filter.
-    """
-
-    def filter_result(self, result):
-        return ( # Results are intra-vectors, not notes, so we need one less
-                ((result.w + 1) >= self.settings['threshold'])
-                # Also filter with other non-algorithm specific user settings
-                and GeoAlgorithm.filter_result(self, result))
-
-
-class SWOld(GeoAlgorithm):
-
+    Wrapper class for S-class algorithm.
     """
     def pre_process(self):
-        super(SW, self).pre_process()
-        self.pattern.compute_intra_vectors(window = self.settings['pattern_window'])
-        self.source.compute_intra_vectors(window = self.settings['source_window'])
-        self.pattern.initialize_Ktables(self.source)
-        #TODO if window == 0 or maybe "max"? set window to len(pattern)
+        # Antecedent and Postcedent Keys for S-class algorithms
+        self.antecedentKey = lambda row: (row.sourceVec.noteEndIndex, row.scale)
+        self.postcedentKey = lambda row: (row.sourceVec.noteStartIndex, row.scale)
+        super(S, self).pre_process()
 
-        if isinstance(self.settings['mismatches'], (int, long)):
-            ## TODO make it so you can't have threshold and mismatches set
-            ## TODO make it so threshold refers to number of notes (add at +1 in alg)
-            self.settings['threshold'] = len(self.pattern.flat.notes) - self.settings['mismatches'] - 1 #recall threshold refers to # of pattern vectors matched
-        # If threshold has been passed in and intends to be 'max'..
-        if self.settings['threshold'] == len(self.pattern.flat.notes):
-            self.settings['threshold'] = self.settings['threshold'] - 1
+
+class W(SW):
     """
-
-    def process_results(self):
-        #TODO clean up chain flattening
-        def flatten_chain(K_row, chain=None):
-            """
-            Call this with the final K_row in the chain
-            """
-            chain = music21.stream.Stream()
-            if K_row.y == None:
-                chain.insert(K_row.source_vector.start)
-                return chain
-            else:
-                chain.insert(K_row.source_vector.end)
-                return flatten_chain(K_row.y, chain)
-
-        ### Filtering. TEMPORARY FIX. TODO you should make separate subclasses?
-
-        occurrences = music21.stream.Stream()
-        for r in self.results:
-            # Get the notes of this particular occurrence
-            result_stream = music21.stream.Stream()
-            ptr = r
-            # TODO make backtracking part of a Ktable (entry or table?) class method
-            ## TODO make this a tail-recursive function
-            while ptr != None:
-                result_stream.insert(ptr.source_vector.end.getOffsetBySite(self.source.flat.notes), ptr.source_vector.end) # use insert for the note to be placed at its proper offset
-                if ptr.y == None:
-                    first_note = ptr.source_vector.start
-                    result_stream.insert(first_note.getOffsetBySite(self.source.flat.notes), first_note)
-                ptr = ptr.y
-            # Get the shift vector for this occurrence
-            # TODO make this a NoteVector() - but can't currently, because fist note of pattern is not necessarily contained in the same stream as source note
-            result_stream.shift = (first_note.offset - self.pattern.flat.notes[0].offset, first_note.pitch.ps - self.pattern.flat.notes[0].pitch.ps)
-            occurrences.append(result_stream)
-
-        return occurrences
-
+    Wrapper class for W-class algorithm.
+    """
+    def pre_process(self):
+        # Antecedent and Postcedent Keys for W-class algorithms
+        self.antecedentKey = lambda row: (row.sourceVec.noteEndIndex,) # pre_process uses tuple concatenation to sort K tables
+        self.postcedentKey = lambda row: (row.sourceVec.noteStartIndex,)
+        super(W, self).pre_process()
