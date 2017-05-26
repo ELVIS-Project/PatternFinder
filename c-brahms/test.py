@@ -26,6 +26,7 @@ ALGORITHMS = [P1, P2, P3, S1, S2, W1, W2]
 
 # Music21 User Settings
 us = music21.environment.UserSettings()
+us['directoryScratch'] = 'music21-temp-output'
 
 def tavern(composer, catalogue, variation, phrase):
     if composer == "Beethoven":
