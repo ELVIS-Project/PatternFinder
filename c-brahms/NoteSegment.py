@@ -5,8 +5,6 @@ from pprint import pprint, pformat #for K_enry __repr__
 from more_itertools import peekable # to peek in the priority queue
 import Queue # to make a custom Priority Queue
 import copy # for link_and_create
-import numpy as np
-import pandas as pd
 import music21
 import pdb
 
