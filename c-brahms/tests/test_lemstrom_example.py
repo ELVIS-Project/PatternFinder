@@ -1,5 +1,4 @@
 from unittest import TestCase, TestLoader, TextTestRunner
-from tests import tools
 from functools import partial
 from nose_parameterized import parameterized, param
 from LineSegment import TwoDVector, LineSegmentSet
