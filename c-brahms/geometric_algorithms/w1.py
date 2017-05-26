@@ -1,5 +1,5 @@
-from Queue import PriorityQueue # Lemstrom's choice of data structure
-from geometric_algorithms import geo_algorithms
+from queue import PriorityQueue # Lemstrom's choice of data structure
+from geometric_algorithms.geo_algorithms import W
 from LineSegment import LineSegmentSet
 from pprint import pprint, pformat
 import traceback
@@ -7,7 +7,7 @@ import copy
 import pdb
 
 
-class W1(geo_algorithms.W):
+class W1(W):
 
     def pre_process(self):
         super(W1, self).pre_process()

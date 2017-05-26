@@ -89,8 +89,8 @@ class GeoAlgorithm(object):
     def __iter__(self):
         return self.output
 
-    def next(self):
-        return self.output.next()
+    def __next__(self):
+        return next(self.output)
 
     def parse_scores(self, pattern_input, source_input):
         """

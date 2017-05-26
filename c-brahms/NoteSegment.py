@@ -3,12 +3,12 @@ from fractions import Fraction
 from collections import namedtuple # to make a custom Priority Queue
 from pprint import pprint, pformat #for K_enry __repr__
 from more_itertools import peekable # to peek in the priority queue
-import Queue # to make a custom Priority Queue
+import queue # to make a custom Priority Queue
 import copy # for link_and_create
 import music21
 import pdb
 
-class CmpItQueue(Queue.PriorityQueue):
+class CmpItQueue(queue.PriorityQueue):
     """
     A subclass of PriorityQueue which implements iteration and custom comparators
 
@@ -18,7 +18,7 @@ class CmpItQueue(Queue.PriorityQueue):
     queue_item = namedtuple('queue_item', ['sortTuple', 'item'])
 
     def __init__(self, keyfunc=lambda p: p, maxsize = 0):
-        Queue.PriorityQueue.__init__(self, maxsize)
+        queue.PriorityQueue.__init__(self, maxsize)
         # We expect that keyfunc(item) returns a sortTuple to sort the elements
         self.keyfunc = keyfunc
 
@@ -28,17 +28,17 @@ class CmpItQueue(Queue.PriorityQueue):
     def next(self):
         try:
             return self.get()
-        except Queue.Empty:
+        except queue.Empty:
             raise StopIteration
 
     def put(self, item):
         # Every item in the queue is a tuple (sortTuple, item)
         ralph = self.queue_item(self.keyfunc(item), item)
-        Queue.PriorityQueue.put(self, ralph, False)
+        queue.PriorityQueue.put(self, ralph, False)
 
     def get(self):
         # Return only the item so that PQ covers up the inconvenience of dealing with the sortTuple
-        return Queue.PriorityQueue.get(self, False).item
+        return queue.PriorityQueue.get(self, False).item
 
 class GeometricNote(music21.note.Note):
 

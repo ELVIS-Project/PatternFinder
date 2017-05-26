@@ -2,12 +2,12 @@ from LineSegment import LineSegment
 from itertools import takewhile
 from more_itertools import peekable
 from NoteSegment import InterNoteVector
-import geo_algorithms
+from geometric_algorithms.geo_algorithms import P
 import NoteSegment
 import music21
 import pdb
 
-class P1(geo_algorithms.P):
+class P1(P):
     """
     INPUT:
         pattern - sorted flattened music21 stream of notes (no chords)

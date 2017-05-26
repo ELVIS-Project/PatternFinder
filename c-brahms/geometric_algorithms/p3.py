@@ -1,16 +1,16 @@
 from LineSegment import TwoDVector, LineSegment, LineSegmentSet, TurningPoint, TwoDVector, Bucket
-from Queue import PriorityQueue
+from queue import PriorityQueue
 from NoteSegment import CmpItQueue, NotePointSet, InterNoteVector
 from collections import namedtuple # container to hold sum of line segment intersection
 from more_itertools import peekable # for peekable InterNoteVector generators
+from geometric_algorithms.geo_algorithms import P
 import music21
 import itertools
-import geo_algorithms
 import NoteSegment
 import copy
 import pdb
 
-class P3(geo_algorithms.P):
+class P3(P):
 
     def pre_process(self):
         super(P3, self).pre_process()

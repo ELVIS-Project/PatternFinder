@@ -105,15 +105,3 @@ for i in range(100):
 
 """
 
-
-
-import SimpleHTTPServer
-import SocketServer
-
-PORT = 8000
-
-#Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
-#httpd = SocketServer.TCPServer(("", PORT), Handler)
-
-print("ready to serve at port use 'httpd.serve_forever()'" + str(PORT))
-

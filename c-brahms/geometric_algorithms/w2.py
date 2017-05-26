@@ -1,12 +1,12 @@
 from LineSegment import LineSegmentSet
-from Queue import PriorityQueue
-from geometric_algorithms import geo_algorithms
+from queue import PriorityQueue
+from geometric_algorithms.geo_algorithms import W
 from NoteSegment import K_entry
 import music21
 import copy
 import pdb
 
-class W2(geo_algorithms.W):
+class W2(W):
 
     def algorithmAlsoOld(self):
         """

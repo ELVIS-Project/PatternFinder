@@ -1,4 +1,4 @@
-from geometric_algorithms import geo_algorithms
+from geometric_algorithms.geo_algorithms import S
 from NoteSegment import InterNoteVector, K_entry # to create occurrence chains
 from LineSegment import LineSegmentSet
 from pprint import pprint, pformat
@@ -7,7 +7,7 @@ import copy
 import pdb
 
 
-class S1(geo_algorithms.S):
+class S1(S):
 
     def pre_process(self):
         super(S1, self).pre_process()

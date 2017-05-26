@@ -1,10 +1,10 @@
-from Queue import PriorityQueue
-from geometric_algorithms import geo_algorithms
+from queue import PriorityQueue
+from geometric_algorithms.geo_algorithms import S
 import music21
 import copy
 import pdb
 
-class S2(geo_algorithms.S):
+class S2(S):
 
     def algorithmAlsoOld(self):
         """

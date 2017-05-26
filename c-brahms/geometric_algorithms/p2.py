@@ -3,13 +3,13 @@ from NoteSegment import InterNoteVector, CmpItQueue
 from collections import namedtuple
 from more_itertools import peekable
 from itertools import groupby
-import geo_algorithms
+from geometric_algorithms.geo_algorithms import P
 import NoteSegment
 import music21
 import pdb
 
 
-class P2(geo_algorithms.P):
+class P2(P):
     """
     P2 returns "pure" and "partial" occurrences of the pattern within the source.
 

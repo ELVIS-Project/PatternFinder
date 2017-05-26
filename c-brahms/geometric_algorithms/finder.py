@@ -28,7 +28,7 @@ class Finder(object):
         self.algorithm = algorithm(pattern, source, **kwargs)
 
     def __iter__(self):
-        return self
+        return self.algorithm
 
-    def next(self):
-        return self.algorithm.next()
+    def __next__(self):
+        return next(self.algorithm)
