@@ -8,10 +8,7 @@ from fractions import Fraction
 from NoteSegment import CmpItQueue, IntraNoteVector, InterNoteVector, NotePointSet
 from collections import namedtuple, Counter
 
-import pickle
-import os # to cycle tavern folders
-import sys
-import tests.tools
+import os
 import music21
 import NoteSegment
 import pdb
@@ -50,10 +47,6 @@ carlos = W1(lemstrom_pattern('e'), lemstrom_source)
 justin = W2(lemstrom_pattern('f'), lemstrom_source)
 john = DPW2(lemstrom_pattern('f'), lemstrom_source)
 """
-
-f = open('fugue_truth.pckl', 'rb')
-bach_truth = pickle.load(f)
-f.close()
 
 pattern = BACH_FUGUE_PATH(1)
 source = BACH_FUGUE_PATH(1)
