@@ -1,28 +1,19 @@
 from unittest import TestCase, TestLoader, TextTestRunner
-from functools import partial
 from parameterized import parameterized, param
-from LineSegment import TwoDVector, LineSegmentSet
 from pprint import pformat # for pretty printing test error messages
 from geometric_algorithms import P1, P2, P3, S1, S2, W1, W2
 from NoteSegment import NotePointSet, InterNoteVector
 from fractions import Fraction # for scale settings
 import music21
-import NoteSegment
 import pdb
 
 
 LEM_PATH_PATTERN = lambda x: 'music_files/lemstrom2011_test/query_' + x + '.mid'
 LEM_PATH_SOURCE = 'music_files/lemstrom2011_test/leiermann.xml'
 
-PATTERN = {query : NotePointSet(music21.converter.parse(LEM_PATH_PATTERN(query))) for query in ['a', 'b', 'c', 'd', 'e', 'f']}
-SOURCE = NotePointSet(music21.converter.parse(LEM_PATH_SOURCE))
-
 MATCHING_INDICES = (
         ((0,12), (1,14), (2,16), (3,17), (4,18), (5,21)),
         ((0,13), (1,14), (2,16), (3,17), (4,18), (5,21)))
-
-MATCHING_PAIRS = lambda q : [[InterNoteVector(PATTERN[q][i], PATTERN[q], SOURCE[j], SOURCE) for i, j in lst]
-        for lst in MATCHING_INDICES]
 
 class TestLemstromExample(TestCase):
 
@@ -37,55 +28,47 @@ class TestLemstromExample(TestCase):
             ## Pure exact match
             # P1 should find two duplicate occurrences since the first note (indices 12, 13) is duplicated (see behaviour of P1)
             ##
-            'a' : [
-                (
-                    P1,
-                    MATCHING_PAIRS('a'),
-                    {}),
-                (
-                    P2,
-                    MATCHING_PAIRS('a')[1:2],
-                    {}),
-                (
-                    P3,
-                    [
-                        [InterNoteVector(PATTERN['a'][i], PATTERN['a'], SOURCE[j], SOURCE) for i, j in ((0,12), (0,13), (1,14), (2,16), (3,11), (3,17), (4,18), (5,21))]],
-                    {}),
-                (
-                    S1,
-                    MATCHING_PAIRS('a'),
-                    {}),
-                (
-                    S2,
-                    MATCHING_PAIRS('a'),
-                    {'threshold' : 6, 'pattern_window' : 1}),
-                (
-                    W1,
-                    [
-                        [InterNoteVector(PATTERN['a'][i], PATTERN['a'], SOURCE[j], SOURCE) for i, j in ((0,2), (1,6), (2,8), (3,11), (4,16), (5,21))],
-                        [InterNoteVector(PATTERN['a'][i], PATTERN['a'], SOURCE[j], SOURCE) for i, j in ((0,3), (1,6), (2,8), (3,11), (4,16), (5,21))]] + MATCHING_PAIRS('a'),
-                    {}),
-                (
-                    W2,
-                    [
-                        [InterNoteVector(PATTERN['a'][i], PATTERN['a'], SOURCE[j], SOURCE) for i, j in ((0,2), (1,6), (2,8), (3,11), (4,16), (5,21))],
-                        [InterNoteVector(PATTERN['a'][i], PATTERN['a'], SOURCE[j], SOURCE) for i, j in ((0,3), (1,6), (2,8), (3,11), (4,16), (5,21))]] + MATCHING_PAIRS('a'),
-                    {'threshold' : 6, 'pattern_window' : 1})],
-            'b' : [
-                (
-                    P2,
-                    MATCHING_PAIRS('b')[1:2][:3] + MATCHING_PAIRS('b')[1:2][4:],
-                    {'threshold' : 5})],
-            'c' : [
-                (
-                    S1,
-                    [
-                        [(0,12), (1,14), (2,16), (3,17), (4,18), (5,21)]],
-                    {})]
+            'a' : (
+                {'threshold' : 'all', 'pattern_window' : 1, 'scale' : 1},
+                [
+                    # P1 finds both matches
+                    (P1, MATCHING_INDICES),
 
+                    # P2 only finds the second
+                    (P2, MATCHING_INDICES[1:2]),
 
+                    # P3 finds something else, but fails because is non consistent in its returns
+                    (P3, [
+                        ((0,12), (0,13), (1,14), (2,16), (3,11), (3,17), (4,18), (5,21))]),
+                    (S1, MATCHING_INDICES),
+                    (S2, MATCHING_INDICES),
+                    (W1, (
+                        ((0,2), (1,6), (2,8), (3,11), (4,16), (5,21)),
+                        ((0,3), (1,6), (2,8), (3,11), (4,16), (5,21))) + MATCHING_INDICES),
+                    (W2, (
+                        ((0,2), (1,6), (2,8), (3,11), (4,16), (5,21)),
+                        ((0,3), (1,6), (2,8), (3,11), (4,16), (5,21))) + MATCHING_INDICES)]
+                ),
 
-                #(P1, [(3.0, -10), (3.0, -10)], {})] + [(alg, [(3.0, -10)], {'scale' : 1, 'threshold' : 5}) for alg in (P2, P3, S1, S2, W1, W2)],
+            'b' : (
+                {'threshold' : 5, 'pattern_window' : 2, 'scale' : 1},
+                [
+                    # P2 only finds the second
+                    (P2, MATCHING_INDICES[1:2][:3] + MATCHING_INDICES[1:2][4:]),
+
+                    # P3 finds something else, but fails because is non consistent in its returns
+                    (P3, [
+                        ((0,12), (0,13), (1,14), (2,16), (4,18), (5,21))]),
+                    (S1, MATCHING_INDICES),
+                    (S2, MATCHING_INDICES),
+                    (W1, (
+                        ((0,2), (1,6), (2,8), (4,16), (5,21)),
+                        ((0,3), (1,6), (2,8), (4,16), (5,21))) + MATCHING_INDICES),
+                    (W2, (
+                        ((0,2), (1,6), (2,8), (4,16), (5,21)),
+                        ((0,3), (1,6), (2,8), (4,16), (5,21))) + MATCHING_INDICES)]
+                )}
+            #(P1, [(3.0, -10), (3.0, -10)], {})] + [(alg, [(3.0, -10)], {'scale' : 1, 'threshold' : 5}) for alg in (P2, P3, S1, S2, W1, W2)],
 
             ## Pure partial match with one mismatch
             #'b' : [(alg, [(3.0, -10)], {}) for alg in (P2, S2, W2)],
@@ -101,21 +84,27 @@ class TestLemstromExample(TestCase):
 
             ## Warped partial match with one mismatch
             #'f' : [(alg, [(3.0, -10)], {'threshold': 5}) for alg in (W2,)]
-            }
+            #}
 
     ## Reduce QUERIES into list of tests
     # List comprehension wasn't working, no idea why. (probably from list comprehension scope bleeding) # TESTS = [(key, algorithm, list_of_shifts, settings) for algorithm, list_of_shifts, settings in val for key, val in QUERIES.items()]
+    """
     TESTS = []
     for key, val in QUERIES.items():
         for algorithm, list_of_shifts, settings in val:
             TESTS.append((key, algorithm, list_of_shifts, settings))
+    """
+    TESTS = []
+    for key, val in QUERIES.items():
+        for algorithm, lists_of_pairs in val[1]:
+            TESTS.append((key, algorithm, lists_of_pairs, val[0]))
 
     def custom_test_name(testcase_func, param_num, param):
-        return "%s_algorithm_%s_Query_%s" % (
+        return "_".join([
                 testcase_func.__name__,
                 param.args[1].__name__, # Algorithm name
                 param.args[0] # Query name
-        )
+        ])
 
     @parameterized.expand([param(*case) for case in TESTS], name_func = custom_test_name)
     def test(self, query, algorithm, expected, settings={}):
@@ -123,17 +112,13 @@ class TestLemstromExample(TestCase):
         pattern = NotePointSet(music21.converter.parse(LEM_PATH_PATTERN(query)))
         source = NotePointSet(music21.converter.parse(LEM_PATH_SOURCE))
 
-        matching_pairs = lambda q : [
-                InterNoteVector(pattern[0], pattern, source[12], source),
-                InterNoteVector(pattern[1], pattern, source[14], source),
-                InterNoteVector(pattern[2], pattern, source[16], source),
-                InterNoteVector(pattern[3], pattern, source[17], source),
-                InterNoteVector(pattern[4], pattern, source[18], source),
-                InterNoteVector(pattern[5], pattern, source[21], source)]
+        matching_pairs = [
+                [InterNoteVector(pattern[p_i], pattern, source[s_i], source) for p_i, s_i in pairs]
+                for pairs in expected]
 
         self.longMessage = True
-        carlos = algorithm(LEM_PATH_PATTERN(query), LEM_PATH_SOURCE, **settings)
-        for occurrence, exp in zip(carlos.occurrences, expected):
+        carlos = algorithm(pattern, source, **settings)
+        for occurrence, exp in zip(carlos.occurrences, matching_pairs):
             self.assertEqual(occurrence, exp, msg =
                     "\nFOUND:\n" + pformat(occurrence) +
                     "\nEXPECTED\n" + pformat(exp))
@@ -217,3 +202,5 @@ LEMSTROM_EXAMPLE_SUITE = TestLoader().loadTestsFromTestCase(TestLemstromExample)
 
 if __name__ == "__main__":
     result = TextTestRunner(verbosity=2).run(LEMSTROM_EXAMPLE_SUITE)
+    #LEMSTROM_EXAMPLE_SUITE.debug()
+
