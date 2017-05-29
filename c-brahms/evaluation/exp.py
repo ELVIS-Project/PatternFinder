@@ -1,4 +1,4 @@
-from geometric_algorithms import P1, P2, P3, S1, S2, W1, W2, DPW2, geoAlgorithm
+from geometric_algorithms import P1, P2, P3, S1, S2, W1, W2
 from pprint import pprint as pp
 from collections import namedtuple
 from parse_fugue_truth import parse_truth
@@ -12,7 +12,6 @@ import math #to round the measure ranges to nearest int
 import pickle
 import os # to cycle tavern folders
 import sys
-import tests.tools
 import music21
 import LineSegment
 import NoteSegment
@@ -28,7 +27,7 @@ BACH_FUGUE_PATH = lambda x: os.path.join(BACH_PATH, 'wtc1f' + str(x).zfill(2) + 
 LEM_PATH_P = lambda x: 'music_files/lemstrom2011_test/query_' + x + '.mid'
 LEM_PATH_S = os.path.join('music_files', 'lemstrom2011_test', 'leiermann.xml')
 
-ALGORITHMS = [P1, P2, P3, S1, S2, W1, W2, DPW2]
+ALGORITHMS = [P1, P2, P3, S1, S2, W1, W2]
 
 FILTER_FOR_SUBJECT_LABELS = lambda x: [x for x in x if x in ['S', 'S2', 'CS', 'CS2', 'Saug', 'Sinv']]
 
@@ -172,7 +171,7 @@ def get_ground_truth_dataframe():
             ground_truth['start'] = [x['start'] for x in bach_truth[fugue_tag][subject]['occurrences']]
             gt = pd.concat([gt, ground_truth], ignore_index=True)
 
-    gt.to_pickle('experiment/ground_truth.pckl')
+    gt.to_pickle('evaluation/ground_truth.pckl')
     return gt
 
 
@@ -283,11 +282,11 @@ thresh = [x * 0.1 for x in range(6,11)] #proportional to length of pattern
 
 logging.basicConfig(filename='exp.log', level=logging.DEBUG)
 
-f = open('exps/fugue_truth.pckl', 'rb')
+f = open('evaluation/fugue_truth.pckl', 'rb')
 bach_truth = pickle.load(f)
 f.close()
 
-gt = pd.read_pickle('experiment/ground_truth.pckl')
+gt = pd.read_pickle('evaluation/ground_truth.pckl')
 
 all_df = []
 for f in os.walk('exps'):
