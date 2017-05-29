@@ -5,10 +5,13 @@ from NoteSegment import NotePointSet, K_entry, CmpItQueue, InterNoteVector
 from bisect import insort # to insert while maintaining a sorted list
 from itertools import groupby # for K table initialization
 from builtins import object #Python 2 and 3 next() compatibility
+import logging
 import NoteSegment
 import copy
 import music21
 import pdb
+
+geo_algorithms_logger = logging.getLogger(__name__)
 
 # TODO measure total runtime with timeit (as a ratio of # of notes), store in an attribute like self.algorithmRunTime?
 
@@ -18,14 +21,14 @@ import pdb
 # pattern_accuracy : 'max' --> threshold = len(max(self.results, key=lambda x: len(x)))
 DEFAULT_SETTINGS = {
         'algorithm' : None,
-        'pattern_window' : 5,
+        'pattern_window' : 1,
         'source_window' : 5,
-        'scale' : 'all',
+        'scale' : 'pure',
         'threshold' : 'all',
         '%pattern_window' : 1,
         'colour' : "red",
         '%threshold' : 1,
-        'mismatches' : 'min',
+        'mismatches' : 0,
         'segment' : False,
         'overlap' : True,
         'parsed_input' : False,
@@ -37,6 +40,8 @@ class GeoAlgorithm(object):
     Generic base class to manage execution of P, S, and W algorithms
     """
     def __init__(self, pattern_input, source_input, **kwargs):
+        self.logger = logging.getLogger(__name__)
+        self.logger.info('Creating a GeoAlgorithm instance')
 
         # Update the default settings with user-specified ones so that the user only has to specify non-default parameters.
         self.settings = {key : val for key, val in DEFAULT_SETTINGS.items()}
@@ -75,6 +80,7 @@ class GeoAlgorithm(object):
         We can run contextSites() on elements within the parsed score stream. It's a generator which finds context sites, but also follows derivation chains!
         So each element in a derivation chain has to implement contextSites() - so use music21Objects in derivation chains!
         """
+        # TODO what if the file is not found? It will fail!
         try:
             self.pattern = music21.converter.parse(pattern_input)
             self.pattern.derivation.origin = music21.text.TextBox(pattern_input)
@@ -114,6 +120,8 @@ class GeoAlgorithm(object):
         # TODO implement 'mismatch'?
         if self.settings['threshold'] == 'all':
             self.settings['threshold'] = len(self.patternPointSet)
+        if self.settings['mismatches'] > 0:
+            self.settings['threshold'] = len(self.patternPointSet) - self.settings['mismatches']
 
     # TODO What if you find nothing? How to ensure len(occ) > 0?
     def filter_result(self, result):

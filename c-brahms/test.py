@@ -7,6 +7,7 @@ from fractions import Fraction
 from NoteSegment import CmpItQueue, IntraNoteVector, InterNoteVector, NotePointSet
 from collections import namedtuple, Counter
 
+import logging
 import os
 import music21
 import NoteSegment
@@ -15,9 +16,12 @@ import pdb
 ### PATHS
 # ex. TAVERN_PATH('B', 'B063', 1, 1) --> 'tavern/B/B063/Krn/B063_01_01_score.krn'
 TAVERN_PATH = lambda composer, catalogue, variation, phrase: os.path.join('tavern', composer, catalogue, 'Krn', "_".join((catalogue, str(variation).zfill(2), str(phrase).zfill(2), 'score.krn')))
+
 # ex. BACH_FUGUE_PATH(1) --> 'music_files/bach_wtc/wtc1f01.krn'
 BACH_PATH = os.path.join('music_files', 'bach_wtc1')
 BACH_FUGUE_PATH = lambda x: os.path.join(BACH_PATH, 'wtc1f' + str(x).zfill(2) + '.krn')
+SUBJECT_PATH = lambda f, s: os.path.join(BACH_PATH, 'e_wtc1f' + str(f).zfill(2) + '_' + s + '.xml')
+
 # ex. LEM_PATH_P('a') --> 'music_files/lemstrom2011_test/query_a.mid'
 LEM_PATH_P = lambda x: 'music_files/lemstrom2011_test/query_' + x + '.mid'
 LEM_PATH_S = os.path.join('music_files', 'lemstrom2011_test', 'leiermann.xml')
@@ -26,7 +30,14 @@ ALGORITHMS = [P1, P2, P3, S1, S2, W1, W2]
 
 # Music21 User Settings
 us = music21.environment.UserSettings()
-us['directoryScratch'] = 'music21-temp-output'
+us['directoryScratch'] = 'music21_temp_output'
+
+#LOGGING
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+ch = logging.StreamHandler()
+logger.addHandler(ch)
 
 def tavern(composer, catalogue, variation, phrase):
     if composer == "Beethoven":
