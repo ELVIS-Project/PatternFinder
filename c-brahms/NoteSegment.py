@@ -206,6 +206,7 @@ class NotePointSet(music21.stream.Stream):
 
                 # note essentials
                 note.duration = chord.duration
+                note.offset = chord.offset
 
                 note_list.append(note)
 
@@ -234,9 +235,9 @@ class NotePointSet(music21.stream.Stream):
         # Get each note or chord, convert it to a tuple of notes, and sort them by the keyfunc
         new_notes = sorted(
                 [note for note_list in
-                    [music21Chord_to_music21Notes(n, note_stream) if n.isChord
-                        # Don't use copy.deepcopy(n) or else it will lose the offset info
-                        else (n,) for n in note_stream]
+                    # Use (n,) instead of copy.deepcopy(n) or else it will lose the offset info
+                    [music21Chord_to_music21Notes(n, note_stream) if n.isChord else (n,)
+                        for n in note_stream]
                     for note in note_list],
                 key=sort_keyfunc)
 
