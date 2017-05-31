@@ -164,7 +164,7 @@ class GeoAlgorithm(object):
                         "Integer arguments to this parameter must be: {0}".format(valid_keywords[-1])]))
 
         # TODO make threshold and mismatches define an upper/lower bound range of tolerance
-        if user_settings.has_key('threshold') and user_settings.has_key('mismatches'):
+        if ('threshold' in user_settings) and ('mismatches' in user_settings):
             raise ValueError("Threshold and mismatches not yet both supported: use one or the other")
 
         # Generate self.settings from the default settings, then update it with
