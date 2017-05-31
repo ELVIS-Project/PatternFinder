@@ -5,6 +5,7 @@ from NoteSegment import NotePointSet, K_entry, CmpItQueue, InterNoteVector
 from bisect import insort # to insert while maintaining a sorted list
 from itertools import groupby # for K table initialization
 from builtins import object #Python 2 and 3 next() compatibility
+import geometric_algorithms
 import logging
 import NoteSegment
 import copy
@@ -19,23 +20,89 @@ geo_algorithms_logger = logging.getLogger(__name__)
 # mismatches?
 # pattern_accuracy : 'all' --> threshold : len(pattern)
 # pattern_accuracy : 'max' --> threshold = len(max(self.results, key=lambda x: len(x)))
+
+SETTINGS_CONFIG = {
+        'algorithm' : ('P1',
+            ['P1', 'P2', 'P3', 'S1', 'S2', 'W1', 'W2', 'no numeric argument'],
+            lambda s: False),
+
+        'threshold' : ('all',
+            ['all', 'max', 'a positive integer > 0'],
+            lambda s: isinstance(s, int) and (s > 0)),
+
+        'mismatches' : (0,
+            ['a positive integer > 0'],
+            lambda s: isinstance(s, int) and (s > 0)),
+
+        # TODO fix scale which should take in a Fraction or a float or an integer
+        'scale' : ('pure',
+            ['pure', 'warped', 'a nonnegative integer >= 0'],
+            lambda s: isinstance(s, int) and (s >= 0)),
+
+        # TODO implement 0 < float percentage <= 1
+        'pattern_window' : (1,
+            ['a positive integer > 0'],
+            lambda s: isinstance(s, int) and (s > 0)),
+
+        'source_window' : (5,
+            ['a positive integer > 0'],
+            lambda s: isinstance(s, int) and (s > 0))
+        }
+
 DEFAULT_SETTINGS = {
-        'algorithm' : None,
+        # Choose algorithm directly
+        'algorithm' : 'P1',
+
+        # Universal Algorithm settings
         'pattern_window' : 1,
         'source_window' : 5,
         'scale' : 'pure',
         'threshold' : 'all',
-        '%pattern_window' : 1,
-        'colour' : "red",
-        '%threshold' : 1,
         'mismatches' : 0,
+
+        # P class settings
         'segment' : False,
         'overlap' : True,
-        'parsed_input' : False,
+
+        # More meaningful settings
+        '%pattern_window' : 1,
+        '%threshold' : 1,
+        'offset_window' : False,
+
+        #Output
+        'colour' : "red",
         'show_pattern' : True,
-        'runOnInit' : True}
+        'runOnInit' : True
+        }
 
 class GeoAlgorithm(object):
+    @classmethod
+    def create(cls, pattern, source, **kwargs):
+
+        # TODO - do this here, or in algorithm init?
+        # Maybe we shouldn't allow algorithm init outside of create()?
+        self.process_settings(kwargs)
+
+        if settings['scale'] == 1 or settings['scale'] == 'pure':
+            cls = 'P'
+        elif settings['scale'] == 'warped':
+            cls = 'W'
+        else:
+            cls = 'S'
+
+        if settings['threshold'] == 'all' and settings['mismatches'] == 0:
+            tp = '1'
+        else:
+            tp = '2'
+
+        if settings['algorithm']:
+            algorithm_name = settings['algorithm']
+        else:
+            algorithm_name = cls + tp
+
+        algorithm = getattr(geometric_algorithms, algorithm_name)
+        return algorithm(pattern, source, **kwargs)
+
     """
     Generic base class to manage execution of P, S, and W algorithms
     """
