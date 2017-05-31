@@ -110,25 +110,23 @@ class GeoAlgorithm(object):
         self.logger = logging.getLogger(__name__)
         self.logger.info('Creating a GeoAlgorithm instance')
 
-        # Update the default settings with user-specified ones so that the user only has to specify non-default parameters.
-        self.settings = {key : val for key, val in DEFAULT_SETTINGS.items()}
-        self.settings.update(kwargs)
+        # Defines self.user_settings and self.settings
+        self.process_settings(kwargs)
 
         # Defines self.pattern and self.source
-        # If file paths were given, they are stored in the stream derivations
-        # Catches converter exception to allow for pre-parsed input
         self.parse_scores(pattern_input, source_input)
 
         # Defines self.patternPointSet and self.sourcePointSet
+        # Also modifies self.settings based on self.user_settings
         self.pre_process()
 
         # Run the algorithm, filter the occurrences, define an occurrence generator.
         #TODO make occurrence objects for easier processing and testing
         self.results = (r for r in self.algorithm() if self.filter_result(r))
         self.occurrences = (self.process_result(r) for r in self.results)
-        #self.occurrences = (self.process_result(r) for r in self.algorithm() if self.filter_result(r))
 
         self.output = (self.process_occurrence(occ) for occ in self.occurrences)
+
         # Do something with the occurrences
         #self.post_process()
 
@@ -137,6 +135,42 @@ class GeoAlgorithm(object):
 
     def __next__(self):
         return next(self.output)
+
+    def process_settings(self, user_settings):
+        self.user_settings = user_settings
+
+        ## VALIDATE THE USER CONFIGURATION
+        for key in user_settings.keys():
+            # Ensure this setting parameter is supported by the application
+            # e.g. if the user passes in a typo "thresold = 5", KeyError will be raised
+            if key not in DEFAULT_SETTINGS.keys():
+                raise KeyError("Parameter '{0}' is not a valid parameter.".format(key))
+
+            # Validate the data
+            default, valid_keywords, is_valid_integer_argument = SETTINGS_CONFIG[key]
+
+            # Check for a valid keyword
+            if ((not isinstance(user_settings[key], int)) and
+                    (user_settings[key] not in valid_keywords[:-1])): #the last elt specifies valid int args
+                raise ValueError("\n".join([
+                        "Parameter '{0}' has an invalid value of {1}".format(key, user_settings[key]),
+                        "Valid arguments are: {0} or {1}".format(valid_keywords[:-1], valid_keywords[-1])]))
+
+            # Else check for a valid integer argument
+            elif ((isinstance(user_settings[key], int)) and
+                    (not is_valid_integer_argument(user_settings[key]))):
+                raise ValueError("\n".join([
+                        "Parameter '{0}' has an invalid integer value of {1}".format(key, user_settings[key]),
+                        "Integer arguments to this parameter must be: {0}".format(valid_keywords[-1])]))
+
+        # TODO make threshold and mismatches define an upper/lower bound range of tolerance
+        if user_settings.has_key('threshold') and user_settings.has_key('mismatches'):
+            raise ValueError("Threshold and mismatches not yet both supported: use one or the other")
+
+        # Generate self.settings from the default settings, then update it with
+        # the user settings.
+        self.settings = {key : default for key, (default, _, _) in SETTINGS_CONFIG.items()}
+        self.settings.update(user_settings)
 
     def parse_scores(self, pattern_input, source_input):
         """
@@ -183,8 +217,13 @@ class GeoAlgorithm(object):
         self.sourcePointSet = NotePointSet(self.source)
         self.sourcePointSet.id = 'sourcePointSet'
 
+        # TODO then after all this, put a new setting in for base40, generic intervals, etc..
+
+        self.algorithm_settings = {}
+        if self.settings['threshold'] == 'all':
+            self.algorithm_settings['threshold'] = len(self.patternPointSet)
+
         # TODO implement 'threshold' == max
-        # TODO implement 'mismatch'?
         if self.settings['threshold'] == 'all':
             self.settings['threshold'] = len(self.patternPointSet)
         if self.settings['mismatches'] > 0:
