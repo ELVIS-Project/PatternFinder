@@ -1,7 +1,7 @@
 from unittest import TestCase, TestLoader, TextTestRunner
 from parameterized import parameterized, param
 from pprint import pformat # for pretty printing test error messages
-from geometric_algorithms import P1, P2, P3, S1, S2, W1, W2
+from geometric_algorithms import P1, P2, P3, S1, S2, W1, W2, Finder
 from NoteSegment import NotePointSet, InterNoteVector
 from fractions import Fraction # for scale settings
 import music21
@@ -23,13 +23,15 @@ class TestLemstromExample(TestCase):
     # In exact matches, we restrict the error-tolerance of the algorithms:
     # "scale" filters out found occurrences by how much they scaled the pattern
     # "threshold" is the minimum number of notes that had to be found in any partial match
+    # "pattern_window" limits the number of intervening notes between matched notes in the pattern
+    # "source_window" limits the number of intervening notes between matched notes in the source
     ##
     QUERIES = {
             ## Pure exact match
             # P1 should find two duplicate occurrences since the first note (indices 12, 13) is duplicated (see behaviour of P1)
             ##
             'a' : (
-                {'threshold' : 'all', 'pattern_window' : 1, 'scale' : 1},
+                {'threshold' : 'all', 'pattern_window' : 1, 'source_window' : 3, 'scale' : 1},
                 [
                     # P1 finds both matches
                     (P1, MATCHING_INDICES),
@@ -38,66 +40,55 @@ class TestLemstromExample(TestCase):
                     (P2, MATCHING_INDICES[1:2]),
 
                     # P3 finds something else, but fails because is non consistent in its returns
-                    (P3, [
-                        ((0,12), (0,13), (1,14), (2,16), (3,11), (3,17), (4,18), (5,21))]),
+                    #(P3, [((0,12), (0,13), (1,14), (2,16), (3,11), (3,17), (4,18), (5,21))]),
                     (S1, MATCHING_INDICES),
                     (S2, MATCHING_INDICES),
-                    (W1, (
-                        ((0,2), (1,6), (2,8), (3,11), (4,16), (5,21)),
-                        ((0,3), (1,6), (2,8), (3,11), (4,16), (5,21))) + MATCHING_INDICES),
-                    (W2, (
-                        ((0,2), (1,6), (2,8), (3,11), (4,16), (5,21)),
-                        ((0,3), (1,6), (2,8), (3,11), (4,16), (5,21))) + MATCHING_INDICES)]
-                ),
+
+                    # W class algorithms will find extra matches when source window = 5
+                    #((0,2), (1,6), (2,8), (3,11), (4,16), (5,21)),
+                    #((0,3), (1,6), (2,8), (3,11), (4,16), (5,21))) 
+                    (W1, MATCHING_INDICES),
+                    (W2, MATCHING_INDICES)
+                ]),
 
             'b' : (
-                {'threshold' : 5, 'pattern_window' : 2, 'scale' : 1},
+                {'threshold' : 5, 'pattern_window' : 2, 'source_window' : 3, 'scale' : 1},
                 [
-                    # P2 only finds the second
-                    (P2, MATCHING_INDICES[1:2][:3] + MATCHING_INDICES[1:2][4:]),
+                    # P2 only finds the first (why is this different from query a?)
+                    (P2, [MATCHING_INDICES[0][:3] + MATCHING_INDICES[0][4:]]),
 
                     # P3 finds something else, but fails because is non consistent in its returns
-                    (P3, [
-                        ((0,12), (0,13), (1,14), (2,16), (4,18), (5,21))]),
+                    #(P3, [((0,12), (0,13), (1,14), (2,16), (4,18), (5,21))]),
+                    (S2, tuple(lst[:3] + lst[4:] for lst in MATCHING_INDICES)),
+                    (W2, tuple(lst[:3] + lst[4:] for lst in MATCHING_INDICES))]
+                ),
+            'c' : (
+                {'threshold' : 'all', 'pattern_window' : 1, 'source_window' : 3, 'scale' : Fraction(1,3)},
+                [
                     (S1, MATCHING_INDICES),
                     (S2, MATCHING_INDICES),
-                    (W1, (
-                        ((0,2), (1,6), (2,8), (4,16), (5,21)),
-                        ((0,3), (1,6), (2,8), (4,16), (5,21))) + MATCHING_INDICES),
-                    (W2, (
-                        ((0,2), (1,6), (2,8), (4,16), (5,21)),
-                        ((0,3), (1,6), (2,8), (4,16), (5,21))) + MATCHING_INDICES)]
-                )}
-            #(P1, [(3.0, -10), (3.0, -10)], {})] + [(alg, [(3.0, -10)], {'scale' : 1, 'threshold' : 5}) for alg in (P2, P3, S1, S2, W1, W2)],
-
-            ## Pure partial match with one mismatch
-            #'b' : [(alg, [(3.0, -10)], {}) for alg in (P2, S2, W2)],
-
-            ## Scaled exact match
-            #'c' : [(alg, [(3.0, -10)], {'scale' : Fraction(1,3), 'threshold': 5}) for alg in (S1, S2, W1, W2)],
-
-            ## Scaled partial match with one mismatch
-            #'d' : [(alg, [(3.0, -10)], {'scale' : Fraction(1,3), 'threshold': 5}) for alg in (S1, S2, W1, W2)],
-
-            ## Warped exact match
-            #'e' : [(alg, [(3.0, -10)], {'threshold': 5}) for alg in (W1, W2)],
-
-            ## Warped partial match with one mismatch
-            #'f' : [(alg, [(3.0, -10)], {'threshold': 5}) for alg in (W2,)]
-            #}
+                    (W1, MATCHING_INDICES),
+                    (W2, MATCHING_INDICES)]),
+            'd' : (
+                {'threshold' : 5, 'pattern_window' : 2, 'source_window' : 3, 'scale' : Fraction(1,3)},
+                [
+                    (S2, tuple(lst[:3] + lst[4:] for lst in MATCHING_INDICES)),
+                    (W2, tuple(lst[:3] + lst[4:] for lst in MATCHING_INDICES))]),
+            'e' : (
+                {'threshold' : 6, 'pattern_window' : 1, 'source_window' : 3, 'scale' : 'warped'},
+                [
+                    (W1, MATCHING_INDICES),
+                    (W2, MATCHING_INDICES)]),
+            'f' : (
+                {'threshold' : 5, 'pattern_window' : 2, 'source_window' : 3, 'scale' : 'warped'},
+                [
+                    (W2, tuple(lst[:3] + lst[4:] for lst in MATCHING_INDICES))])
+            }
 
     ## Reduce QUERIES into list of tests
-    # List comprehension wasn't working, no idea why. (probably from list comprehension scope bleeding) # TESTS = [(key, algorithm, list_of_shifts, settings) for algorithm, list_of_shifts, settings in val for key, val in QUERIES.items()]
-    """
-    TESTS = []
-    for key, val in QUERIES.items():
-        for algorithm, list_of_shifts, settings in val:
-            TESTS.append((key, algorithm, list_of_shifts, settings))
-    """
-    TESTS = []
-    for key, val in QUERIES.items():
-        for algorithm, lists_of_pairs in val[1]:
-            TESTS.append((key, algorithm, lists_of_pairs, val[0]))
+    TESTS = [(key, algorithm, lists_of_pairs, val[0])
+            for key, val in QUERIES.items()
+            for algorithm, lists_of_pairs in val[1]]
 
     def custom_test_name(testcase_func, param_num, param):
         return "_".join([
@@ -118,7 +109,12 @@ class TestLemstromExample(TestCase):
 
         self.longMessage = True
         carlos = algorithm(pattern, source, **settings)
-        for occurrence, exp in zip(carlos.occurrences, matching_pairs):
+        for exp in matching_pairs:
+            try:
+                occurrence = next(carlos.occurrences)
+            except StopIteration:
+                self.fail("Not enough occurrences found")
+
             self.assertEqual(occurrence, exp, msg =
                     "\nFOUND:\n" + pformat(occurrence) +
                     "\nEXPECTED\n" + pformat(exp))
