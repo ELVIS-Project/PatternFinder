@@ -398,7 +398,7 @@ class SW(GeoAlgorithm):
                 for key, g in groupby(self.sourcePointSet.intra_vectors, lambda x: x.y)}
 
         for pattern_vec in self.patternPointSet.intra_vectors:
-            for database_vec in database_vectors[pattern_vec.y]:
+            for database_vec in database_vectors.get(pattern_vec.y, []):
                 new_entry = K_entry(pattern_vec, database_vec)
                 if new_entry.scale:
                     pattern_vec.noteStart.K_table.append(new_entry)
