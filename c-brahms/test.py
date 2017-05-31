@@ -31,7 +31,7 @@ ALGORITHMS = [P1, P2, P3, S1, S2, W1, W2]
 
 # Music21 User Settings
 us = music21.environment.UserSettings()
-us['directoryScratch'] = 'music21_temp_output'
+us['directoryScratch'] = 'music_files/music21_temp_output'
 
 #LOGGING
 logger = logging.getLogger(__name__)
