@@ -142,15 +142,12 @@ class K_entry(object):
         # we can more easily replace the shorter yields with their longer ones
         self.z = z # occurrence ID
 
-        # TODO save matching_pairs here rather than computing them in process_result
-        """
-        throws TypeError: "InterNoteVector object is not callable"
-        matching_pairs = namedtuple('matching_pairs', ['start', 'end'])._make(
+        # A pair of InterNoteVectors which connect this pair of IntraNoteVectors
+        self.matching_pairs = namedtuple('matching_pairs', ['start', 'end'])._make([
                 InterNoteVector(self.patternVec.noteStart, self.patternVec.site,
-                    self.noteStart, self.site),
+                    self.sourceVec.noteStart, self.sourceVec.site),
                 InterNoteVector(self.patternVec.noteEnd, self.patternVec.site,
-                    self.noteEnd, self.site))
-        """
+                    self.sourceVec.noteEnd, self.sourceVec.site)])
 
 
     def __repr__(self):
@@ -159,17 +156,6 @@ class K_entry(object):
             + "INTRA DATABASE VECTOR {0}\n".format(self.sourceVec)
             # Indent the backlink so it's more readable
             + "WITH BACKLINK:\n    {0}".format(str(self.y).replace('\n', '\n    ')))
-        """
-        return ("<NoteSegment.K_entry> with s={0}, w={1}, ".format(self.scale, self.w)
-                + "INTRA DATABASE VECTOR: "
-                + "<IntraNoteVector> TYPE {0} (x={1}, y={2}) ".format(
-                    self.tp_type, self.x, self.y)
-                + " #{0}: {1} --> #{2}: {3}\n".format(
-                    self.noteStartIndex, self.noteStart, self.noteEndIndex, self.noteEnd)
-                + "INTRA PATTERN VECTOR: {0}\n".format(self.patternVec)
-            # Indent the backlink so it's more readable
-            + "WITH BACKLINK:\n    {0}".format(str(self.y).replace('\n', '\n    ')))
-        """
 
 class Occurrence(object):
     """
