@@ -1,0 +1,4 @@
+# Ignore everything in this directory since they are temporary output from music21
+*
+# Except for this file, so that the directory is recognized by git
+!.gitignore
