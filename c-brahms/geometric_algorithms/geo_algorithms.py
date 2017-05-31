@@ -422,15 +422,12 @@ class SW(GeoAlgorithm):
             """
             Tail recursively extracts the matching pairs from the final K_entry of an occurrence
             """
-            end_note = [InterNoteVector(K_entry.patternVec.noteEnd, self.patternPointSet,
-                    K_entry.sourceVec.noteEnd, self.sourcePointSet)]
             if K_entry.y is None:
-                return ([InterNoteVector(K_entry.patternVec.noteStart, self.patternPointSet,
-                        K_entry.sourceVec.noteStart, self.sourcePointSet)]
-                        + end_note
+                return ([K_entry.matching_pairs.start]
+                        + [K_entry.matching_pairs.end]
                         + matching_pairs)
             else:
-                return extract_matching_pairs(K_entry.y, end_note + matching_pairs)
+                return extract_matching_pairs(K_entry.y, [K_entry.matching_pairs.end] + matching_pairs)
 
         return extract_matching_pairs(result, [])
 
