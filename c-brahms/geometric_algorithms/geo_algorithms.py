@@ -296,7 +296,12 @@ class GeoAlgorithm(object):
                     inter_vec.noteEnd.color = self.settings['colour']
 
     def __repr__(self):
-        return "{0}\npattern = {1},\nsource = {2},\nsettings = {3}".format(self.__class__.__name__, self.pattern.derivation, self.source.derivation, self.settings)
+        return "\n".join([
+            self.__class__.__name__,
+            "pattern = {0}".format(self.pattern.derivation),
+            "source = {0}".format(self.source.derivation),
+            "user settings = {0}".format(self.user_settings),
+            "settings = {0}".format(self.settings)])
 
 class P(GeoAlgorithm):
     pass
