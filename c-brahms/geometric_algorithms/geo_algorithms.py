@@ -1,10 +1,13 @@
 from collections import namedtuple #for .scores immutable tuple
 from pprint import pformat #for repr
 from LineSegment import LineSegment
-from NoteSegment import NotePointSet, K_entry, CmpItQueue, InterNoteVector
+from NoteSegment import NotePointSet, K_entry, CmpItQueue, InterNoteVector, IntraNoteVector
 from bisect import insort # to insert while maintaining a sorted list
 from itertools import groupby # for K table initialization
 from builtins import object #Python 2 and 3 next() compatibility
+from more_itertools import peekable #for P class ptrs
+from fractions import Fraction # for scale
+import collections
 import geometric_algorithms
 import logging
 import NoteSegment
@@ -14,41 +17,14 @@ import pdb
 
 geo_algorithms_logger = logging.getLogger(__name__)
 
-# TODO measure total runtime with timeit (as a ratio of # of notes), store in an attribute like self.algorithmRunTime?
+# @TODO measure total runtime with timeit (as a ratio of # of notes), store in an attribute like self.algorithmRunTime?
+# @TODO implement 'threshold' == max
+# @TODO implement threshold range, e.g. at least 15 matches but at least 1 mismatch, etc.
 
-# TODO maybe have separate user and algorithm settings. this would allow for translations like..
+# @TODO maybe have separate user and algorithm settings. this would allow for translations like..
 # mismatches?
 # pattern_accuracy : 'all' --> threshold : len(pattern)
 # pattern_accuracy : 'max' --> threshold = len(max(self.results, key=lambda x: len(x)))
-
-SETTINGS_CONFIG = {
-        'algorithm' : ('P1',
-            ['P1', 'P2', 'P3', 'S1', 'S2', 'W1', 'W2', 'no numeric argument'],
-            lambda s: False),
-
-        'threshold' : ('all',
-            ['all', 'max', 'a positive integer > 0'],
-            lambda s: isinstance(s, int) and (s > 0)),
-
-        'mismatches' : (0,
-            ['a positive integer > 0'],
-            lambda s: isinstance(s, int) and (s > 0)),
-
-        # TODO fix scale which should take in a Fraction or a float or an integer
-        'scale' : ('pure',
-            ['pure', 'warped', 'a nonnegative integer >= 0'],
-            lambda s: isinstance(s, int) and (s >= 0)),
-
-        # TODO implement 0 < float percentage <= 1
-        'pattern_window' : (1,
-            ['a positive integer > 0'],
-            lambda s: isinstance(s, int) and (s > 0)),
-
-        'source_window' : (5,
-            ['a positive integer > 0'],
-            lambda s: isinstance(s, int) and (s > 0))
-        }
-
 DEFAULT_SETTINGS = {
         # Choose algorithm directly
         'algorithm' : 'P1',
@@ -59,27 +35,26 @@ DEFAULT_SETTINGS = {
         'scale' : 'pure',
         'threshold' : 'all',
         'mismatches' : 0,
+        'interval_func' : 'semitones',
 
         # P class settings
-        'segment' : False,
-        'overlap' : True,
+        #'segment' : False,
+        #'overlap' : True,
 
         # More meaningful settings
-        '%pattern_window' : 1,
-        '%threshold' : 1,
-        'offset_window' : False,
+        #'%pattern_window' : 1,
+        #'%threshold' : 1,
 
         #Output
         'colour' : "red",
         'show_pattern' : True,
-        'runOnInit' : True
         }
 
 class GeoAlgorithm(object):
     @classmethod
     def create(cls, pattern, source, **kwargs):
 
-        # TODO - do this here, or in algorithm init?
+        # @TODO - do this here, or in algorithm init?
         # Maybe we shouldn't allow algorithm init outside of create()?
         self.process_settings(kwargs)
 
@@ -110,25 +85,24 @@ class GeoAlgorithm(object):
         self.logger = logging.getLogger(__name__)
         self.logger.info('Creating a GeoAlgorithm instance')
 
+        # @TODO parse scores first, then validate & translate in one step using
+        # a subclassed dict object.
+
+        # Defines self.pattern, self.patternPointSet, self.source, self.sourcePointSet
+        self.parse_scores(pattern_input, source_input)
+
         # Defines self.user_settings and self.settings
         self.process_settings(kwargs)
 
-        # Defines self.pattern and self.source
-        self.parse_scores(pattern_input, source_input)
-
-        # Defines self.patternPointSet and self.sourcePointSet
-        # Also modifies self.settings based on self.user_settings
         self.pre_process()
 
         # Run the algorithm, filter the occurrences, define an occurrence generator.
-        #TODO make occurrence objects for easier processing and testing
+        #@TODO make occurrence objects for easier processing and testing
         self.results = (r for r in self.algorithm() if self.filter_result(r))
         self.occurrences = (self.process_result(r) for r in self.results)
 
+        # Output them!
         self.output = (self.process_occurrence(occ) for occ in self.occurrences)
-
-        # Do something with the occurrences
-        #self.post_process()
 
     def __iter__(self):
         return self
@@ -136,100 +110,92 @@ class GeoAlgorithm(object):
     def __next__(self):
         return next(self.output)
 
+    def parse_scores(self, pattern_input, source_input):
+        """
+        Defines self.pattern, self.patternPointSet, self.source, and self.sourcePointSet
+        Tests to see if the input is a file path or something else (possibly already parsed scores)
+
+        Stores input file path in the derivation as a music21Object
+        (each element in a derivation chain has to be a music21Object)
+
+        Also runs all necessary pre-processing common to every algorithm
+        (lexicographic sorting and chord flattening)
+        """
+        # @TODO what if the file is not found? It will fail!
+        for input_type, inpt in (('pattern', pattern_input), ('source', source_input)):
+            try:
+                score = music21.converter.parse(inpt)
+                score.derivation.origin = music21.ElementWrapper(inpt)
+                score.derivation.method = 'music21.converter.parse()'
+            except AttributeError:
+                score = inpt
+                try:
+                    score.derivation.method = 'pre-parsed'
+                except AttributeError:
+                    raise ValueError("Invalid input: pattern and source must be music21"
+                            + "streams or file names!")
+
+            # Define self.pattern, self.source
+            score.id = input_type
+            setattr(self, input_type, score)
+
+            # Define self.patternPointSet, self.sourcePointSet
+            # NotePointSet sets the derivations of new streams on init
+            point_set = NotePointSet(score)
+            setattr(self, input_type + 'PointSet', point_set)
+
     def process_settings(self, user_settings):
+        """
+        Validates user-specified settings (AND validates the default settings)
+        Translated keywords to algorithm-usable values
+        e.g. 'threshold' = 'all' --> threshold = len(pattern)
+
+        Some parameters are validated and translated before put into the settings dict
+        These validation and translation functions are stored as attributes of self as _'key'
+        They either return the value or raise a ValueError with the valid options
+        """
+
+        # Generate self.settings from the default settings
+        self.settings = dict(DEFAULT_SETTINGS.items())
         self.user_settings = user_settings
 
-        ## VALIDATE THE USER CONFIGURATION
+        # Validate user KEYS
         for key in user_settings.keys():
-            # Ensure this setting parameter is supported by the application
-            # e.g. if the user passes in a typo "thresold = 5", KeyError will be raised
             if key not in DEFAULT_SETTINGS.keys():
-                raise KeyError("Parameter '{0}' is not a valid parameter.".format(key))
+                raise ValueError("Parameter '{0}' is not a valid parameter.".format(key))
 
-            # Validate the data
-            default, valid_keywords, is_valid_integer_argument = SETTINGS_CONFIG[key]
+        # Validate and translate the setting arguments
+        self.settings.update(user_settings)
+        for key, arg in self.settings.items():
+            try:
+                # GET THE TRANSLATOR
+                translator = getattr(self, '_' + key)
+            except AttributeError:
+                # If the parameter doesn't have a validator or translator, let it be
+                continue
+            try:
+                # VALIDATE OR TRANSLATE THE DATA
+                self.settings[key] = translator(arg)
+            except ValueError as e:
+                # Distinguish whether the invalid data came from the DEFAULT settings, 
+                # or the user-specified ones
+                if key in user_settings.keys():
+                    message = "\n".join([
+                    "Parameter '{0}' has an invalid value of {1}".format(key, arg),
+                    "Valid arguments are: {0}".format(e.message)])
+                else:
+                    message = "\n".join([
+                    "DEFAULT SETTINGS has set parameter '{0}' to an invalid value of {1}".format(key, arg),
+                    "Valid arguments are: {0}".format(e.message)])
+                raise ValueError(message)
 
-            # Check for a valid keyword
-            if ((not isinstance(user_settings[key], int)) and
-                    (user_settings[key] not in valid_keywords[:-1])): #the last elt specifies valid int args
-                raise ValueError("\n".join([
-                        "Parameter '{0}' has an invalid value of {1}".format(key, user_settings[key]),
-                        "Valid arguments are: {0} or {1}".format(valid_keywords[:-1], valid_keywords[-1])]))
-
-            # Else check for a valid integer argument
-            elif ((isinstance(user_settings[key], int)) and
-                    (not is_valid_integer_argument(user_settings[key]))):
-                raise ValueError("\n".join([
-                        "Parameter '{0}' has an invalid integer value of {1}".format(key, user_settings[key]),
-                        "Integer arguments to this parameter must be: {0}".format(valid_keywords[-1])]))
-
-        # TODO make threshold and mismatches define an upper/lower bound range of tolerance
+        # @TODO make threshold and mismatches define an upper/lower bound range of tolerance
         if ('threshold' in user_settings) and ('mismatches' in user_settings):
             raise ValueError("Threshold and mismatches not yet both supported: use one or the other")
 
-        # Generate self.settings from the default settings, then update it with
-        # the user settings.
-        self.settings = {key : default for key, (default, _, _) in SETTINGS_CONFIG.items()}
-        self.settings.update(user_settings)
-
-    def parse_scores(self, pattern_input, source_input):
-        """
-        Defines self.pattern and self.source
-        Tests to see if the input is a file path or something else (possibly already parsed scores)
-
-        Stores input file path in the derivation as a music21Object.
-        We can run contextSites() on elements within the parsed score stream. It's a generator which finds context sites, but also follows derivation chains!
-        So each element in a derivation chain has to implement contextSites() - so use music21Objects in derivation chains!
-        """
-        # TODO what if the file is not found? It will fail!
-        try:
-            self.pattern = music21.converter.parse(pattern_input)
-            self.pattern.derivation.origin = music21.text.TextBox(pattern_input)
-            self.pattern.derivation.method = 'music21.converter.parse()'
-        except (music21.converter.ConverterException, AttributeError):
-            self.pattern = pattern_input
-            self.pattern.derivation.method = 'pre-parsed'
-        self.pattern.id = 'pattern'
-
-        try:
-            # Parse
-            self.source = music21.converter.parse(source_input)
-            # Set the derivation
-            self.source.derivation.origin = music21.text.TextBox(source_input)
-            self.source.derivation.method = 'music21.converter.parse()'
-            # Set the score title
-            self.source.metadata = music21.metadata.Metadata()
-            self.source.metadata.title = source_input
-        except(music21.converter.ConverterException, AttributeError):
-            self.source = source_input
-            self.source.derivation.method = 'pre-parsed'
-        self.source.id = 'source'
-
-
     def pre_process(self):
-        """
-        Defines self.patternPointSet and self.sourcePointSet
-        Runs all necessary pre-processing common to every algorithm (lexicographic sorting and chord flattening)
-        """
-        # NotePointSet sets the derivations of new streams on init
-        self.patternPointSet = NotePointSet(self.pattern)
-        self.patternPointSet.id = 'patternPointSet'
-        self.sourcePointSet = NotePointSet(self.source)
-        self.sourcePointSet.id = 'sourcePointSet'
+        pass
 
-        # TODO then after all this, put a new setting in for base40, generic intervals, etc..
-
-        self.algorithm_settings = {}
-        if self.settings['threshold'] == 'all':
-            self.algorithm_settings['threshold'] = len(self.patternPointSet)
-
-        # TODO implement 'threshold' == max
-        if self.settings['threshold'] == 'all':
-            self.settings['threshold'] = len(self.patternPointSet)
-        if self.settings['mismatches'] > 0:
-            self.settings['threshold'] = len(self.patternPointSet) - self.settings['mismatches']
-
-    # TODO What if you find nothing? How to ensure len(occ) > 0?
     def filter_result(self, result):
         """
         Decide whether the algorithm output is worth outputting
@@ -245,27 +211,34 @@ class GeoAlgorithm(object):
     def process_occurrence(self, occ):
         """
         Given an occurrence, process it and produce output
+
+        Implementation:
+        We look at the original source and gather all of the notes which have been matched.
+        First we tag these matched notes them with a group. We use groups rather than id's because
+        music21 will soon implement group-based style functions.
+        Next, we deepcopy the measure range excerpt in the score corresponding to matched notes
+        Finally we untag the matched notes in the original score and output the excerpt
         """
-
-        #occurence_ids = [vec.noteEnd.id if not vec.noteEnd.derivation.origin
-        #        else vec.noteEnd.derivation.origin.id for vec in occ]
-
+        # @TODO colour pattern notes too
         # The notes in the score corresponding to this occurrence
-        # TODO colour pattern notes too
         original_notes = [vec.noteEnd if not vec.noteEnd.derivation.origin
                 else vec.noteEnd.derivation.origin for vec in occ]
 
+        # Tag the matched notes
         for note in original_notes:
             note.groups.append('occurrence')
 
+        # Get a copied excerpt of the score
         excerpt = copy.deepcopy(self.source.measures(
                 numberStart = original_notes[0].getContextByClass('Measure').number,
                 numberEnd = original_notes[-1].getContextByClass('Measure').number))
 
+        # Untag the matched notes, process the occurrence
         for original_note, excerpt_note in zip(original_notes, excerpt.flat.getElementsByGroup('occurrence')):
             excerpt_note.color = 'red'
             original_note.groups.remove('occurrence')
 
+        # Output the occurrence
         if self.settings['show_pattern']:
             output = music21.stream.Opus([self.pattern, excerpt, self.source])
         else:
@@ -282,18 +255,90 @@ class GeoAlgorithm(object):
 
         return output
 
-    def post_process(self):
-        # Colour the score
-        self.check = []
-        if self.source.derivation.method == 'manual':
-            return
-        for occurrence in self.occurrences:
-            self.check.append(occurrence)
-            for inter_vec in occurrence:
-                if inter_vec.noteEnd.derivation.origin:
-                    inter_vec.noteEnd.derivation.origin.color = self.settings['colour']
-                else:
-                    inter_vec.noteEnd.color = self.settings['colour']
+    def _algorithm(self, arg):
+        valid_options = ['P1', 'P2', 'P3', 'S1', 'S2', 'W1', 'W2']
+        if arg in valid_options:
+            return getattr(geometric_algorithms, arg)
+        else:
+            raise ValueError(valid_options)
+
+    def _threshold(self, arg):
+        valid_options = []
+
+        valid_options.append('all')
+        if arg == 'all':
+            return len(self.patternPointSet)
+
+        valid_options.append('positive integer > 0')
+        if isinstance(arg, int) and (arg > 0):
+            return arg
+
+        valid_options.append('max')
+        if arg == 'max':
+            raise ValueError("Threshold option 'max' not yet implemented")
+
+        raise ValueError(valid_options)
+
+    def _mismatches(self, arg):
+        valid_options = []
+
+        valid_options.append('positive integer >= 0')
+        if isinstance(arg, int) and (arg >= 0):
+            return arg
+
+        raise ValueError(valid_options)
+
+    def _scale(self, arg):
+        valid_options = []
+
+        valid_options.append('2-tuple of positive integers (numerator, denominator)')
+        try:
+            scale = Fraction(*arg)
+        except (TypeError, ValueError):
+            valid_options.append('integer or float >= 0')
+            try:
+                scale = Fraction(arg)
+            except ValueError:
+                pass
+
+        valid_options.append('pure')
+        if arg == 'pure': return 1
+        valid_options.append('any', 'warped')
+        if arg == 'any' or arg == 'warped': return arg
+
+        if scale >= 0:
+            return scale
+
+        raise ValueError(valid_options)
+
+    def _pattern_window(self, arg):
+        valid_options = []
+
+        valid_options.append('positive integer > 0')
+        if isinstance(arg, int) and (arg > 0):
+            return arg
+
+        raise ValueError(valid_options)
+
+    def _source_window(self, arg):
+        return self._pattern_window(arg)
+
+    def _interval_func(self, arg):
+        valid_options = {
+                'semitones' : lambda v: v.chromatic.semitones,
+                'generic' : lambda v: v.generic.value,
+                'base40' : lambda v: (
+                    music21.musedata.base40.pitchToBase40(v.noteEnd) -
+                    music21.musedata.base40.pitchToBase40(v.noteStart))}
+        try:
+            return valid_options[arg]
+        except KeyError:
+            raise ValueError(valid_options)
+
+    def _colour(self, arg):
+        # @TODO validate colour
+        valid_options = ['any hexadecimal RGB colour?']
+        return arg
 
     def __repr__(self):
         return "\n".join([
@@ -304,7 +349,38 @@ class GeoAlgorithm(object):
             "settings = {0}".format(self.settings)])
 
 class P(GeoAlgorithm):
-    pass
+    """
+    Implements algorithms P1, P2, and P3 from Ukkonen's 2003 papers
+
+    P1, P2, and P3 all have separate algorithm implementations. They all use InterNoteVectors,
+    which originate from each pattern note and iterate through the source.
+    """
+    def pre_process(self):
+        super(P, self).pre_process()
+        self.sourcePointSet_offsetSort = NotePointSet(self.source, offsetSort=True)
+
+        interval_func = self.settings['interval_func']
+
+        # Compute InterNoteVector generator pointers
+        for note in self.patternPointSet:
+            note.source_ptrs = [
+                peekable((lambda p:
+                    (InterNoteVector(p, self.patternPointSet, s, self.sourcePointSet,
+                        interval_func, tp_type = 0)
+                    for s in self.sourcePointSet))(note)),
+                peekable((lambda p:
+                    (InterNoteVector(p, self.patternPointSet, s, self.sourcePointSet,
+                        interval_func, tp_type = 1)
+                    for s in self.sourcePointSet))(note)),
+                peekable((lambda p:
+                    (InterNoteVector(p, self.patternPointSet, s, self.sourcePointSet_offsetSort,
+                        interval_func, tp_type = 2)
+                    for s in self.sourcePointSet))(note)),
+                peekable((lambda p:
+                    (InterNoteVector(p, self.patternPointSet, s, self.sourcePointSet_offsetSort,
+                        interval_func, tp_type = 3)
+                    for s in self.sourcePointSet))(note))]
+
 
 class SW(GeoAlgorithm):
     """
@@ -381,12 +457,25 @@ class SW(GeoAlgorithm):
             3) Every intra vector match can constitute either the beginning of an antecedent chain,
             or a possible postcedent to an existing chain. So we push each one to the priority queues.
         """
+        def compute_intra_vectors(point_set, window = 1):
+            """
+            Computes the set of IntraSetVectors in a NotePointSet.
+
+            :int: window refers to the "reach" of any intra vector. It is the maximum
+            number of intervening notes inbetween the start and end of an intra-vector.
+            """
+            # @TODO would be nice to use iterators instead of indices, couldn't get it to work
+            point_set.intra_vectors = [IntraNoteVector(
+                point_set[i], end, point_set, self.settings['interval_func'])
+                    for i in range(len(point_set))
+                    for end in point_set[i+1 : i+1+window]]
+
         # Define self.patternPointSet and self.sourcePointSet. Also processes settings
         super(SW, self).pre_process()
 
         # Compute Intra vectors
-        self.patternPointSet.compute_intra_vectors(self.settings['pattern_window'])
-        self.sourcePointSet.compute_intra_vectors(self.settings['source_window'])
+        compute_intra_vectors(self.patternPointSet, self.settings['pattern_window'])
+        compute_intra_vectors(self.sourcePointSet, self.settings['source_window'])
 
         # Initialize antecedent and postcedent lists
         for p in self.patternPointSet:
@@ -404,9 +493,9 @@ class SW(GeoAlgorithm):
                     pattern_vec.noteStart.K_table.append(new_entry)
                     pattern_vec.noteEnd.PQ.setdefault(self.antecedentKey(new_entry), []).append(new_entry)
 
-        # TODO use bisect.insort() instead? or a priority queue?
+        # @TODO use bisect.insort() instead? or a priority queue?
         # We sort the K tables by <a, s, b> to keep them in a consistent order so that the
-        # order of the algorithm output remains consistent?
+        # order of the algorithm output remains consistent
         # Also they have to at least be sorted by selfpostcedentKey(x) for the algorithm to work.
         for p in self.patternPointSet:
             p.K_table.sort(key=lambda x: self.postcedentKey(x) + (x.sourceVec.noteEndIndex,))
@@ -453,9 +542,9 @@ class SW(GeoAlgorithm):
         for p in self.patternPointSet[1:-1]:
             # Get groups of K_rows with identical binding keys
             for postcedentKey, postcedents in groupby(p.K_table, self.postcedentKey):
-                # For this binding key, get every combination of K_row and chain, then bind them.
+                ## For this binding key, get every combination of K_row and chain, then bind them.
                 for K_row in postcedents:
-                    # The antecedent chains are hashed to the binding key
+                    # The antecedent chains we're looking for are hashed to the binding key
                     for antecedent in p.PQ.get(postcedentKey, []):
                         # BINDING OF EXTENSION
                         new_entry = K_entry(

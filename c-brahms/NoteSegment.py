@@ -51,13 +51,13 @@ class GeometricNote(music21.note.Note):
     def __add__(self, other_note):
         pass
 
-#TODO make this a generic SortVector class which InterNoteVector inherits?
+# @TODO make this a generic SortVector class which InterNoteVector inherits?
 # Or just get rid of it all together. we only use note vectors within a site
 class NoteVector(music21.interval.Interval):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, y_func, *args, **kwargs):
         super(NoteVector, self).__init__(*args, **kwargs)
         self.x = 0
-        self.y = self.chromatic.semitones
+        self.y = y_func(self)
 
         self.sortTupleOrder = ['x', 'y']
         self.sortTuple = lambda: tuple(getattr(self, attr) for attr in self.sortTupleOrder)
@@ -83,25 +83,38 @@ class NoteVector(music21.interval.Interval):
         return self.sortTuple() < other
 
 class InterNoteVector(NoteVector):
-    def __init__(self, ralph, ralphSite, larry, larrySite, tp_type=1):
-        super(InterNoteVector, self).__init__(noteStart=ralph, noteEnd=larry)
-        #TODO make all tp_types attributes or functions, freely accessible?
+    """
+    Each InterNoteVector is a shift from a pattern note to a source note
+    We subclass NoteVector to inherit rich comparisons and a SortTuple mechanism
+
+    We use the y_func to determine the height difference between notes (e.g. if we want don't want
+    enharmonic equivalence, use base40)
+    """
+    # y_func should get the default from SETTINGS. but we include a default here because
+    # we use InterNoteVector in K_entry to compute matching pairs.
+    def __init__(self, ralph, ralphSite, larry, larrySite, y_func=lambda x: x.chromatic.semitones, tp_type=1):
+        super(InterNoteVector, self).__init__(noteStart=ralph, noteEnd=larry, y_func=y_func)
+        #TODO calculate all tp_types and make them available as attributes?
         if tp_type == 0:
             # source.onset - pattern.offset
-            self.x = larry.getOffsetBySite(larrySite) - (ralph.getOffsetBySite(ralphSite) + ralph.duration.quarterLength)
+            self.x = (larry.getOffsetBySite(larrySite) -
+                    (ralph.getOffsetBySite(ralphSite) + ralph.duration.quarterLength))
         elif tp_type == 1:
             # source.onset - pattern.onset
             self.x = larry.getOffsetBySite(larrySite) - ralph.getOffsetBySite(ralphSite)
         elif tp_type == 2:
             # source.offset - pattern.offset
-            self.x = (larry.getOffsetBySite(larrySite) + larry.duration.quarterLength) - (ralph.getOffsetBySite(ralphSite) + ralph.duration.quarterLength)
+            self.x = ((larry.getOffsetBySite(larrySite) + larry.duration.quarterLength) -
+                    (ralph.getOffsetBySite(ralphSite) + ralph.duration.quarterLength))
         elif tp_type == 3:
             # source.offset - pattern.onset
-            self.x = (larry.getOffsetBySite(larrySite) + larry.duration.quarterLength) - ralph.getOffsetBySite(ralphSite)
+            self.x = ((larry.getOffsetBySite(larrySite) + larry.duration.quarterLength)
+                    - ralph.getOffsetBySite(ralphSite))
         else:
             raise ValueError("InterNoteVector tp_type must be initialized with 0, 1, 2, or 3")
 
 
+        # Sort an InterNoteVector by (x, y, tp_type)
         self.tp_type = tp_type
         self.sortTupleOrder.append('tp_type')
 
@@ -117,9 +130,9 @@ class InterNoteVector(NoteVector):
                     self.noteStartIndex, self.noteStart, self.noteEndIndex, self.noteEnd))
 
 class IntraNoteVector(InterNoteVector):
-    def __init__(self, ralph, larry, site):
+    def __init__(self, ralph, larry, site, y_func):
         self.site = site
-        super(IntraNoteVector, self).__init__(ralph, site, larry, site)
+        super(IntraNoteVector, self).__init__(ralph, site, larry, site, y_func)
 
 class K_entry(object):
     def __init__(self, intra_pattern_vector, intra_database_vector, w=1, y=None, e=0, z=0):
@@ -232,18 +245,6 @@ class NotePointSet(music21.stream.Stream):
         self.autoSort = False
         for n in new_notes:
             self.insert(n)
-
-    def compute_intra_vectors(self, window = 1):
-        """
-        Computes the set of IntraSetVectors in a NotePointSet.
-
-        :int: window refers to the "reach" of any intra vector. It is the maximum
-        number of intervening notes inbetween the start and end of an intra-vector.
-        """
-        # NOTE would be nice to use iterators instead of indices, couldn't get it to work
-        self.intra_vectors = [IntraNoteVector(self[i], end, self)
-                for i in range(len(self))
-                for end in self[i+1 : i+1+window]]
 
     # TODO make this a part of geoAlgorithm since it's really about a pattern and a source, not just any segment stream.
     def initialize_KtablesOld(self, source):
