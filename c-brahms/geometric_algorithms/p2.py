@@ -39,10 +39,7 @@ class P2(P):
         # from generator comprehensions
         # NOTE possibly a generator comprehension would work fine in python3
         for note in self.patternPointSet:
-            shifts.put(peekable((lambda p:
-                (InterNoteVector(p, self.patternPointSet, s, self.sourcePointSet)
-                    for s in self.sourcePointSet))
-                (note)))
+            shifts.put(note.source_ptrs[1])
 
         # NOTE this may break since groupby can break up the following group while pushing a smaller group?
         for k, ptr_group in groupby(shifts, key=lambda gen: gen.peek()):

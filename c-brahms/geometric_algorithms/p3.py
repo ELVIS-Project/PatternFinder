@@ -13,9 +13,8 @@ import pdb
 class P3(P):
 
     def pre_process(self):
-        super(P3, self).pre_process()
-        self.sourcePointSet_offsetSort = NotePointSet(self.source, offsetSort=True)
         #TODO merge overlapping notes using stream.getOverlaps()
+        super(P3, self).pre_process()
 
 
     def process_result(self, result):
@@ -40,10 +39,12 @@ class P3(P):
             # Push four inter vectors generators for each pattern note, with varying tp_types (0, 1, 2, 3)
             # tp_types 0, 1 iterate through a source sorted by onset (attack)
             # while types 2, 3 iterate through a source sorted by offset (release)
-            shifts.put(peekable((lambda p: (InterNoteVector(p, pattern, s, source_onsetSort, tp_type=0) for s in source_onsetSort))(note)))
-            shifts.put(peekable((lambda p: (InterNoteVector(p, pattern, s, source_onsetSort, tp_type=1) for s in source_onsetSort))(note)))
-            shifts.put(peekable((lambda p: (InterNoteVector(p, pattern, s, source_offsetSort, tp_type=2) for s in source_offsetSort))(note)))
-            shifts.put(peekable((lambda p: (InterNoteVector(p, pattern, s, source_offsetSort, tp_type=3) for s in source_offsetSort))(note)))
+            for ptr in note.source_ptrs:
+                shifts.put(ptr)
+            #shifts.put(peekable((lambda p: (InterNoteVector(p, pattern, s, source_onsetSort, tp_type=0) for s in source_onsetSort))(note)))
+            #shifts.put(peekable((lambda p: (InterNoteVector(p, pattern, s, source_onsetSort, tp_type=1) for s in source_onsetSort))(note)))
+            #shifts.put(peekable((lambda p: (InterNoteVector(p, pattern, s, source_offsetSort, tp_type=2) for s in source_offsetSort))(note)))
+            #shifts.put(peekable((lambda p: (InterNoteVector(p, pattern, s, source_offsetSort, tp_type=3) for s in source_offsetSort))(note)))
 
         for turning_point_generator in shifts:
             inter_vec = turning_point_generator.next()

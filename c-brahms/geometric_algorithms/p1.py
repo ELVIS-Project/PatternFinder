@@ -23,32 +23,33 @@ class P1(P):
         return True
 
     def algorithm(self):
-        def is_pure_occurrence(ptrs):
+        def is_pure_occurrence(ptrs, cur_shift):
             for inter_vector_gen in ptrs[1:]:
-                # Take the first intervec that's too big. if you use itertools.takewhile, it will consume the first one that's too big, but you want to keep it in the generator for subsequent cur_shifts.
+                # Take the first intervec that's too big.
+                # If you use itertools.takewhile, it will consume the first one that's
+                # too big, # but you want to keep it in the generator for subsequent cur_shifts.
                 try:
-                    while inter_vector_gen.peek() < cur_shift: inter_vector_gen.next()
+                    while inter_vector_gen.peek() < cur_shift:
+                        inter_vector_gen.next()
 
-                    # TODO add if cndt_intr_vector.peek() == cur_shift, take it. Then make is_pure_occurrence a generator, so we can find multiple matches if there are duplicated notes
+                    # TODO add if cndt_intr_vector.peek() == cur_shift, take it.
+                    # Then make is_pure_occurrence a generator,
+                    # so we can find multiple matches if there are duplicated notes
                     if inter_vector_gen.peek() != cur_shift:
                         return False
                 except StopIteration:
                     return False
-            # If we've gotten down here, then there are enough matching pairs to constitute a pure, exact match!
+            # If we've gotten down here, then there are enough matching pairs to
+            # constitute a pure, exact match!
             return True
 
-        source = self.sourcePointSet
-        pattern = self.patternPointSet
-
-        ptrs = [peekable((lambda p: (InterNoteVector(p, pattern, s, source) for s in source))(note)) for note in pattern]
+        ptrs = [p.source_ptrs[1] for p in self.patternPointSet]
 
         # At the very least, p_0 must match, so we use this shift as a candidate
         for cur_shift in ptrs[0]:
             # Then we look at the rest of the pointers to see if they also can form a matching pair with this shift
-            if is_pure_occurrence(ptrs):
-                yield [cur_shift] + map(lambda x: x.peek(), ptrs[1:])
-
-
+            if is_pure_occurrence(ptrs, cur_shift):
+                yield [cur_shift] + [x.peek() for x in ptrs[1:]]
 
     def algorithmOld(self):
         """
