@@ -1,4 +1,5 @@
-from geometric_algorithms import P1, P2, P3, S1, S2, W1, W2, Finder
+import geometric_algorithms
+from geometric_algorithms import P1, P2, P3, S1, S2, W1, W2
 from geometric_algorithms.geo_algorithms import GeoAlgorithm
 from pprint import pprint as pp
 from collections import namedtuple
