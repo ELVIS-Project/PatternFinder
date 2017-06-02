@@ -1,5 +1,5 @@
 from collections import namedtuple #for .scores immutable tuple
-from pprint import pformat #for repr
+from pprint import pformat #for repr and logging
 from LineSegment import LineSegment
 from NoteSegment import NotePointSet, K_entry, CmpItQueue, InterNoteVector, IntraNoteVector
 from bisect import insort # to insert while maintaining a sorted list
@@ -9,48 +9,39 @@ from more_itertools import peekable #for P class ptrs
 from fractions import Fraction # for scale
 import collections
 import geometric_algorithms
-import logging
+import logging.config
 import NoteSegment
 import copy
 import music21
 import pdb
+import yaml
 
-geo_algorithms_logger = logging.getLogger(__name__)
+import os
+import logging
+import yaml
 
-# @TODO measure total runtime with timeit (as a ratio of # of notes), store in an attribute like self.algorithmRunTime?
-# @TODO implement 'threshold' == max
-# @TODO implement threshold range, e.g. at least 15 matches but at least 1 mismatch, etc.
+LOGGING_PATH = 'logging.yaml'
+SETTINGS_PATH = 'settings.yaml'
 
-# @TODO maybe have separate user and algorithm settings. this would allow for translations like..
-# mismatches?
-# pattern_accuracy : 'all' --> threshold : len(pattern)
-# pattern_accuracy : 'max' --> threshold = len(max(self.results, key=lambda x: len(x)))
-DEFAULT_SETTINGS = {
-        # Choose algorithm directly
-        'algorithm' : 'P1',
+# Configure logging
+if os.path.exists(LOGGING_PATH):
+    with open(LOGGING_PATH, 'rt') as f:
+        config = yaml.safe_load(f.read())
+    logging.config.dictConfig(config)
+else:
+    logging.basicConfig(level=logging.INFO)
 
-        # Universal Algorithm settings
-        'pattern_window' : 1,
-        'source_window' : 5,
-        'scale' : 'pure',
-        'threshold' : 'all',
-        'mismatches' : 0,
-        'interval_func' : 'semitones',
-
-        # P class settings
-        #'segment' : False,
-        #'overlap' : True,
-
-        # More meaningful settings
-        #'%pattern_window' : 1,
-        #'%threshold' : 1,
-
-        #Output
-        'colour' : "red",
-        'show_pattern' : True,
-        }
+# Load default settings
+if os.path.exists(SETTINGS_PATH):
+    with open(SETTINGS_PATH, 'rt') as f:
+        DEFAULT_SETTINGS = yaml.safe_load(f.read())
+else:
+    raise Exception("No settings.yaml file found")
 
 class GeoAlgorithm(object):
+    """
+    Generic base class to manage execution of P, S, and W algorithms
+    """
     @classmethod
     def create(cls, pattern, source, **kwargs):
 
@@ -78,28 +69,46 @@ class GeoAlgorithm(object):
         algorithm = getattr(geometric_algorithms, algorithm_name)
         return algorithm(pattern, source, **kwargs)
 
-    """
-    Generic base class to manage execution of P, S, and W algorithms
-    """
     def __init__(self, pattern_input, source_input, **kwargs):
+        """
+        An algorithm object parses the input and runs algorithm pre processing on __init__
+        The object itself is a generator, so it won't begin looking for results until
+        the user calls next(self)
+        """
+
+        # Log the creation of this object
         self.logger = logging.getLogger(__name__)
-        self.logger.info('Creating a GeoAlgorithm instance')
+        self.logger.info('Creating a %s algorithm with:\n pattern %s\n source %s\n settings %s',
+                self.__class__.__name__, pattern_input, source_input, pformat(kwargs))
 
-        # @TODO parse scores first, then validate & translate in one step using
-        # a subclassed dict object.
-
+        ## PARSE THE SCOERS
+        self.logger.info("Attempting to parse scores...")
+        self.logger = logging.getLogger(self.logger.name + '.parse_scores()')
         # Defines self.pattern, self.patternPointSet, self.source, self.sourcePointSet
         self.parse_scores(pattern_input, source_input)
+        self.logger = logging.getLogger(__name__)
+        self.logger.info("Parsed scores")
 
+        ## PROCESS SETTINGS
+        self.logger.info("Processing user settings \n %s", pformat(kwargs))
+        self.logger = logging.getLogger(self.logger.name + '.process_settings()')
         # Defines self.user_settings and self.settings
         self.process_settings(kwargs)
+        self.logger = logging.getLogger(__name__)
+        self.logger.info("Processed settings: \n %s", pformat(self.settings))
 
+        ## PRE-PROCESS
+        self.logger.info("Pre-processing...")
+        self.logger = logging.getLogger(self.logger.name + '.pre_process()')
+        # Run any necessary pre-processing required for the algorithm
         self.pre_process()
+        self.logger = logging.getLogger(__name__)
+        self.logger.info("Pre-processed")
 
         # Run the algorithm, filter the occurrences, define an occurrence generator.
         #@TODO make occurrence objects for easier processing and testing
-        self.results = (r for r in self.algorithm() if self.filter_result(r))
-        self.occurrences = (self.process_result(r) for r in self.results)
+        self.results = self.filtered_results()
+        self.occurrences = self.occurrence_generator()
 
         # Output them!
         self.output = (self.process_occurrence(occ) for occ in self.occurrences)
@@ -124,14 +133,17 @@ class GeoAlgorithm(object):
         # @TODO what if the file is not found? It will fail!
         for input_type, inpt in (('pattern', pattern_input), ('source', source_input)):
             try:
+                self.logger.debug("Attempting to parse %s", inpt)
                 score = music21.converter.parse(inpt)
                 score.derivation.origin = music21.ElementWrapper(inpt)
                 score.derivation.method = 'music21.converter.parse()'
             except AttributeError:
+                self.logger.debug("%s could not be parsed - we now assume it's a stream...", inpt)
                 score = inpt
                 try:
                     score.derivation.method = 'pre-parsed'
                 except AttributeError:
+                    self.logger.exception("%s does not have a derivation attribute", inpt)
                     raise ValueError("Invalid input: pattern and source must be music21"
                             + "streams or file names!")
 
@@ -141,6 +153,7 @@ class GeoAlgorithm(object):
 
             # Define self.patternPointSet, self.sourcePointSet
             # NotePointSet sets the derivations of new streams on init
+            self.logger.debug("Making a NotePointSet out of %s", score)
             point_set = NotePointSet(score)
             setattr(self, input_type + 'PointSet', point_set)
 
@@ -154,7 +167,6 @@ class GeoAlgorithm(object):
         These validation and translation functions are stored as attributes of self as _'key'
         They either return the value or raise a ValueError with the valid options
         """
-
         # Generate self.settings from the default settings
         self.settings = dict(DEFAULT_SETTINGS.items())
         self.user_settings = user_settings
@@ -167,15 +179,19 @@ class GeoAlgorithm(object):
         # Validate and translate the setting arguments
         self.settings.update(user_settings)
         for key, arg in self.settings.items():
+            self.logger.debug("Processing setting %s with value %s", key, arg)
             try:
                 # GET THE TRANSLATOR
                 translator = getattr(self, '_' + key)
             except AttributeError:
+                self.logger.debug("'%s' does not have a validator/translator", key)
                 # If the parameter doesn't have a validator or translator, let it be
                 continue
             try:
                 # VALIDATE OR TRANSLATE THE DATA
+                self.logger.debug("Validating and translating key %s ...", key)
                 self.settings[key] = translator(arg)
+                self.logger.debug("'%s' : %s translates to %s", key, arg, self.settings[key])
             except ValueError as e:
                 # Distinguish whether the invalid data came from the DEFAULT settings, 
                 # or the user-specified ones
@@ -470,11 +486,12 @@ class SW(GeoAlgorithm):
                     for i in range(len(point_set))
                     for end in point_set[i+1 : i+1+window]]
 
-        # Define self.patternPointSet and self.sourcePointSet. Also processes settings
         super(SW, self).pre_process()
 
         # Compute Intra vectors
+        self.logger.info("Computing intra pattern vectors...")
         compute_intra_vectors(self.patternPointSet, self.settings['pattern_window'])
+        self.logger.info("Computing intra source vectors...")
         compute_intra_vectors(self.sourcePointSet, self.settings['source_window'])
 
         # Initialize antecedent and postcedent lists
@@ -499,6 +516,12 @@ class SW(GeoAlgorithm):
         # Also they have to at least be sorted by selfpostcedentKey(x) for the algorithm to work.
         for p in self.patternPointSet:
             p.K_table.sort(key=lambda x: self.postcedentKey(x) + (x.sourceVec.noteEndIndex,))
+
+        # DEBUG LOG: a complete view of the K-tables
+        if self.logger.isEnabledFor(logging.DEBUG):
+            self.logger.debug('K-table initialization: %s', pformat(
+                list(enumerate(p.K_table for p in self.patternPointSet))))
+
 
     def filter_result(self, result):
         return (# Results are intra-vectors, not notes, so we need one less

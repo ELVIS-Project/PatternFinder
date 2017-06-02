@@ -1,0 +1,35 @@
+algorithm:
+    P1
+pattern_window:
+    1
+source_window:
+    1
+scale:
+    pure
+threshold:
+    all
+mismatches:
+    0
+interval_func:
+    semitones
+colour:
+    red
+show_pattern:
+    True
+    #
+    # P class settings
+    #'segment' : False,
+    #'overlap' : True,
+
+    # More meaningful settings
+    #'%pattern_window' : 1,
+    #'%threshold' : 1,
+    # @TODO measure total runtime with timeit (as a ratio of # of notes), store in an attribute like self.algorithmRunTime?
+    # @TODO implement 'threshold' == max
+    # @TODO implement threshold range, e.g. at least 15 matches but at least 1 mismatch, etc.
+
+    # @TODO maybe have separate user and algorithm settings. this would allow for translations like..
+    # mismatches?
+    # pattern_accuracy : 'all' --> threshold : len(pattern)
+    # pattern_accuracy : 'max' --> threshold = len(max(self.results, key=lambda x: len(x)))
+

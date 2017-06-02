@@ -1,0 +1,52 @@
+version: 1
+disable_existing_loggers: false
+
+root:
+    level: WARNING
+    handlers: [console]
+
+loggers:
+    geometric_algorithms.geo_algorithms:
+        level: INFO
+        handlers: [console, logfile]
+        propagate: no
+    geomeric_algorithms.geo_algorithms.parse_scores():
+        level: INFO
+        handlers: [console]
+        propagate: no
+    geometric_algorithms.geo_algorithms.process_settings():
+        level: INFO
+        handlers: [console]
+        propagate: no
+    geometric_algorithms.geo_algorithms.pre_process():
+        level: WARNING
+        handlers: [console]
+        propagate: no
+
+    NoteSegment:
+        level: INFO
+        handlers: [console, logfile]
+        propagate: no
+    VectorCreation:
+        level: DEBUG
+        handlers: [console]
+        propagate: no
+
+handlers:
+    console:
+        class: logging.StreamHandler
+        level: DEBUG
+        formatter: simple
+        stream: ext://sys.stdout
+
+    logfile:
+        class: logging.FileHandler
+        level: DEBUG
+        formatter: simple
+        filename: debug.log
+
+formatters:
+    simple:
+        class: logging.Formatter
+        format: "%(asctime)s - %(name)s - %(levelname)s - %(funcName)s \n %(message)s \n"
+
