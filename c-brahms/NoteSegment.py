@@ -3,6 +3,7 @@ from fractions import Fraction
 from collections import namedtuple # to make a custom Priority Queue
 from pprint import pprint, pformat #for K_enry __repr__
 from more_itertools import peekable # to peek in the priority queue
+import logging
 import queue # to make a custom Priority Queue
 import copy # for link_and_create
 import music21
@@ -187,14 +188,18 @@ class NotePointSet(music21.stream.Stream):
     music21.stream.Stream does not allow any required arguments in its __init__, so every argument must be optional.
     """
     def __init__(self, stream=music21.stream.Stream(), offsetSort=False, *args, **kwargs):
-        # TODO use stream.mergeElements and then stream.sort(), overriding sortTuples
         def music21Chord_to_music21Notes(chord, site):
             """
             CHORD TO LIST OF NOTES FOR USE IN music21.stream.insert()
             For serious flattening of the score into a 2-d plane of horizontal line segments.
-            music21.note.Note and music21.chord.Chord subclass the same bases, so in theory it shoud look something like this...
+            music21.note.Note and music21.chord.Chord subclass the same bases,
+            so in theory it shoud look something like this...
 
-            NOTE: this will screw up the coloring since music21 doesn't support coloring just one note of a chord (i don't think?), so as compromise i'll just color the whole chord.
+            NOTE: this will screw up the coloring since music21 doesn't support coloring just
+            one note of a chord (i don't think?), so as compromise i'll just color the whole chord.
+
+            @TODO maybe a cleaner implementation: use stream.MergeElements and override
+            music21Object.sortTuple so we can use stream.sort()
             """
             note_list = []
             for pitch in chord.pitches:
