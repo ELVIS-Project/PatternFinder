@@ -119,6 +119,34 @@ class GeoAlgorithm(object):
     def __next__(self):
         return next(self.output)
 
+    def filtered_results(self):
+        """
+        A generator which filters the algorithm output based on self.filter_result
+        This is the middle step in processing between algorithm output and occurrence output
+        We implement this function in case someone wants to directly access algorithm filtered output
+        """
+        for r in self.algorithm():
+            log_msg = "Algorithm yielded\n {0}...\n".format(pformat(r))
+            if self.filter_result(r):
+                log_msg += "Passed the filter!"
+                self.logger.debug(log_msg)
+                yield r
+            else:
+                log_msg += "Didn't pass the filter"
+                self.logger.debug(log_msg)
+
+    def occurrence_generator(self):
+        """
+        An occurrence generator: creates Occurrence objects from the filtered algorithm results.
+        We implement this function so that users can look for occurrences again after having
+        exhausted self.occurrences (without having to create another Algorithm object)
+        """
+        results = self.filtered_results()
+        for r in results:
+            occ = self.process_result(r)
+            self.logger.info("Yielding occurrence %s", pformat(occ))
+            yield occ
+
     def parse_scores(self, pattern_input, source_input):
         """
         Defines self.pattern, self.patternPointSet, self.source, and self.sourcePointSet
