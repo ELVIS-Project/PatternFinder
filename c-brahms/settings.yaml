@@ -1,9 +1,9 @@
 algorithm:
-    P1
+    'P1'
 pattern_window:
     1
 source_window:
-    1
+    5
 scale:
     pure
 threshold:
@@ -16,6 +16,13 @@ colour:
     red
 show_pattern:
     True
+auto_select:
+    True
+
+pattern: # we separate these in __init__ as syntactic sugar
+    None
+source: # but we use them within Finder.update() to avoid parsing more than we need to
+    None
     #
     # P class settings
     #'segment' : False,

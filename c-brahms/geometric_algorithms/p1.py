@@ -1,7 +1,6 @@
 from LineSegment import LineSegment
 from itertools import takewhile
 from more_itertools import peekable
-from NoteSegment import InterNoteVector
 from geometric_algorithms.geo_algorithms import P
 import NoteSegment
 import music21
@@ -19,8 +18,6 @@ class P1(P):
     POLYPHONIC BEHAVIOUR:
         P1 can find exact melodic occurrences through many voices. It will only find multiple matches if the first note of the pattern can match more than one identical note in the source, while all the rest of the notes find possibly non-unique matches. THIS should be changed.
     """
-    def filter_result(self, result):
-        return True
 
     def algorithm(self):
         def is_pure_occurrence(ptrs, cur_shift):

@@ -108,7 +108,9 @@ class TestLemstromExample(TestCase):
                 for pairs in expected]
 
         self.longMessage = True
-        carlos = algorithm(pattern, source, **settings)
+        #carlos = algorithm(pattern, source, **settings)
+        # @TODO put algorithm name in settings
+        carlos = Finder(pattern, source, auto_select = False, algorithm=algorithm.__name__, **settings)
         for exp in matching_pairs:
             try:
                 occurrence = next(carlos.occurrences)
