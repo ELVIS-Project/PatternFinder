@@ -177,6 +177,38 @@ class Occurrence(object):
     """
     pass
 
+def music21Chord_to_music21Notes(chord, site):
+    """
+    For internal use in NotePointSet()
+
+    CHORD TO LIST OF NOTES FOR USE IN music21.stream.insert()
+    For serious flattening of the score into a 2-d plane of horizontal line segments.
+    music21.note.Note and music21.chord.Chord subclass the same bases,
+    so in theory it shoud look something like this...
+
+    NOTE: this will screw up the coloring since music21 doesn't support coloring just
+    one note of a chord (i don't think?), so as compromise i'll just color the whole chord.
+
+    @TODO maybe a cleaner implementation: use stream.MergeElements and override
+    music21Object.sortTuple so we can use stream.sort()
+    """
+    note_list = []
+    for pitch in chord.pitches:
+        note = music21.note.Note(pitch)
+
+        # Music21Object.mergeAttributes gets the 'id' and 'group' attributes
+        note.mergeAttributes(chord)
+
+        # note essentials
+        note.duration = chord.duration
+        note.offset = chord.offset
+
+        note_list.append(note)
+
+        note.derivation.origin = chord
+        note.derivation.method = 'chord_to_notes'
+    return note_list
+
 class NotePointSet(music21.stream.Stream):
     """
     A container for the notes of a music21 parsed score.
@@ -187,45 +219,35 @@ class NotePointSet(music21.stream.Stream):
 
     music21.stream.Stream does not allow any required arguments in its __init__, so every argument must be optional.
     """
-    def __init__(self, stream=music21.stream.Stream(), offsetSort=False, *args, **kwargs):
-        def music21Chord_to_music21Notes(chord, site):
-            """
-            CHORD TO LIST OF NOTES FOR USE IN music21.stream.insert()
-            For serious flattening of the score into a 2-d plane of horizontal line segments.
-            music21.note.Note and music21.chord.Chord subclass the same bases,
-            so in theory it shoud look something like this...
-
-            NOTE: this will screw up the coloring since music21 doesn't support coloring just
-            one note of a chord (i don't think?), so as compromise i'll just color the whole chord.
-
-            @TODO maybe a cleaner implementation: use stream.MergeElements and override
-            music21Object.sortTuple so we can use stream.sort()
-            """
-            note_list = []
-            for pitch in chord.pitches:
-                note = music21.note.Note(pitch)
-
-                # Music21Object.mergeAttributes gets the 'id' and 'group' attributes
-                note.mergeAttributes(chord)
-
-                # note essentials
-                note.duration = chord.duration
-                note.offset = chord.offset
-
-                note_list.append(note)
-
-                note.derivation.origin = chord
-                note.derivation.method = 'chord_to_notes'
-            return note_list
+    def __init__(self, maybe_stream=music21.stream.Stream(), offsetSort=False, *args, **kwargs):
+        # Log this function
+        # @TODO not sure how to tie this in with the calling function
+        logger = logging.getLogger(__name__)
 
         super(NotePointSet, self).__init__()
         self.derivation.method = 'NotePointSet()'
-        self.derivation.origin = stream
+
+        if isinstance(maybe_stream, str):
+            logger.debug("Attempting to use music21.converter.parse on %s", maybe_stream)
+            score = music21.converter.parse(maybe_stream)
+            score.derivation.origin = music21.ElementWrapper(maybe_stream)
+            score.derivation.method = 'music21.converter.parse()'
+        elif isinstance(maybe_stream, music21.stream.Stream):
+            logger.debug("%s input has already been manually parsed", maybe_stream)
+            score = maybe_stream
+            score.derivation.method = 'manually pre-parsed'
+        else:
+            logger.exception("NotePointSet() input %s is neither a str nor a Stream!", maybe_stream)
+            raise ValueError("Invalid input: pattern and source must be music21"
+                    + "streams or file names!")
+
+        # Set the derivation for this PointSet
+        self.derivation.origin = score
 
         # Use .flat instead of .recurse() because we want to preserve the nested
         # stream offsets. When we switch to python3 and use music21 v.3, we can use
         # music21Object.getoffsetInHierarchy(), but for now use stream.flat
-        note_stream = stream.flat.notes
+        note_stream = score.flat.notes
 
         # Sorting key for the NotePointSet: sort lexicographicaly by tuples of:
         #    1) either note onset (attack) or note offset (release)
