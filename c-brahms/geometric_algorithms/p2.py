@@ -27,7 +27,8 @@ class P2(P):
     of the matching pairs corresponding to the current candidate shift)
     """
     def filter_result(self, result):
-        return (len(result) >= self.settings['threshold'])
+        return ((len(result) >= self.settings['threshold'])
+                and super(P2, self).filter_result(result))
 
     def algorithm(self):
 
