@@ -1,22 +1,15 @@
-from collections import namedtuple #for .scores immutable tuple
 from pprint import pformat #for repr and logging
-from LineSegment import LineSegment
-from NoteSegment import NotePointSet, K_entry, CmpItQueue, InterNoteVector, IntraNoteVector
-from bisect import insort # to insert while maintaining a sorted list
+from geometric_helsinki.NoteSegment import NotePointSet, K_entry, CmpItQueue, InterNoteVector, IntraNoteVector
+from bisect import insort # @TODO to insert while maintaining a sorted list
 from itertools import groupby # for K table initialization
-from builtins import object #Python 2 and 3 next() compatibility
-from more_itertools import peekable #for P class ptrs
+from builtins import object # Python 2 and 3 next() compatibility
+from more_itertools import peekable # for P class ptrs
 from fractions import Fraction # for scale
-import collections
-import geometric_algorithms
-import NoteSegment
-import copy
+import logging
 import music21
 import pdb
-import logging
-import yaml
 
-class GeoAlgorithm(object):
+class GeometricHelsinkiBase(object):
     """
     A base class for P, S, and W algorithms
 
@@ -37,8 +30,7 @@ class GeoAlgorithm(object):
         The object itself is a generator, so it won't begin looking for results until
         the user calls next(self)
         """
-        # Log the creation of this object
-        self.logger = logging.getLogger(__name__)
+        self.logger = logging.getLogger("{0}.{1}".format('geometric_algorithms', self.__class__.__name__))
         self.logger.info('Creating a %s algorithm with:\n pattern %s\n source %s\n settings %s',
                 self.__class__.__name__, pattern_input, source_input, pformat(settings))
 
@@ -46,7 +38,9 @@ class GeoAlgorithm(object):
         self.sourcePointSet = source_input
         self.settings = settings
 
-        self.pre_process()
+    def setup_logging(self):
+        # Log the creation of this object
+        self.logger = logging.getLogger(__name__)
 
     def pre_process(self):
         pass
@@ -83,10 +77,10 @@ class GeoAlgorithm(object):
         results = self.filtered_results()
         for r in results:
             occ = self.process_result(r)
-            self.logger.info("Yielding occurrence %s", pformat(occ))
+            self.logger.debug("Yielding occurrence %s", pformat(occ))
             yield occ
 
-class P(GeoAlgorithm):
+class P(GeometricHelsinkiBase):
     """
     Implements algorithms P1, P2, and P3 from Ukkonen's 2003 papers
 
@@ -120,7 +114,7 @@ class P(GeoAlgorithm):
                     for s in self.sourcePointSet))(note))]
 
 
-class SW(GeoAlgorithm):
+class SW(GeometricHelsinkiBase):
     """
     Implements algorithms S1, S2, W1, and W2 from Lemstrom's 2010 and 2011 papers
 
@@ -318,3 +312,210 @@ class W(SW):
         self.antecedentKey = lambda row: (row.sourceVec.noteEndIndex,) # pre_process uses tuple concatenation to sort K tables
         self.postcedentKey = lambda row: (row.sourceVec.noteStartIndex,)
         super(W, self).pre_process()
+
+
+class P1(P):
+    """
+    INPUT:
+        pattern - sorted flattened music21 stream of notes (no chords)
+        source - another sorted flattened music21 stream of notes (no chords)
+        settings - dictionary
+    OUTPUT:
+        a list of InterNoteVectors indicating each matching pair within an exact, pure occurrence of the pattern within the source
+
+    Modification from pseudocode code. Skips this line:
+        ptrs[p] = max(ptrs[p], p + t)
+
+    POLYPHONIC BEHAVIOUR
+        P1 can find exact melodic occurrences through many voices. It will only find multiple matches if the first note of the pattern can match more than one identical note in the source, while all the rest of the notes find possibly non-unique matches. THIS should be changed.
+
+
+    UKKONEN PSEUDOCODE
+        ### (1) for j <- 1, ..., n-m do
+        # Any solution to the P1 specification must at least match p_0 with a segment in source. So we loop through all possible matches for p_0, and ascertain whether any of the resulting shifts also induce a total match for the whole pattern. There are n - m + 1 possible matches (the pseudocode in the paper appears to have missed the + 1).
+            ### (3) for j <- 1, ..., n - m do
+            # Find exact matches for p_1, ..., p_m
+    POLYPHONIC BEHAVIOUR:
+
+                ### (8) q_i <- max(q_i, t_j)
+                # The first value for q_i is either its offset from the match of p_0 (s_j), or its previous value from the last iteration. We take the maximum because q_i is non-decreasing.
+                # p + t will never be greater than len(source).
+                # the choice of p + t as a minimum possible match for p_i implies that two unison voices in the pattern cannot match to a single voice in the source. Every note in the pattern must have a unique matching note in the source.
+                ### (9) while q_i < p_i + f
+                    ### (9) q_i <- next(q_i)
+
+                ### (10) until q_i > p_i + f
+                # Check if there is no match for this p_i. If so, there is no exact match for this t_j. Break, and try the next one.
+                ### (11) if i = m + 1 then output(f)
+
+    """
+    def algorithm(self):
+        def is_pure_occurrence(ptrs, cur_shift):
+            for inter_vector_gen in ptrs[1:]:
+                # Take the first intervec that's too big.
+                # If you use itertools.takewhile, it will consume the first one that's
+                # too big, # but you want to keep it in the generator for subsequent cur_shifts.
+                try:
+                    while inter_vector_gen.peek() < cur_shift:
+                        inter_vector_gen.next()
+
+                    # TODO add if cndt_intr_vector.peek() == cur_shift, take it.
+                    # Then make is_pure_occurrence a generator,
+                    # so we can find multiple matches if there are duplicated notes
+                    if inter_vector_gen.peek() != cur_shift:
+                        return False
+                except StopIteration:
+                    return False
+            # If we've gotten down here, then there are enough matching pairs to
+            # constitute a pure, exact match!
+            return True
+
+        ptrs = [p.source_ptrs[1] for p in self.patternPointSet]
+
+        # At the very least, p_0 must match, so we use this shift as a candidate
+        for cur_shift in ptrs[0]:
+            # Then we look at the rest of the pointers to see if they also can form a matching pair with this shift
+            self.logger.debug('Checking if cur_shift %s causes a pure occurrence...',
+                    cur_shift)
+            if is_pure_occurrence(ptrs, cur_shift):
+                yield [cur_shift] + [x.peek() for x in ptrs[1:]]
+            else:
+                self.logger.debug("Not a pure occurrence. Current ptrs: \n %s",
+                        pformat([cur_shift] + [x.peek() for x in ptrs[1:]]))
+
+
+class P2(P):
+    """
+    P2 returns "pure" and "partial" occurrences of the pattern within the source.
+
+    Filters:
+        threshold value : indicates the minimum number of matching pairs that
+        a shift must yield to be considered an occurrence
+
+
+    Summary of implementation: count the multiplicity of each possible vector
+
+    Each intervector represents a matching pair between the pattern and source
+    Since they come out of the PQ in increasing order (and the generators also
+    will yield intervectors in increasing order), we can use groupby() to
+    pop the PQ until there is a change (indicating that it has found all
+    of the matching pairs corresponding to the current candidate shift)
+    """
+    def filter_result(self, result):
+        return ((len(result) >= self.settings['threshold'])
+                and super(P2, self).filter_result(result))
+
+    def algorithm(self):
+
+        # Priority Queue of pattern note to source note vector pointers
+        shifts = CmpItQueue(lambda x: (x.peek(),), len(self.patternPointSet))
+
+        # We use generators to implement line-sweeping the pointers through
+        # the score. Use a lambda expression to avoid bugs caused by scope-bleeding
+        # from generator comprehensions
+        # NOTE possibly a generator comprehension would work fine in python3
+        for note in self.patternPointSet:
+            shifts.put(note.source_ptrs[1])
+
+        # NOTE this may break since groupby can break up the following group while pushing a smaller group?
+        for k, ptr_group in groupby(shifts, key=lambda gen: gen.peek()):
+            occ_ptrs = list(ptr_group) # save the group
+            yield [ptr.next() for ptr in occ_ptrs] # return the occurrence
+
+            ## Put the ptr generators back into the PQ
+            # By waiting until now to put them back in, we ensure that
+            # each pattern note can only be used once to count the multiplicity
+            # of the shift in question. Otherwise, we might have a single
+            # pattern note matching with many identical notes in the source
+            # wrongfully suggesting a high-multiplicity shift
+            for ptr in occ_ptrs:
+                shifts.put(ptr)
+
+class P3(P):
+
+    def pre_process(self):
+        #TODO merge overlapping notes using stream.getOverlaps()
+        super(P3, self).pre_process()
+
+
+    def process_result(self, result):
+        # TODO insert sort (using bisect_insort) vectors to matching_pairs rather than sorting them after
+        return sorted(result['matching_pairs'], key=lambda x: x.noteStartIndex)
+
+    def filter_result(self, result):
+        total_pattern_value = sum(map(lambda x: x.duration.quarterLength, self.patternPointSet))
+        return (result['value'] >= self.settings['%threshold'] * total_pattern_value)
+
+    def algorithm(self):
+        pattern = self.patternPointSet
+        source_onsetSort = self.sourcePointSet
+        source_offsetSort = self.sourcePointSet_offsetSort
+        settings = self.settings
+
+        shifts = CmpItQueue(lambda x: (x.peek(),), 4 * len(pattern))
+        bucket = namedtuple('bucket', ['value', 'slope', 'active_tps'])
+        score_buckets = {}
+
+        for note in pattern:
+            # Push four inter vectors generators for each pattern note, with varying tp_types (0, 1, 2, 3)
+            # tp_types 0, 1 iterate through a source sorted by onset (attack)
+            # while types 2, 3 iterate through a source sorted by offset (release)
+            for ptr in note.source_ptrs:
+                shifts.put(ptr)
+            #shifts.put(peekable((lambda p: (InterNoteVector(p, pattern, s, source_onsetSort, tp_type=0) for s in source_onsetSort))(note)))
+            #shifts.put(peekable((lambda p: (InterNoteVector(p, pattern, s, source_onsetSort, tp_type=1) for s in source_onsetSort))(note)))
+            #shifts.put(peekable((lambda p: (InterNoteVector(p, pattern, s, source_offsetSort, tp_type=2) for s in source_offsetSort))(note)))
+            #shifts.put(peekable((lambda p: (InterNoteVector(p, pattern, s, source_offsetSort, tp_type=3) for s in source_offsetSort))(note)))
+
+        for turning_point_generator in shifts:
+            inter_vec = turning_point_generator.next()
+
+            # Get the current bucket, or initialize it
+            cur_bucket = score_buckets.setdefault(inter_vec.y, {'value' : 0, 'last_value': 0, 'slope' : 0, 'prev_tp' : None, 'matching_pairs' : []})
+
+            # Each turning point dictates the behaviour (slope) of the score up until the next turning point. So the very first thing we need to do is update the score (especially before updating the slope!)
+            cur_bucket['value'] += cur_bucket['slope'] * (inter_vec.x - cur_bucket['prev_tp'].x) if cur_bucket['prev_tp'] else 0
+
+            # Update the slope after we update the value
+            cur_bucket['slope'] += 1 if inter_vec.tp_type in [0,3] else -1
+            # Save current turning point so other TP's know long it has been since the value has been updated
+            cur_bucket['prev_tp'] = inter_vec
+
+            # Keep track of the matching pairs
+            if inter_vec.tp_type == 0:
+                cur_bucket['matching_pairs'].append(inter_vec)
+            elif inter_vec.tp_type == 3:
+                cur_bucket['matching_pairs'].remove(
+                        InterNoteVector(inter_vec.noteStart, inter_vec.noteStartSite, inter_vec.noteEnd, inter_vec.noteEndSite, 0))
+
+            # Only return occurrences if the intersection is increasing (necessarily must return non-zero intersections since 'last_value' starts at 0
+            if cur_bucket['value'] > cur_bucket['last_value']:
+                yield cur_bucket
+                cur_bucket['last_value'] = cur_bucket['value']
+
+            # The PQ will try to peek() the generator; if it has been exhausted, then don't put it back in!
+            try:
+                shifts.put(turning_point_generator)
+            except StopIteration:
+                pass
+
+class S1(S):
+
+    def pre_process(self):
+        super(S1, self).pre_process()
+        self.settings['threshold'] = len(self.patternPointSet)
+        self.settings['pattern_window'] = 1
+
+class S2(S):
+    pass
+
+class W1(W):
+
+    def pre_process(self):
+        super(W1, self).pre_process()
+        self.settings['threshold'] = len(self.patternPointSet)
+        self.settings['pattern_window'] = 1
+
+class W2(W):
+    pass
+
