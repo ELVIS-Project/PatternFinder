@@ -125,10 +125,24 @@ class InterNoteVector(NoteVector):
         self.noteEndSite = larrySite
 
     def __repr__(self):
-        return  ('<'+ str(self.__class__.__name__) + '>'
-                + " TYPE {0} (x={1}, y={2}) ".format(self.tp_type, self.x, self.y)
-                + " #{0}: {1} --> #{2}: {3}".format(
-                    self.noteStartIndex, self.noteStart, self.noteEndIndex, self.noteEnd))
+        # @TODO This does not have to be this ugly... Improve the note.Note repr!!!
+        try:
+            # Measure info
+            return  ('<'+ str(self.__class__.__name__) + '>'
+                    + " TYPE {0} (x={1}, y={2}) ".format(self.tp_type, self.x, self.y)
+                    + " #{0} Note {2} offset {6} of m.{1} --> #{3} Note {5} offset {7} of m.{4}".format(
+                        self.noteStartIndex, self.noteStart.getContextByClass('Measure').number,
+                        self.noteStart.pitch.nameWithOctave, self.noteEndIndex,
+                        self.noteEnd.getContextByClass('Measure').number, self.noteEnd.pitch.nameWithOctave,
+                        self.noteStart.getOffsetBySite(self.noteStart.getContextByClass('Measure')),
+                        self.noteEnd.getOffsetBySite(self.noteEnd.getContextByClass('Measure'))))
+        except:
+            # No Measure info available
+            return  ('<'+ str(self.__class__.__name__) + '>'
+                    + " TYPE {0} (x={1}, y={2}) ".format(self.tp_type, self.x, self.y)
+                    + " #{0} Note {1} no measure info --> #{2} Note {3} no measure info".format(
+                        self.noteStartIndex, self.noteStart.pitch.nameWithOctave,
+                        self.noteEndIndex, self.noteEnd.pitch.nameWithOctave))
 
 class IntraNoteVector(InterNoteVector):
     def __init__(self, ralph, larry, site, y_func):
@@ -373,4 +387,3 @@ class K_entryOld():
 
     def __repr__(self):
         return pformat(self.__dict__)
-
