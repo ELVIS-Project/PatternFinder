@@ -1,5 +1,5 @@
 from queue import PriorityQueue # Lemstrom's choice of data structure
-from geometric_algorithms.geo_algorithms import W
+from geometric_helsinki.algorithms.base import W
 from LineSegment import LineSegmentSet
 from pprint import pprint, pformat
 import traceback

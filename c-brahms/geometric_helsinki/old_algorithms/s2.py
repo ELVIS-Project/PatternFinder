@@ -1,5 +1,5 @@
 from queue import PriorityQueue
-from geometric_algorithms.geo_algorithms import S
+from geometric_helsinki.algorithms.base import S
 import music21
 import copy
 import pdb

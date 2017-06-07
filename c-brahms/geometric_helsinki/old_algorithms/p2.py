@@ -1,12 +1,9 @@
 from LineSegment import TwoDVector, LineSegment
 from NoteSegment import InterNoteVector, CmpItQueue
-from collections import namedtuple
 from more_itertools import peekable
 from itertools import groupby
-from geometric_algorithms.geo_algorithms import P
-import NoteSegment
+from geometric_helsinki.algorithms.base import P
 import music21
-import pdb
 
 
 class P2(P):

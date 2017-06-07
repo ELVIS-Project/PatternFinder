@@ -1,6 +1,6 @@
 from LineSegment import LineSegmentSet
 from queue import PriorityQueue
-from geometric_algorithms.geo_algorithms import W
+from geomtric_helsinki.algorithms.base import W
 from NoteSegment import K_entry
 import music21
 import copy

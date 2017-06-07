@@ -3,7 +3,7 @@ from queue import PriorityQueue
 from NoteSegment import CmpItQueue, NotePointSet, InterNoteVector
 from collections import namedtuple # container to hold sum of line segment intersection
 from more_itertools import peekable # for peekable InterNoteVector generators
-from geometric_algorithms.geo_algorithms import P
+from geometric_helsinki.algorithms.base import P
 import music21
 import itertools
 import NoteSegment

@@ -1,4 +1,4 @@
-from geometric_algorithms.geo_algorithms import S
+from geometric_helsinki.algorithms.base import S
 from NoteSegment import InterNoteVector, K_entry # to create occurrence chains
 from LineSegment import LineSegmentSet
 from pprint import pprint, pformat
