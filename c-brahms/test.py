@@ -1,18 +1,15 @@
-import geometric_algorithms
-from geometric_algorithms import P1, P2, P3, S1, S2, W1, W2
-from geometric_algorithms.geo_algorithms import GeoAlgorithm
 from pprint import pprint as pp
 from collections import namedtuple
 from fractions import Fraction
 
 # Testing CmpItQueue
-from NoteSegment import CmpItQueue, IntraNoteVector, InterNoteVector, NotePointSet
+from geometric_helsinki.finder import Finder
+from geometric_helsinki.NoteSegment import CmpItQueue, IntraNoteVector, InterNoteVector, NotePointSet
 from collections import namedtuple, Counter
 
 import logging
 import os
 import music21
-import NoteSegment
 import pdb
 
 ### PATHS
@@ -27,8 +24,6 @@ SUBJECT_PATH = lambda f, s: os.path.join(BACH_PATH, 'e_wtc1f' + str(f).zfill(2) 
 # ex. LEM_PATH_P('a') --> 'music_files/lemstrom2011_test/query_a.mid'
 LEM_PATH_P = lambda x: 'music_files/lemstrom2011_test/query_' + x + '.mid'
 LEM_PATH_S = os.path.join('music_files', 'lemstrom2011_test', 'leiermann.xml')
-
-ALGORITHMS = [P1, P2, P3, S1, S2, W1, W2]
 
 # Music21 User Settings
 us = music21.environment.UserSettings()
@@ -84,12 +79,12 @@ sortPattern = music21.stream.Stream()
 sortPattern.insert(0, G.transpose('M2'))
 sortPattern.insert(0, G)
 sortPattern.insert(1, B)
-sortedPattern = NoteSegment.NotePointSet(sortPattern)
+sortedPattern = NotePointSet(sortPattern)
 
 #Chord test
 chordPattern = music21.stream.Stream()
 chordPattern.insert([0, G, 1, Gmaj])
-flatPattern = NoteSegment.NotePointSet(chordPattern)
+flatPattern = NotePointSet(chordPattern)
 
 # Testing CmpItQueue
 customQueue = CmpItQueue(lambda x: x.y)
@@ -98,15 +93,10 @@ point1 = point(2, 3)
 point2 = point(3, 4)
 
 # Testing algorithms
-lemP1 = P1(LEM_PATH_P('a'), LEM_PATH_S)
-lemP2a = P2(LEM_PATH_P('a'), LEM_PATH_S)
-lemP2b = P2(LEM_PATH_P('b'), LEM_PATH_S, **{'threshold' : 5})
-lemP3a = P3(LEM_PATH_P('a'), LEM_PATH_S)
-lemS1a = S1(LEM_PATH_P('a'), LEM_PATH_S)
-lemS1b = S1(LEM_PATH_P('b'), LEM_PATH_S, **{'pattern_window' : 5, 'threshold' : 5})
-lemS1c = S1(LEM_PATH_P('c'), LEM_PATH_S)
-lemS1d = S1(LEM_PATH_P('d'), LEM_PATH_S, **{'pattern_window' : 5, 'threshold' : 5})
-lemW2a = W2(LEM_PATH_P('a'), LEM_PATH_S)
+lemP1 = Finder(LEM_PATH_P('a'), LEM_PATH_S, auto_select=False, algorithm='P1')
+lemP2a = Finder(LEM_PATH_P('a'), LEM_PATH_S, auto_select=False, algorithm='P2')
+lemP2b = Finder(LEM_PATH_P('b'), LEM_PATH_S, auto_select=False, algorithm='P2')
+lemS1a = Finder(LEM_PATH_P('a'), LEM_PATH_S, auto_select=False, algorithm='S1')
 
 """
 P3, S1, these are doing some weird things, like finding different matches after many trials.  results = {}
@@ -119,3 +109,9 @@ for i in range(100):
 
 """
 
+# @TODO shouldn't get "manually preparsed" for the source here
+# @TODO setting "auto_select" and "interval_func" in Finder __init__ doesn't work. Only works on update()
+
+# Test P1 generic intervals fugue 2
+bach2 = Finder(SUBJECT_PATH(2, 'S'), BACH_FUGUE_PATH(2))
+bach2.update(pattern=bach2.patternPointSet[:-2], auto_select=False, interval_func='generic')

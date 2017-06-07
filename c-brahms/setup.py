@@ -6,5 +6,5 @@ setup(name='PatternFinder',
         author='David Garfinkle',
         author_email='david.garfinkle@mail.mcgill.ca',
         url='https://github.com/ELVIS-Project/VIS-Ohrwurm/',
-        packages=['geometric_algorithms']
+        packages=['geometric_helsinki']
         )

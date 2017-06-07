@@ -1,8 +1,8 @@
 from unittest import TestCase, TestLoader, TextTestRunner
 from parameterized import parameterized, param
 from pprint import pformat # for pretty printing test error messages
-from geometric_algorithms import P1, P2, P3, S1, S2, W1, W2, Finder
-from NoteSegment import NotePointSet, InterNoteVector
+from geometric_helsinki import P1, P2, P3, S1, S2, W1, W2, Finder
+from geometric_helsinki.NoteSegment import NotePointSet, InterNoteVector
 from fractions import Fraction # for scale settings
 import music21
 import pdb
@@ -90,6 +90,9 @@ class TestLemstromExample(TestCase):
             for key, val in QUERIES.items()
             for algorithm, lists_of_pairs in val[1]]
 
+    def setUp(self):
+        self.frederick = Finder()
+
     def custom_test_name(testcase_func, param_num, param):
         return "_".join([
                 testcase_func.__name__,
@@ -98,7 +101,7 @@ class TestLemstromExample(TestCase):
         ])
 
     @parameterized.expand([param(*case) for case in TESTS], name_func = custom_test_name)
-    def test(self, query, algorithm, expected, settings={}):
+    def test_Finder_manual_select(self, query, algorithm, expected, settings={}):
 
         pattern = NotePointSet(music21.converter.parse(LEM_PATH_PATTERN(query)))
         source = NotePointSet(music21.converter.parse(LEM_PATH_SOURCE))
@@ -114,6 +117,35 @@ class TestLemstromExample(TestCase):
         for exp in matching_pairs:
             try:
                 occurrence = next(carlos.occurrences)
+            except StopIteration:
+                self.fail("Not enough occurrences found")
+
+            self.assertEqual(occurrence, exp, msg =
+                    "\nFOUND:\n" + pformat(occurrence) +
+                    "\nEXPECTED\n" + pformat(exp))
+
+    @parameterized.expand([param(*case) for case in TESTS], name_func = custom_test_name)
+    def test_Finder_update(self, query, algorithm, expected, settings):
+
+        pattern = NotePointSet(music21.converter.parse(LEM_PATH_PATTERN(query)))
+        source = NotePointSet(music21.converter.parse(LEM_PATH_SOURCE))
+
+        matching_pairs = [
+                [InterNoteVector(pattern[p_i], pattern, source[s_i], source) for p_i, s_i in pairs]
+                for pairs in expected]
+
+        self.longMessage = True
+        #@ TODO How can I call .update with (pattern, source, **settings) rather than
+        # having to update settings first?
+        settings.update({
+            'pattern' : LEM_PATH_PATTERN(query),
+            'source' : LEM_PATH_SOURCE,
+            'auto_select' : False,
+            'algorithm' : algorithm.__name__})
+        self.frederick.update(**settings)
+        for exp in matching_pairs:
+            try:
+                occurrence = next(self.frederick.occurrences)
             except StopIteration:
                 self.fail("Not enough occurrences found")
 
