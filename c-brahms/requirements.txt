@@ -4,3 +4,4 @@ tox
 more_itertools
 future
 yaml
+jupyter
