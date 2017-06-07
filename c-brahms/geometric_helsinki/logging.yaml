@@ -6,16 +6,50 @@ root:
     handlers: [console]
 
 loggers:
-    geometric_algorithms.geo_algorithms:
-        level: INFO
+    geometric_algorithms:
+        level: WARNING
         handlers: [console, logfile]
         propagate: no
+
+    geometric_algorithms.Finder:
+        level: WARNING
+        handlers: [console, logfile]
+        propagate: yes
+    geometric_algorithms.P1:
+        level: WARNING
+        handlers: [console, logfile]
+        propagate: no
+    geometric_algorithms.P2:
+        level: WARNING
+        handlers: [console, logfile]
+        propagate: yes
+    geometric_algorithms.P3:
+        level: WARNING
+        handlers: [console, logfile]
+        propagate: yes
+    geometric_algorithms.S1:
+        level: WARNING
+        handlers: [console, logfile]
+        propagate: yes
+    geometric_algorithms.S2:
+        level: WARNING
+        handlers: [console, logfile]
+        propagate: yes
+    geometric_algorithms.W1:
+        level: WARNING
+        handlers: [console, logfile]
+        propagate: yes
+    geometric_algorithms.W2:
+        level: WARNING
+        handlers: [console, logfile]
+        propagate: yes
+
     geomeric_algorithms.geo_algorithms.parse_scores():
-        level: INFO
+        level: WARNING
         handlers: [console]
         propagate: no
     geometric_algorithms.geo_algorithms.process_settings():
-        level: INFO
+        level: WARNING
         handlers: [console]
         propagate: no
     geometric_algorithms.geo_algorithms.pre_process():
@@ -24,11 +58,11 @@ loggers:
         propagate: no
 
     NoteSegment:
-        level: INFO
+        level: WARNING
         handlers: [console, logfile]
         propagate: no
     VectorCreation:
-        level: DEBUG
+        level: WARNING
         handlers: [console]
         propagate: no
 

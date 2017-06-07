@@ -1,40 +1,42 @@
 from builtins import object # for python 2 & 3 custom iterator compatibility
-from NoteSegment import NotePointSet
+from geometric_helsinki.NoteSegment import NotePointSet
 from pprint import pformat # for logging
 from fractions import Fraction # for scale verification
 import copy # to copy excerpts from the score
 import music21
-import geometric_algorithms
+import geometric_helsinki
 import logging
 import logging.config
 import os
 import yaml
+import pdb
 
-LOGGING_PATH = 'logging.yaml'
-SETTINGS_PATH = 'settings.yaml'
-
-# Configure logging
-if os.path.exists(LOGGING_PATH):
-    with open(LOGGING_PATH, 'rt') as f:
-        config = yaml.safe_load(f.read())
-    logging.config.dictConfig(config)
-else:
-    logging.basicConfig(level=logging.INFO)
+LOGGING_PATH = 'geometric_helsinki/logging.yaml'
+SETTINGS_PATH = 'geometric_helsinki/settings.yaml'
 
 # Load default settings
 if os.path.exists(SETTINGS_PATH):
     with open(SETTINGS_PATH, 'rt') as f:
         DEFAULT_SETTINGS = yaml.safe_load(f.read())
 else:
-    raise Exception("No settings.yaml file found")
+    raise Exception("No settings.yaml file found (required for default settings)")
 
 class Finder(object):
-    def __init__(self, pattern_input, source_input, **kwargs):
+    def __init__(self, pattern_input=music21.stream.Stream(), source_input=music21.stream.Stream(), **kwargs):
         """
         An algorithm object parses the input and runs algorithm pre processing on __init__
         The object itself is a generator, so it won't begin looking for results until
         the user calls next(self)
         """
+        # Configure logging within init so that if the user imports other librairies with
+        # disable_previous_loggers enabled to true, the logging here will still work.
+        if os.path.exists(LOGGING_PATH):
+            with open(LOGGING_PATH, 'rt') as f:
+                config = yaml.safe_load(f.read())
+            logging.config.dictConfig(config)
+        else:
+            logging.basicConfig(level=logging.INFO)
+
         # Log creation of this object
         self.logger = logging.getLogger(__name__)
         self.logger.info('Creating Finder with:\n pattern %s\n source %s\n settings %s',
@@ -43,7 +45,7 @@ class Finder(object):
         kwargs.update({
                 'pattern' : pattern_input,
                 'source' : source_input})
-        self.update(kwargs)
+        self.update(**kwargs)
 
     def __iter__(self):
         return self
@@ -67,7 +69,7 @@ class Finder(object):
 
         return cls + tp
 
-    def update(self, kwargs):
+    def update(self, **kwargs):
         """
         Update algorithm
 
@@ -95,10 +97,13 @@ class Finder(object):
             logger.info("Parsed the source")
 
         ## PROCESS SETTINGS
-        logger.info("Processing user settings \n %s", pformat(kwargs))
+        logger.info("Processing user settings")
         # Defines self.user_settings and self.settings
         self.process_settings(kwargs)
-        logger.info("Processed settings: \n %s", pformat(self.settings))
+        if logger.isEnabledFor(logging.INFO):
+            logger.info("Processed user settings")
+        elif logger.isEnabledFor(logging.DEBUG):
+            logger.debug("Processed user settings \n %s", pformat(self.settings))
 
         ## SELECT THE ALGORITHM
         # Allow the user to manually choose the algorithm rather than letting
@@ -108,12 +113,15 @@ class Finder(object):
         else:
             algorithm_name = self.decide_algorithm(self.settings)
 
-        algorithm = getattr(geometric_algorithms, algorithm_name)
+        # @TODO do i need to use getattr here? on the module? whatabout self?
+        algorithm = getattr(geometric_helsinki, algorithm_name)
         self.algorithm = algorithm(self.patternPointSet, self.sourcePointSet, self.settings)
+        self.logger = logging.getLogger("{0}.{1}".format('geometric_algorithms', algorithm_name))
 
         ## RUN THE ALGORITHM
         self.results = self.algorithm.filtered_results()
         self.occurrences = self.algorithm.occurrence_generator()
+        self.algorithm.pre_process()
 
         # OUTPUT STUFF!
         self.output = (self.process_occurrence(occ) for occ in self.occurrences)
@@ -129,7 +137,7 @@ class Finder(object):
         They either return the value or raise a ValueError with the valid options
         """
         # Log this function
-        logger = logging.getLogger("{0}.{1}".format(self.logger.name, 'process_settings'))
+        logger = logging.getLogger("{0}.{1}".format('geometric_algorithms', 'process_settings'))
 
         # Generate self.settings from the default settings
         self.settings = dict(DEFAULT_SETTINGS.items())
@@ -336,4 +344,4 @@ class Finder(object):
             "pattern = {0}".format(self.patternPointSet.derivation),
             "source = {0}".format(self.sourcePointSet.derivation),
             "user settings = {0}".format(self.user_settings),
-            "settings = {0}".format(self.settings)])
+            "settings = \n {0}".format(pformat(self.settings))])
