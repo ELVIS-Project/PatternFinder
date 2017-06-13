@@ -353,6 +353,10 @@ class Finder(object):
     def _threshold(self, arg):
         valid_options = []
 
+        # @TODO support using both threshold and mismatch as a range - DOESNT WORK
+        if self.settings['mismatches'] > 0:
+            return len(self.patternPointSet) - self.settings['mismatches']
+
         valid_options.append('all')
         if arg == 'all':
             return len(self.patternPointSet)
@@ -433,6 +437,10 @@ class Finder(object):
     def _interval_func(self, arg):
         valid_options = {
                 'semitones' : lambda v: v.chromatic.semitones,
+                # 4 -> 4, 13 -> 1, -13 -> -1, -11 -> -11
+                'semitones-mod12' : lambda v: (
+                    (v.chromatic.semitones % 12) if v.chromatic.semitones > 0
+                    else -(-v.chromatic.semitones % 12)),
                 'generic' : lambda v: v.generic.value,
                 'base40' : lambda v: (
                     music21.musedata.base40.pitchToBase40(v.noteEnd) -
@@ -450,7 +458,12 @@ class Finder(object):
     def __repr__(self):
         return "\n".join([
             self.algorithm.__class__.__name__,
+            # @TODO eat up the derivation chain to find the file name input?
             "pattern = {0}".format(self.patternPointSet.derivation),
             "source = {0}".format(self.sourcePointSet.derivation),
             "user settings = {0}".format(self.user_settings),
             "settings = \n {0}".format(pformat(self.settings))])
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
