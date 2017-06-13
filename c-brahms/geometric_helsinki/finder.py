@@ -108,31 +108,61 @@ class Finder(object):
 
         Also runs all necessary pre-processing common to every algorithm
         (lexicographic sorting and chord flattening)
+
+        Usage:
+
+        Change just pattern or source
+        >>> foo = Finder()
+        >>> foo.update(pattern=music21.stream.Stream())
+
+        Remember the settings
+        >>> foo = Finder()
+        >>> foo.update(threshold=1)
+        >>> foo.update()
+        >>> foo.settings['threshold']
+        1
         """
         # Log this method
         logger = logging.getLogger("{0}.{1}".format(self.logger.name, 'update'))
-        logger.info('Updating Finder with settings %s', pformat(kwargs))
+        logger.debug('Updating Finder with settings \n%s', pformat(kwargs))
+
+        # User-settings limitations (these limitations don't apply to default settings)
+        # @TODO make threshold and mismatches define an upper/lower bound range of tolerance
+        if ('threshold' in kwargs) and ('mismatches' in kwargs):
+            raise ValueError("Threshold and mismatches not yet both supported: use one or the other")
 
         ## PARSE THE SCORES
+        # @TODO wrap in a function?
         if 'pattern' in kwargs:
-            logger.info("Attempting to parse the pattern...")
+            logger.debug("Attempting to parse the pattern...")
             self.patternPointSet = NotePointSet(kwargs['pattern'])
             self.patternPointSet.id = 'pattern'
-            logger.info("Parsed the pattern")
+            #self.patternPointer = (n for n in self.patternPointSet)
+            logger.debug("Parsed the pattern")
         if 'source' in kwargs:
-            logger.info("Attempting to parse the source...")
+            logger.debug("Attempting to parse the source...")
             self.sourcePointSet = NotePointSet(kwargs['source'])
             self.sourcePointSet.id = 'source'
-            logger.info("Parsed the source")
+            #self.sourcePointer = (n for n in self.sourcePointSet)
+            # @TODO come up with a better way to sort than this, srsly...
+            self.sourcePointSet_offsetSort = NotePointSet(self.sourcePointSet, offsetSort=True)
+            #self.sourcePointer_offsetSort = (n for n in self.sourcePointSet_offsetSort)
+            logger.debug("Parsed the source")
 
-        ## PROCESS SETTINGS
-        logger.info("Processing user settings")
-        # Defines self.user_settings and self.settings
-        self.process_settings(kwargs)
-        if logger.isEnabledFor(logging.INFO):
-            logger.info("Processed user settings")
-        elif logger.isEnabledFor(logging.DEBUG):
-            logger.debug("Processed user settings \n %s", pformat(self.settings))
+        ### PROCESS SETTINGS
+        logger.debug("Processing user settings")
+
+        # Always call self.load_default_settings() when called from __init__()
+        if 'load_defaults' in args:
+            # Resets self.default_settings to {}
+            # Sets self.settings to a processed DEFAULT_SETTINGS
+            self.load_default_settings()
+        self.user_settings.update(kwargs)
+
+        # Validates and translates kwargs while updating self.settings
+        self.settings.update(self.process_settings(kwargs))
+        logger.info("Processed internal settings are: \n %s",
+                pformat(self.settings))
 
         ## SELECT THE ALGORITHM
         # Allow the user to manually choose the algorithm rather than letting
@@ -155,7 +185,35 @@ class Finder(object):
         # OUTPUT STUFF!
         self.output = (self.process_occurrence(occ) for occ in self.occurrences)
 
-    def process_settings(self, user_settings):
+    def load_default_settings(self):
+        """
+        Resets the Finder's settings to default settings and processes them
+        Also dumps the saved user_settings up to this point
+
+        >>> foo = Finder()
+        >>> bar = Finder(algorithm='S2')
+
+        >>> bar.user_settings['algorithm']
+        'S2'
+        >>> foo.settings == bar.settings
+        False
+
+        >>> bar.load_default_settings()
+        >>> bar.user_settings
+        {}
+        >>> foo.settings == bar.settings # Fails because _interval_func generates a new lambda exp each time
+        True
+
+        """
+        self.user_settings = {}
+        self.settings = dict(DEFAULT_SETTINGS)
+        try:
+            self.settings.update(self.process_settings(DEFAULT_SETTINGS))
+        except ValueError as e:
+            message = "The default settings has an invalid argument. \n" + e.message
+            raise ValueError(message)
+
+    def process_settings(self, kwargs):
         """
         Validates user-specified settings (AND validates the default settings)
         Translated keywords to algorithm-usable values
@@ -166,49 +224,55 @@ class Finder(object):
         They either return the value or raise a ValueError with the valid options
         """
         # Log this function
-        logger = logging.getLogger("{0}.{1}".format('geometric_algorithms', 'process_settings'))
+        logger = logging.getLogger("{0}.{1}".format(__name__, 'process_settings'))
 
-        # Generate self.settings from the default settings
-        self.settings = dict(DEFAULT_SETTINGS.items())
-        self.user_settings = user_settings
+        processed_kwargs = {}
 
-        # Validate user KEYS
-        for key in user_settings.keys():
+        ## VALIDATE KWARG KEYS
+        for key in kwargs.keys():
             if key not in DEFAULT_SETTINGS.keys():
                 raise ValueError("Parameter '{0}' is not a valid parameter.".format(key))
 
-        # Validate and translate the setting arguments
-        self.settings.update(user_settings)
-        for key, arg in self.settings.items():
+        ## VALIDATE AND TRANSLATE KWARGS
+        # @TODO wrap the validation into a general function and turn the setting
+        # processing into a dictionary comprehension
+        for key, arg in kwargs.items():
             logger.debug("Processing setting %s with value %s", key, arg)
-            try:
-                # GET THE TRANSLATOR
+            # GET THE TRANSLATOR
+            if hasattr(self, '_' + key):
                 translator = getattr(self, '_' + key)
-            except AttributeError:
+            else:
+                # Default validator: does the key exist in the default settings?
+                if key not in DEFAULT_SETTINGS:
+                    raise ValueError("Parameter '{0}' is not a valid parameter ".format(key)
+                        + "because it does not exist in the default settings.")
                 logger.debug("'%s' does not have a validator/translator", key)
-                # If the parameter doesn't have a validator or translator, let it be
+                processed_kwargs.update([(key, arg)])
                 continue
+            # VALIDATE & TRANSLATE THE DATA
             try:
-                # VALIDATE OR TRANSLATE THE DATA
                 logger.debug("Validating and translating key %s ...", key)
-                self.settings[key] = translator(arg)
-                logger.debug("'%s' : %s translates to %s", key, arg, self.settings[key])
+                translation = translator(arg)
+                processed_kwargs.update([(key, translation)])
+                logger.debug("'%s' : %s translates to %s", key, arg, translation)
             except ValueError as e:
-                # Distinguish whether the invalid data came from the DEFAULT settings, 
-                # or the user-specified ones
-                if key in user_settings.keys():
-                    message = "\n".join([
-                    "Parameter '{0}' has an invalid value of {1}".format(key, arg),
-                    "Valid arguments are: {0}".format(e.message)])
-                else:
-                    message = "\n".join([
-                    "DEFAULT SETTINGS has set parameter '{0}' to an invalid value of {1}".format(key, arg),
-                    "Valid arguments are: {0}".format(e.message)])
+                # @TODO create a ValidationError to clean up this try catch. The error
+                # could just be thrown directly in the translator
+                message = "\n".join([
+                "process_settings() has found an invalid argument. \n",
+                "Parameter '{0}' has value of {1}".format(key, arg),
+                "Valid arguments are: {0}".format(e.message)])
                 raise ValueError(message)
 
-        # @TODO make threshold and mismatches define an upper/lower bound range of tolerance
-        if ('threshold' in user_settings) and ('mismatches' in user_settings):
-            raise ValueError("Threshold and mismatches not yet both supported: use one or the other")
+        # @TODO make this better
+        if 'threshold' in kwargs:
+            self.settings['mismatches'] = (
+                    len(self.patternPointSet) - processed_kwargs['threshold'])
+        elif 'mismatches' in kwargs:
+            self.settings['threshold'] = (
+                    len(self.patternPointSet) - processed_kwargs['mismatches'])
+
+        return processed_kwargs
 
     def process_occurrence(self, occ):
         """
