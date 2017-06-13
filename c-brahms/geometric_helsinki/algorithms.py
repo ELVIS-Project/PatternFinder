@@ -30,7 +30,7 @@ class GeometricHelsinkiBase(object):
         The object itself is a generator, so it won't begin looking for results until
         the user calls next(self)
         """
-        self.logger = logging.getLogger("{0}.{1}".format('geometric_algorithms', self.__class__.__name__))
+        self.logger = logging.getLogger("{0}.{1}".format(__name__, self.__class__.__name__))
         self.logger.info('Creating a %s algorithm with:\n pattern %s\n source %s\n settings %s',
                 self.__class__.__name__, pattern_input, source_input, pformat(settings))
 
@@ -90,8 +90,6 @@ class P(GeometricHelsinkiBase):
 
     def pre_process(self):
         super(P, self).pre_process()
-        # @TODO come up with a better way to sort than this, srsly...
-        self.sourcePointSet_offsetSort = NotePointSet(self.sourcePointSet, offsetSort=True)
 
         # Compute InterNoteVector generator pointers
         for note in self.patternPointSet:
