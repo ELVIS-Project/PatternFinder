@@ -289,34 +289,50 @@ class Finder(object):
         if not self.sourcePointSet.derivation.origin:
             self.logger.info("Manual input: no original score to colour")
             return occ
+
         # @TODO colour pattern notes too
-        # The notes in the score corresponding to this occurrence
-        original_notes = [vec.noteEnd if not vec.noteEnd.derivation.origin
+        # Each source note is either original or came from a chord, so 
+        # we check the derivation to see which one to take.
+        source_notes = [vec.noteEnd if not vec.noteEnd.derivation.origin
                 else vec.noteEnd.derivation.origin for vec in occ]
 
-        # Tag the matched notes
-        for note in original_notes:
+        # Tag the source notes
+        for note in source_notes:
             note.groups.append('occurrence')
 
         # Get a copied excerpt of the score
-        excerpt = copy.deepcopy(self.sourcePointSet.derivation.origin.measures(
-                numberStart = original_notes[0].getContextByClass('Measure').number,
-                numberEnd = original_notes[-1].getContextByClass('Measure').number))
+        first_measure_num = source_notes[0].getContextByClass('Measure').number
+        last_measure_num = source_notes[-1].getContextByClass('Measure').number
+        if self.settings['excerpt']:
+            result = copy.deepcopy(self.sourcePointSet.derivation.origin.measures(
+                    numberStart = first_measure_num,
+                    numberEnd = last_measure_num))
+        else:
+            result = copy.deepcopy(self.sourcePointSet.derivation.origin)
 
         # Untag the matched notes, process the occurrence
-        for original_note, excerpt_note in zip(original_notes, excerpt.flat.getElementsByGroup('occurrence')):
-            excerpt_note.color = 'red'
-            original_note.groups.remove('occurrence')
+        for excerpt_note in result.flat.getElementsByGroup('occurrence'):
+            excerpt_note.color = self.settings['colour']
+            if self.settings['colour_source']:
+                excerpt_note.derivation.origin.color = self.settings['colour']
+            else:
+                excerpt_note.derivation.origin.groups.remove('occurrence')
 
         # Output the occurrence
         if self.settings['show_pattern'] and self.patternPointSet.derivation.origin:
             # @TODO output the pattern from a pointset if that's the only input we have
             output = music21.stream.Opus(
-                    [self.patternPointSet.derivation.origin, excerpt, self.sourcePointSet.derivation.origin])
+                    [self.patternPointSet.derivation.origin, result])
         else:
-            output = excerpt
+            output = result
         output.metadata = music21.metadata.Metadata()
-        output.metadata.title = "Transposed by " + str(occ[0].y)
+        output.metadata.title = (
+                "Transposed by " + str(occ[0].diatonic.simpleNiceName) +
+                # XML and Lily output don't seem to preserve the measure numbers
+                # even though you can see them in .show('t')
+                " mm. {0} - {1}".format(first_measure_num, last_measure_num))
+
+        output.matching_pairs = occ
 
         #Save the pdf file as wtc-i-##_alg.pdf
         #temp_file = output.write('lily')
