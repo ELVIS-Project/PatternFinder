@@ -114,4 +114,15 @@ for i in range(100):
 
 # Test P1 generic intervals fugue 2
 bach2 = Finder(SUBJECT_PATH(2, 'S'), BACH_FUGUE_PATH(2))
-bach2.update(pattern=bach2.patternPointSet[:-2], auto_select=False, interval_func='generic')
+#bach2.update(pattern=bach2.patternPointSet[:-2], auto_select=False, interval_func='generic')
+
+#@TODO it's a little funky if you do source first then update with pattern. should be able to..
+lupi = 'music_files/lupi/melody_p.xml'
+palestrina = Finder('music_files/lupi/module_A2.xml', 'music_files/lupi/Missa-Je-suis-desheritee-Palestrina_Kyrie.krn')
+palestrina.update(scale='warped', mismatches=6, pattern_window=3)
+lassus = Finder('music_files/lupi/module_A2.xml', 'music_files/lupi/Missa-Je-suis-desheritee-Lassus_Kyrie.xml')
+lassus.update(scale='warped', mismatches=6, pattern_window=3)
+
+lassus_full = Finder('music_files/lupi/module_A2.xml', 'music_files/lupi/OMR_Missa_Je_suys_desheritee_Lassus.xml')
+
+lupi = Finder('music_files/lupi/module_A2.xml', 'music_files/lupi/Je_suys_desheritee.xml')
