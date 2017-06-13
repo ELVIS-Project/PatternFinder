@@ -13,6 +13,7 @@ import pdb
 
 ## @TODO these should be put in the __init__ file I think
 LOGGING_PATH = 'geometric_helsinki/logging.yaml'
+SETTINGS_PATH = 'geometric_helsinki/settings.yaml'
 OUTPUT_PATH = 'music_files/music21_temp_output'
 
 def update_logging_config():
@@ -32,6 +33,13 @@ def update_logging_config():
 # Music21 User Settings
 us = music21.environment.UserSettings()
 us['directoryScratch'] = 'music_files/music21_temp_output'
+
+# Load default settings
+if os.path.exists(SETTINGS_PATH):
+    with open(SETTINGS_PATH, 'rt') as f:
+        DEFAULT_SETTINGS = yaml.safe_load(f.read())
+else:
+    raise Exception("No settings.yaml file found (required for default settings)")
 
 """
 And maybe this would work better if it could access the _key function which raised it?
