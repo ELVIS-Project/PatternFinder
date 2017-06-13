@@ -6,53 +6,48 @@ root:
     handlers: [console]
 
 loggers:
-    geometric_algorithms:
+    geometric_helsinki:
         level: WARNING
         handlers: [console, logfile]
         propagate: no
 
-    geometric_algorithms.Finder:
-        level: WARNING
-        handlers: [console, logfile]
+    geometric_helsinki.finder:
+        level: INFO
         propagate: yes
-    geometric_algorithms.P1:
-        level: WARNING
-        handlers: [console, logfile]
-        propagate: no
-    geometric_algorithms.P2:
-        level: WARNING
-        handlers: [console, logfile]
+    geometric_helsinki.algorithms:
+        level: INFO
         propagate: yes
-    geometric_algorithms.P3:
+    geometric_helsinki.P1:
         level: WARNING
-        handlers: [console, logfile]
         propagate: yes
-    geometric_algorithms.S1:
+    geometric_helsinki.algorithms.P2:
         level: WARNING
-        handlers: [console, logfile]
         propagate: yes
-    geometric_algorithms.S2:
+    geometric_helsinki.P3:
         level: WARNING
-        handlers: [console, logfile]
         propagate: yes
-    geometric_algorithms.W1:
+    geometric_helsinki.S1:
         level: WARNING
-        handlers: [console, logfile]
         propagate: yes
-    geometric_algorithms.W2:
+    geometric_helsinki.S2:
         level: WARNING
-        handlers: [console, logfile]
+        propagate: yes
+    geometric_helsinki.W1:
+        level: WARNING
+        propagate: yes
+    geometric_helsinki.W2:
+        level: WARNING
         propagate: yes
 
     geomeric_algorithms.geo_algorithms.parse_scores():
         level: WARNING
         handlers: [console]
         propagate: no
-    geometric_algorithms.geo_algorithms.process_settings():
+    geometric_helsinki.geo_algorithms.process_settings():
         level: WARNING
         handlers: [console]
         propagate: no
-    geometric_algorithms.geo_algorithms.pre_process():
+    geometric_helsinki.geo_algorithms.pre_process():
         level: WARNING
         handlers: [console]
         propagate: no

@@ -11,41 +11,69 @@ import os
 import yaml
 import pdb
 
+## @TODO these should be put in the __init__ file I think
 LOGGING_PATH = 'geometric_helsinki/logging.yaml'
-SETTINGS_PATH = 'geometric_helsinki/settings.yaml'
+OUTPUT_PATH = 'music_files/music21_temp_output'
 
-# Load default settings
-if os.path.exists(SETTINGS_PATH):
-    with open(SETTINGS_PATH, 'rt') as f:
-        DEFAULT_SETTINGS = yaml.safe_load(f.read())
-else:
-    raise Exception("No settings.yaml file found (required for default settings)")
+def update_logging_config():
+    """
+    Configures logging from a logging.yaml file
+    This is only run within object creation, and not on import, so that
+    if the user is importing other librairies with logging which set
+    disable_previous_loggers to True, then the logging here will still work.
+    """
+    if os.path.exists(LOGGING_PATH):
+        with open(LOGGING_PATH, 'rt') as f:
+            config = yaml.safe_load(f.read())
+        logging.config.dictConfig(config)
+    else:
+        logging.basicConfig(level=logging.INFO)
+
+# Music21 User Settings
+us = music21.environment.UserSettings()
+us['directoryScratch'] = 'music_files/music21_temp_output'
+
+"""
+And maybe this would work better if it could access the _key function which raised it?
+class ValidationError(Exception):
+    def __init__(self, msg, key, arg, valid_options):
+        self.message = "\n".join([
+            msg + " \n",
+            "Parameter '{0}' has value of {1}".format(key, arg),
+            "Valid arguments are: {0}".format(e.message)])
+    pass
+"""
 
 class Finder(object):
+    """
+    Desired syntax:
+
+        Finder()
+        Finder.update(pattern='foo.krn', source='bar.krn') or
+        Finder.update(foo.krn, bar.krn)
+
+        Finder('pattern.krn', 'source.krn')
+
+        Finder(source='bar.krn')
+        Finder.update(pattern='foo.krn')
+
+        When either source or pattern are unspecified, they should be NoneType, not a Stream
+    """
     def __init__(self, pattern_input=music21.stream.Stream(), source_input=music21.stream.Stream(), **kwargs):
         """
         An algorithm object parses the input and runs algorithm pre processing on __init__
         The object itself is a generator, so it won't begin looking for results until
         the user calls next(self)
         """
-        # Configure logging within init so that if the user imports other librairies with
-        # disable_previous_loggers enabled to true, the logging here will still work.
-        if os.path.exists(LOGGING_PATH):
-            with open(LOGGING_PATH, 'rt') as f:
-                config = yaml.safe_load(f.read())
-            logging.config.dictConfig(config)
-        else:
-            logging.basicConfig(level=logging.INFO)
+        # Set up logging
+        update_logging_config()
 
         # Log creation of this object
         self.logger = logging.getLogger(__name__)
         self.logger.info('Creating Finder with:\n pattern %s\n source %s\n settings %s',
                 pattern_input, source_input, pformat(kwargs))
 
-        kwargs.update({
-                'pattern' : pattern_input,
-                'source' : source_input})
-        self.update(**kwargs)
+        self.update('load_defaults', pattern=pattern_input, source=source_input, **kwargs)
 
     def __iter__(self):
         return self
@@ -62,14 +90,15 @@ class Finder(object):
         else:
             cls = 'S'
 
-        if settings['threshold'] == 'all' and settings['mismatches'] == 0:
+        if ((settings['threshold'] == len(self.patternPointSet))
+                and (settings['mismatches'] == 0)):
             tp = '1'
         else:
             tp = '2'
 
         return cls + tp
 
-    def update(self, **kwargs):
+    def update(self, *args, **kwargs):
         """
         Update algorithm
 

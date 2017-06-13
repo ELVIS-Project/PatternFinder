@@ -14,7 +14,11 @@ interval_func:
     semitones
 colour:
     red
+colour_source: # Toggles colouring of the original source score
+    True
 show_pattern:
+    False
+excerpt:
     True
 auto_select:
     True
