@@ -113,6 +113,8 @@ class TestLemstromExample(TestCase):
         self.longMessage = True
         #carlos = algorithm(pattern, source, **settings)
         # @TODO put algorithm name in settings
+        # @TODO use long zip
+        # @TODO add tests to measure runtime and make sure it's consistently small!
         carlos = Finder(pattern, source, auto_select = False, algorithm=algorithm.__name__, **settings)
         for exp in matching_pairs:
             try:
