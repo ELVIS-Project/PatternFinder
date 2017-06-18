@@ -1,5 +1,6 @@
 from finder import Finder
 from algorithms import P1, P2, P3, S1, S2, W1, W2
+import music21
 import logging
 import os
 import yaml
