@@ -12,7 +12,7 @@ loggers:
         propagate: no
 
     geometric_helsinki.finder:
-        level: INFO
+        level: WARNING
         propagate: yes
     geometric_helsinki.algorithms:
         level: INFO

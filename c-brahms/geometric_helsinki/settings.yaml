@@ -19,7 +19,7 @@ colour_source: # Toggles colouring of the original source score
 show_pattern:
     False
 excerpt:
-    True
+    False
 auto_select:
     True
 
