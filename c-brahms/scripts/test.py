@@ -116,6 +116,17 @@ palestrina_mass = lambda p: 'music_files/lupi/palestrina/Je_suis_desheritee_' + 
 lupi_chanson = 'music_files/lupi/Je_suys_desheritee.xml'
 
 modules_and_colours = [('A1', 'red'), ('A2', 'orange'), ('B1', 'blue'), ('schub_3', 'purple')]
+module_melodies_and_colours = [
+        ('A1_tenor', 'red'),
+        ('A1_bass', 'red'),
+        ('A2_tenor', 'orange'),
+        ('A2_bass', 'orange'),
+        ('B1_tenor', 'blue'),
+        ('B1_bass', 'blue'),
+        ('B2_soprano', 'purple'),
+        ('B2_alto', 'purple'),
+        ('B2_tenor', 'purple'),
+        ('B2_bass', 'purple')]
 melodies_and_colours = [
         ('P', 'orange'),
         ('Z', 'red'),
@@ -137,7 +148,7 @@ def colour_occ(occ, colour):
 
     # Colour the source notes
     for note in get_source_notes_from_occ(occ):
-        note.color = c
+        note.color = colour
 
 def get_source_notes_from_occ(occ):
     # get the note, or get the chord that the note came from
@@ -157,6 +168,7 @@ def find_palestrina(dest='find_modules', masses=palestrina_movements, modules=mo
 
             for occ in palestrina:
                 counter += 1
+                colour_occ(occ, c)
 
             results[mass].append((m, counter, c))
 
@@ -201,7 +213,7 @@ def find_generic_semitone_difference(dest='find_modules', masses=palestrina_move
         temp_file = palestrina.sourcePointSet.derivation.origin.write('lily.pdf')
         os.rename(temp_file, ".".join([file_name, 'pdf']))
 
-#foo = find_palestrina(dest='find_melodies', threshold=0.9, source_window=3, pattern_window=2, scale='warped', modules=melodies_and_colours, interval_func='semitones')
+foo = find_palestrina(dest='find_melodies', threshold=0.9, source_window=3, pattern_window=2, scale='warped', modules=module_melodies_and_colours, interval_func='semitones')
 #bar = find_palestrina(dest='find_melodies', threshold=0.9, source_window=3, pattern_window=2, scale='warped', modules=melodies_and_colours, interval_func='generic')
 
 #find_generic_semitone_difference(dest='find_melodies', threshold=0.9, source_window=3, pattern_window=2, scale='warped', modules=melodies_and_colours, interval_func='semitones')
