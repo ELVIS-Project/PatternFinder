@@ -59,14 +59,15 @@ class GeometricHelsinkiBase(object):
         We implement this function in case someone wants to directly access algorithm filtered output
         """
         for r in self.algorithm():
-            log_msg = "Algorithm yielded\n {0}...".format(pformat(r))
+            #@TODO is this necessary? will pformat(r) be evaluated within a normal debug statement?
+            # it was taking so much time in the profiler, omg.
+            if self.logger.isEnabledFor(logging.DEBUG):
+                self.logger.debug("Algorithm yielded\n {0}...".format(pformat(r)))
             if self.filter_result(r):
-                log_msg += "\nPassed the filter!"
-                self.logger.debug(log_msg)
+                self.logger.debug("Passed the filter!")
                 yield r
             else:
-                log_msg += "\nDidn't pass the filter"
-                self.logger.debug(log_msg)
+                self.logger.debug("Didn't pass the filter")
 
     def occurrence_generator(self):
         """
@@ -77,7 +78,8 @@ class GeometricHelsinkiBase(object):
         results = self.filtered_results()
         for r in results:
             occ = self.process_result(r)
-            self.logger.debug("Yielding occurrence %s", pformat(occ))
+            if self.logger.isEnabledFor(logging.DEBUG):
+                self.logger.debug("Yielding occurrence %s", pformat(occ))
             yield occ
 
 class P(GeometricHelsinkiBase):
@@ -248,12 +250,18 @@ class SW(GeometricHelsinkiBase):
             """
             Tail recursively extracts the matching pairs from the final K_entry of an occurrence
             """
+            # needed on each iteration
+            note_end = InterNoteVector(K_entry.patternVec.noteEnd, K_entry.patternVec.site,
+                K_entry.sourceVec.noteEnd, K_entry.sourceVec.site)
             if K_entry.y is None:
-                return ([K_entry.matching_pairs.start]
-                        + [K_entry.matching_pairs.end]
+                # only needed at the base case
+                note_start = InterNoteVector(K_entry.patternVec.noteStart, K_entry.patternVec.site,
+                    K_entry.sourceVec.noteStart, K_entry.sourceVec.site)
+                return ([note_start]
+                        + [note_end]
                         + matching_pairs)
             else:
-                return extract_matching_pairs(K_entry.y, [K_entry.matching_pairs.end] + matching_pairs)
+                return extract_matching_pairs(K_entry.y, [note_end] + matching_pairs)
 
         return extract_matching_pairs(result, [])
 
@@ -373,13 +381,18 @@ class P1(P):
         # At the very least, p_0 must match, so we use this shift as a candidate
         for cur_shift in ptrs[0]:
             # Then we look at the rest of the pointers to see if they also can form a matching pair with this shift
-            self.logger.debug('Checking if cur_shift %s causes a pure occurrence...',
-                    cur_shift)
+
+            if self.logger.isEnabledFor(logging.DEBUG):
+                self.logger.debug('Checking if cur_shift %s causes a pure occurrence...',
+                        cur_shift)
+
             if is_pure_occurrence(ptrs, cur_shift):
                 yield [cur_shift] + [x.peek() for x in ptrs[1:]]
+
             else:
-                self.logger.debug("Not a pure occurrence. Current ptrs: \n %s",
-                        pformat([cur_shift] + [x.peek() for x in ptrs[1:]]))
+                if self.logger.isEnabledFor(logging.DEBUG):
+                    self.logger.debug("Not a pure occurrence. Current ptrs: \n %s",
+                            pformat([cur_shift] + [x.peek() for x in ptrs[1:]]))
 
 
 class P2(P):
