@@ -66,8 +66,19 @@ class Finder(object):
         Finder.update(pattern='foo.krn')
 
         When either source or pattern are unspecified, they should be NoneType, not a Stream
+
+        @TODO really should have pattern & source objects. no point sets, just pointers.
+        @TODO update is broken for pattern / source changing. certain settings must be recalculated such as threshold and pattern window. maybe make these things functions of the length?
+        @TODO put occurrences in a separate occurrence class, so we can do:
+            for occ in finder:
+                occ.colour_in_score()
+        @TODO no measure info runs into errors because of occ excerpt writing. check for measure info!
+        @TODO Delay creating the algorithm (or even pre processing) until you have both the pattern and the source! what's the point while one is None?
+        @TODO P2 is broken - cannot find modules A1, A2, B1, and B2 in the Palestrina Kyrie movement
+        @TODO with pointers, you can put a progress on the algorithm completion!
+        @TODO have a tuple in the settings, or two separate settings: one human readable, one for the algorithm - and distinguish between defaults and user-specified
     """
-    def __init__(self, pattern_input=music21.stream.Stream(), source_input=music21.stream.Stream(), **kwargs):
+    def __init__(self, pattern=None, source=None, **kwargs):
         """
         An algorithm object parses the input and runs algorithm pre processing on __init__
         The object itself is a generator, so it won't begin looking for results until
@@ -79,9 +90,11 @@ class Finder(object):
         # Log creation of this object
         self.logger = logging.getLogger(__name__)
         self.logger.info('Creating Finder with:\n pattern %s\n source %s\n settings %s',
-                pattern_input, source_input, pformat(kwargs))
+                pattern, source, pformat(kwargs))
 
-        self.update('load_defaults', pattern=pattern_input, source=source_input, **kwargs)
+        #@ TODO: broken..
+        #kwargs.update([('pattern', pattern_input), ('source', source_input)])
+        self.update('load_defaults', pattern=pattern, source=source, **kwargs)
 
     def __iter__(self):
         return self
@@ -123,12 +136,32 @@ class Finder(object):
         >>> foo = Finder()
         >>> foo.update(pattern=music21.stream.Stream())
 
-        Remember the settings
+        Remember all user settings until the defaults are restored
         >>> foo = Finder()
         >>> foo.update(threshold=1)
+
+        >>> foo.settings['threshold']
+        1
+
         >>> foo.update()
         >>> foo.settings['threshold']
         1
+
+        >>> foo.load_default_settings()
+        >>> foo.settings['threshold']
+        0
+
+        Set up settings before importing pattern or source
+        @ TODO (doesn't work yet)
+        >>> from tests.test_lemstrom_example import LEM_PATH_PATTERN
+        >>> foo = Finder(threshold='all')
+
+        >>> foo.settings['threshold']
+        0
+
+        >>> foo.update(pattern=LEM_PATH_PATTERN('a'))
+        >>> foo.settings['threshold']
+        6
         """
         # Log this method
         logger = logging.getLogger("{0}.{1}".format(self.logger.name, 'update'))
@@ -191,7 +224,12 @@ class Finder(object):
         self.algorithm.pre_process()
 
         # OUTPUT STUFF!
-        self.output = (self.process_occurrence(occ) for occ in self.occurrences)
+        self.output = self.output_generator()
+
+    def output_generator(self):
+        for occ in self.occurrences:
+            self.logger.info("Yielded {0}".format(occ))
+            yield self.process_occurrence(occ)
 
     def load_default_settings(self):
         """
@@ -292,6 +330,7 @@ class Finder(object):
         music21 will soon implement group-based style functions.
         Next, we deepcopy the measure range excerpt in the score corresponding to matched notes
         Finally we untag the matched notes in the original score and output the excerpt
+
         """
         # Check if there's a score to colour
         if not self.sourcePointSet.derivation.origin:
@@ -300,7 +339,7 @@ class Finder(object):
 
         # @TODO colour pattern notes too
         # Each source note is either original or came from a chord, so 
-        # we check the derivation to see which one to take.
+        # we check the derivation to see which one to take. also, use 'is None'
         source_notes = [vec.noteEnd if not vec.noteEnd.derivation.origin
                 else vec.noteEnd.derivation.origin for vec in occ]
 
@@ -308,9 +347,14 @@ class Finder(object):
         for note in source_notes:
             note.groups.append('occurrence')
 
+        return occ
+        """
         # Get a copied excerpt of the score
         first_measure_num = source_notes[0].getContextByClass('Measure').number
         last_measure_num = source_notes[-1].getContextByClass('Measure').number
+
+        GET AN EXCERPT OF THE SCORE
+        @TODO You don't want to do this for large searches, deepcopy takes way too much time
         if self.settings['excerpt']:
             result = copy.deepcopy(self.sourcePointSet.derivation.origin.measures(
                     numberStart = first_measure_num,
@@ -333,6 +377,7 @@ class Finder(object):
                     [self.patternPointSet.derivation.origin, result])
         else:
             output = result
+
         output.metadata = music21.metadata.Metadata()
         output.metadata.title = (
                 "Transposed by " + str(occ[0].diatonic.simpleNiceName) +
@@ -350,6 +395,7 @@ class Finder(object):
         #os.rename(temp_file[:-4], ".".join(['output', 'ly']))
 
         return output
+        """
 
     def _algorithm(self, arg):
         valid_options = ['P1', 'P2', 'P3', 'S1', 'S2', 'W1', 'W2']
@@ -372,6 +418,13 @@ class Finder(object):
         valid_options.append('positive integer > 0')
         if isinstance(arg, int) and (arg > 0):
             return arg
+
+        valid_options.append('percentage 0 <= p <= 1')
+        #@ TODO separate setting for this, or at least save the info. user should
+        # be reminded they set the threshold to a percentage! maybe namedtuples in settings?
+        if isinstance(arg, float) and (arg <= 1):
+            from math import ceil
+            return int(ceil(len(self.patternPointSet) * arg))
 
         valid_options.append('max')
         if arg == 'max':
