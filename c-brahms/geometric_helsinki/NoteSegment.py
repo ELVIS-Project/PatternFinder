@@ -171,11 +171,13 @@ class K_entry(object):
         self.z = z # occurrence ID
 
         # A pair of InterNoteVectors which connect this pair of IntraNoteVectors
+        """
         self.matching_pairs = namedtuple('matching_pairs', ['start', 'end'])._make([
                 InterNoteVector(self.patternVec.noteStart, self.patternVec.site,
                     self.sourceVec.noteStart, self.sourceVec.site),
                 InterNoteVector(self.patternVec.noteEnd, self.patternVec.site,
                     self.sourceVec.noteEnd, self.sourceVec.site)])
+        """
 
 
     def __repr__(self):
@@ -250,6 +252,9 @@ class NotePointSet(music21.stream.Stream):
             logger.debug("%s input has already been manually parsed", maybe_stream)
             score = maybe_stream
             score.derivation.method = 'manually pre-parsed'
+        # @TODO temp..
+        elif maybe_stream is None:
+            score = music21.stream.Stream()
         else:
             logger.exception("NotePointSet() input %s is neither a str nor a Stream!", maybe_stream)
             raise ValueError("Invalid input: pattern and source must be music21"
