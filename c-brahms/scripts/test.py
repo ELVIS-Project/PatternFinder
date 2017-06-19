@@ -16,6 +16,11 @@ import pdb
 # ex. TAVERN_PATH('B', 'B063', 1, 1) --> 'tavern/B/B063/Krn/B063_01_01_score.krn'
 TAVERN_PATH = lambda composer, catalogue, variation, phrase: os.path.join('tavern', composer, catalogue, 'Krn', "_".join((catalogue, str(variation).zfill(2), str(phrase).zfill(2), 'score.krn')))
 
+# Download files from server
+remotehost = "dgarfinkle@132.206.14.238"
+def scp_transfer(source, target):
+    return os.system('scp "{0}" "{1}:{2}"'.format(source, remotehost, target))
+
 # ex. BACH_FUGUE_PATH(1) --> 'music_files/bach_wtc/wtc1f01.krn'
 BACH_PATH = os.path.join('music_files', 'bach_wtc1')
 BACH_FUGUE_PATH = lambda x: os.path.join(BACH_PATH, 'wtc1f' + str(x).zfill(2) + '.krn')
@@ -213,7 +218,7 @@ def find_generic_semitone_difference(dest='find_modules', masses=palestrina_move
         temp_file = palestrina.sourcePointSet.derivation.origin.write('lily.pdf')
         os.rename(temp_file, ".".join([file_name, 'pdf']))
 
-foo = find_palestrina(dest='find_melodies', threshold=0.9, source_window=3, pattern_window=2, scale='warped', modules=module_melodies_and_colours, interval_func='semitones')
+#foo = find_palestrina(dest='find_melodies', threshold=0.9, source_window=3, pattern_window=2, scale='warped', modules=module_melodies_and_colours, interval_func='semitones')
 #bar = find_palestrina(dest='find_melodies', threshold=0.9, source_window=3, pattern_window=2, scale='warped', modules=melodies_and_colours, interval_func='generic')
 
 #find_generic_semitone_difference(dest='find_melodies', threshold=0.9, source_window=3, pattern_window=2, scale='warped', modules=melodies_and_colours, interval_func='semitones')
