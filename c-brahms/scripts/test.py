@@ -19,7 +19,7 @@ TAVERN_PATH = lambda composer, catalogue, variation, phrase: os.path.join('taver
 # Download files from server
 remotehost = "dgarfinkle@132.206.14.238"
 def scp_transfer(source, target):
-    return os.system('scp "{0}" "{1}:{2}"'.format(source, remotehost, target))
+    return os.system('scp "{0}" "{1}"'.format(source, target)
 
 # ex. BACH_FUGUE_PATH(1) --> 'music_files/bach_wtc/wtc1f01.krn'
 BACH_PATH = os.path.join('music_files', 'bach_wtc1')
