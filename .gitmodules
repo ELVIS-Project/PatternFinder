@@ -1,3 +1,7 @@
 [submodule "c-brahms/music_files/TAVERN"]
 	path = c-brahms/music_files/TAVERN
 	url = git://github.com/jcdevaney/TAVERN
+[submodule "music_files/TAVERN"]
+	path = music_files/TAVERN
+	url = https://www.github.com/jcdevaney/TAVERN
+	branch = master
