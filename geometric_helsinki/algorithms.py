@@ -1,5 +1,5 @@
 from pprint import pformat #for repr and logging
-from geometric_helsinki.NoteSegment import NotePointSet, K_entry, CmpItQueue, InterNoteVector, IntraNoteVector
+from geometric_helsinki.NoteSegment import NotePointSet, K_entry, CmpItQueue, InterNoteVector, IntraNoteVector, music21Chord_to_music21Notes
 from bisect import insort # @TODO to insert while maintaining a sorted list
 from itertools import groupby # for K table initialization
 from builtins import object # Python 2 and 3 next() compatibility
@@ -26,9 +26,10 @@ class GeometricHelsinkiBase(object):
     """
     def __init__(self, pattern_input, source_input, settings):
         """
-        An algorithm object parses the input and runs algorithm pre processing on __init__
-        The object itself is a generator, so it won't begin looking for results until
-        the user calls next(self)
+        Input: pattern, source NotePointSets and a settings dictionary
+        Output: a generator of InterNoteVector lists
+                each list is one occurrence -- it represents the matching pairs between
+                pattern notes and their corresponding source notes
         """
         self.logger = logging.getLogger("{0}.{1}".format(__name__, self.__class__.__name__))
         self.logger.info('Creating a %s algorithm with:\n pattern %s\n source %s\n settings %s',
@@ -37,10 +38,6 @@ class GeometricHelsinkiBase(object):
         self.patternPointSet = pattern_input
         self.sourcePointSet = source_input
         self.settings = settings
-
-    def setup_logging(self):
-        # Log the creation of this object
-        self.logger = logging.getLogger(__name__)
 
     def pre_process(self):
         pass
@@ -51,7 +48,6 @@ class GeometricHelsinkiBase(object):
     def process_result(self, result):
         return result
 
-    # @TODO ask Reiner if I should docstring an interfaced functions?
     def filtered_results(self):
         """
         A generator which filters the algorithm output based on self.filter_result
@@ -59,8 +55,7 @@ class GeometricHelsinkiBase(object):
         We implement this function in case someone wants to directly access algorithm filtered output
         """
         for r in self.algorithm():
-            #@TODO is this necessary? will pformat(r) be evaluated within a normal debug statement?
-            # it was taking so much time in the profiler, omg.
+            # Avoid calling pformat() for debug statements we don't use
             if self.logger.isEnabledFor(logging.DEBUG):
                 self.logger.debug("Algorithm yielded\n {0}...".format(pformat(r)))
             if self.filter_result(r):
@@ -100,6 +95,7 @@ class P(GeometricHelsinkiBase):
                     (InterNoteVector(p, self.patternPointSet, s, self.sourcePointSet,
                         self.settings['interval_func'], tp_type = 0)
                     for s in self.sourcePointSet))(note)),
+
                 peekable((lambda p:
                     (InterNoteVector(p, self.patternPointSet, s, self.sourcePointSet,
                         self.settings['interval_func'], tp_type = 1)
@@ -308,6 +304,22 @@ class S(SW):
         self.postcedentKey = lambda row: (row.sourceVec.noteStartIndex, row.scale)
         super(S, self).pre_process()
 
+    def filter_result(self, result):
+        """
+        Filters results by the scale parameter
+        The consistency of scale within the chain is already guaranteed by the algorithm,
+        so the only thing left to check is whether any of the K_entries have a scale accepted
+        by the settings.
+        """
+        # Not needed since the consistency of scale within the chain is guaranteed by
+        # the S class pre_processing
+        #def helper(r):
+        #    if r.y:
+        #        return (r.scale == self.settings['scale']) and helper(r.y)
+        #    else:
+        #        return True
+        return (result.scale == self.settings['scale']) and super(S, self).filter_result(result)
+
 
 class W(SW):
     """
@@ -327,33 +339,17 @@ class P1(P):
         source - another sorted flattened music21 stream of notes (no chords)
         settings - dictionary
     OUTPUT:
-        a list of InterNoteVectors indicating each matching pair within an exact, pure occurrence of the pattern within the source
+        a list of InterNoteVectors indicating each matching pair within an exact,
+        pure occurrence of the pattern within the source
 
     Modification from pseudocode code. Skips this line:
         ptrs[p] = max(ptrs[p], p + t)
 
     POLYPHONIC BEHAVIOUR
-        P1 can find exact melodic occurrences through many voices. It will only find multiple matches if the first note of the pattern can match more than one identical note in the source, while all the rest of the notes find possibly non-unique matches. THIS should be changed.
-
-
-    UKKONEN PSEUDOCODE
-        ### (1) for j <- 1, ..., n-m do
-        # Any solution to the P1 specification must at least match p_0 with a segment in source. So we loop through all possible matches for p_0, and ascertain whether any of the resulting shifts also induce a total match for the whole pattern. There are n - m + 1 possible matches (the pseudocode in the paper appears to have missed the + 1).
-            ### (3) for j <- 1, ..., n - m do
-            # Find exact matches for p_1, ..., p_m
-    POLYPHONIC BEHAVIOUR:
-
-                ### (8) q_i <- max(q_i, t_j)
-                # The first value for q_i is either its offset from the match of p_0 (s_j), or its previous value from the last iteration. We take the maximum because q_i is non-decreasing.
-                # p + t will never be greater than len(source).
-                # the choice of p + t as a minimum possible match for p_i implies that two unison voices in the pattern cannot match to a single voice in the source. Every note in the pattern must have a unique matching note in the source.
-                ### (9) while q_i < p_i + f
-                    ### (9) q_i <- next(q_i)
-
-                ### (10) until q_i > p_i + f
-                # Check if there is no match for this p_i. If so, there is no exact match for this t_j. Break, and try the next one.
-                ### (11) if i = m + 1 then output(f)
-
+        P1 can find exact polyphonic occurrences through many voices. It will only
+        find multiple matches if the first note of the pattern can match more than
+        one identical note in the source, while all the rest of the notes find
+        possibly non-unique matches. THIS should be changed.
     """
     def algorithm(self):
         def is_pure_occurrence(ptrs, cur_shift):
