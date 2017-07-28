@@ -1,43 +1,37 @@
-from finder import Finder
-from algorithms import P1, P2, P3, S1, S2, W1, W2
 import music21
 import logging
 import os
 import yaml
+
+from algorithms import P1, P2, P3, S1, S2, W1, W2
+from finder import Finder
+from settings import Settings
+
+LOGGING_PATH = 'geometric_helsinki/logging.yaml'
+MUSIC21_OUTPUT_PATH = 'music_files/music21_temp_output/'
 
 ## LOGGING
 # Add a NullHandler so that logging exceptions are silenced in this library
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
-# Music21 User Settings
-us = music21.environment.UserSettings()
-us['directoryScratch'] = 'music_files/music21_temp_output'
-
-## SETTINGS
-SETTINGS_PATH = 'geometric_helsinki/settings.yaml'
-# Load default settings
-if os.path.exists(SETTINGS_PATH):
-    with open(SETTINGS_PATH, 'rt') as f:
-        DEFAULT_SETTINGS = yaml.safe_load(f.read())
+# Load logging config file
+if os.path.exists(LOGGING_PATH):
+    with open(LOGGING_PATH, 'rt') as f:
+        config = yaml.safe_load(f.read())
+    logging.config.dictConfig(config)
 else:
-    logger.warning("'settings.yaml' file not found; we will use the hard-coded"
-            + "dictionary stored in " + __name__ + " to determine the default settings")
-    DEFAULT_SETTINGS = {
-            'algorithm' : 'P1',
-            'pattern_window' : 1,
-            'source_window' : 5,
-            'scale' : pure,
-            'threshold' : all,
-            'mismatches' : 0,
-            'interval_func' : semitones,
-            'colour' : red,
-            'modify_source' : False,
-            'show_pattern' : False,
-            'excerpt' : True,
-            'auto_select' : True,
-            'pattern' : None,
-            'source' : None}
+    logging.basicConfig(level=logging.INFO)
+
+
+## Music21 User Settings
+us = music21.environment.UserSettings()
+us['directoryScratch'] = MUSIC21_OUTPUT_PATH
+
+__all__ = [
+        'Finder'
+        ]
+
 
 # @TODO SETUP.PY
 # once we figure out the workflow, we can settle on a package structure and make our setup.py
