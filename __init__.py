@@ -1,1 +1,4 @@
-from geometric_helsinki.finder import Finder
+__all__ = [
+        'geometric_helsinki',
+        'fanimae'
+        ]
