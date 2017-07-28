@@ -41,17 +41,6 @@ class CmpItQueue(queue.PriorityQueue):
         # Return only the item so that PQ covers up the inconvenience of dealing with the sortTuple
         return queue.PriorityQueue.get(self, False).item
 
-class GeometricNote(music21.note.Note):
-
-    # Override music21 sort tuple so that it sorts by offset rather than onset?
-    # This would also help to avoid using indices in algorithms SW. 'a' and 'b'
-    # could be replaced by the note itself
-    def sortTuple():
-        pass
-
-    def __add__(self, other_note):
-        pass
-
 # @TODO make this a generic SortVector class which InterNoteVector inherits?
 # Or just get rid of it all together. we only use note vectors within a site
 class NoteVector(music21.interval.Interval):
@@ -150,6 +139,9 @@ class IntraNoteVector(InterNoteVector):
         super(IntraNoteVector, self).__init__(ralph, site, larry, site, y_func)
 
 class K_entry(object):
+    """
+    K_entries are
+    """
     def __init__(self, intra_pattern_vector, intra_database_vector, w=1, y=None, e=0, z=0):
         if (intra_database_vector.x == 0) and (intra_pattern_vector.x == 0):
             scale = 1
@@ -170,19 +162,9 @@ class K_entry(object):
         # we can more easily replace the shorter yields with their longer ones
         self.z = z # occurrence ID
 
-        # A pair of InterNoteVectors which connect this pair of IntraNoteVectors
-        """
-        self.matching_pairs = namedtuple('matching_pairs', ['start', 'end'])._make([
-                InterNoteVector(self.patternVec.noteStart, self.patternVec.site,
-                    self.sourceVec.noteStart, self.sourceVec.site),
-                InterNoteVector(self.patternVec.noteEnd, self.patternVec.site,
-                    self.sourceVec.noteEnd, self.sourceVec.site)])
-        """
-
-
     def __repr__(self):
         return ("<NoteSegment.K_entry> with s={0}, w={1}\n".format(self.scale, self.w)
-            + "INTRA PATTERN VECTOR {0} ====>\n".format(self.patternVec)
+            + "INTRA PATTERN VECTOR {0}\n".format(self.patternVec)
             + "INTRA DATABASE VECTOR {0}\n".format(self.sourceVec)
             # Indent the backlink so it's more readable
             + "WITH BACKLINK:\n    {0}".format(str(self.y).replace('\n', '\n    ')))
@@ -193,7 +175,7 @@ class Occurrence(object):
     """
     pass
 
-def music21Chord_to_music21Notes(chord, site):
+def music21Chord_to_music21Notes(chord):
     """
     For internal use in NotePointSet()
 
@@ -203,10 +185,7 @@ def music21Chord_to_music21Notes(chord, site):
     so in theory it shoud look something like this...
 
     NOTE: this will screw up the coloring since music21 doesn't support coloring just
-    one note of a chord (i don't think?), so as compromise i'll just color the whole chord.
-
-    @TODO maybe a cleaner implementation: use stream.MergeElements and override
-    music21Object.sortTuple so we can use stream.sort()
+    one note of a chord (I don't think?), so as compromise I'll just color the whole chord.
     """
     note_list = []
     for pitch in chord.pitches:
@@ -235,38 +214,15 @@ class NotePointSet(music21.stream.Stream):
 
     music21.stream.Stream does not allow any required arguments in its __init__, so every argument must be optional.
     """
-    def __init__(self, maybe_stream=music21.stream.Stream(), offsetSort=False, *args, **kwargs):
-        # Log this function
-        # @TODO not sure how to tie this in with the calling function
-        logger = logging.getLogger(__name__)
-
+    def __init__(self, score=music21.stream.Stream(), offsetSort=False, *args, **kwargs):
         super(NotePointSet, self).__init__()
-        self.derivation.method = 'NotePointSet()'
-
-        if isinstance(maybe_stream, str):
-            logger.debug("Attempting to use music21.converter.parse on %s", maybe_stream)
-            score = music21.converter.parse(maybe_stream)
-            score.derivation.origin = music21.ElementWrapper(maybe_stream)
-            score.derivation.method = 'music21.converter.parse()'
-        elif isinstance(maybe_stream, music21.stream.Stream):
-            logger.debug("%s input has already been manually parsed", maybe_stream)
-            score = maybe_stream
-            score.derivation.method = 'manually pre-parsed'
-        # @TODO temp..
-        elif maybe_stream is None:
-            score = music21.stream.Stream()
-        else:
-            logger.exception("NotePointSet() input %s is neither a str nor a Stream!", maybe_stream)
-            raise ValueError("Invalid input: pattern and source must be music21"
-                    + "streams or file names!")
-
         # Set the derivation for this PointSet
+        self.derivation.method = 'NotePointSet()'
         self.derivation.origin = score
 
-        # Use .flat instead of .recurse() because we want to preserve the nested
-        # stream offsets. When we switch to python3 and use music21 v.3, we can use
-        # music21Object.getoffsetInHierarchy(), but for now use stream.flat
-        note_stream = score.flat.notes
+        # If we have None input, return an empty stream
+        if not score:
+            return
 
         # Sorting key for the NotePointSet: sort lexicographicaly by tuples of:
         #    1) either note onset (attack) or note offset (release)
@@ -278,13 +234,10 @@ class NotePointSet(music21.stream.Stream):
                 if offsetSort else (n.offset, n.pitch.frequency))
 
         # Get each note or chord, convert it to a tuple of notes, and sort them by the keyfunc
-        new_notes = sorted(
-                [note for note_list in
-                    # Use (n,) instead of copy.deepcopy(n) or else it will lose the offset info
-                    [music21Chord_to_music21Notes(n, note_stream) if n.isChord else (n,)
-                        for n in note_stream]
-                    for note in note_list],
-                key=sort_keyfunc)
+        new_notes = reduce(lambda x, y: x+y,
+                [music21Chord_to_music21Notes(n, new_notes) if n.isChord else [n]
+                    for n in score.flat.notes])
+        sorted(new_notes, key=sort_keyfunc)
 
         # Make sure to turn off stream.autoSort, since streams automatically sort on insert by
         # an internal sortTuple which prioritizes note onset (attack)
