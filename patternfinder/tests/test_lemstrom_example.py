@@ -116,12 +116,12 @@ class TestLemstromExample(TestCase):
         # @TODO use long zip
         # @TODO add tests to measure runtime and make sure it's consistently small!
         carlos = Finder(pattern, source, auto_select = False, algorithm=algorithm.__name__, **settings)
-        for exp in matching_pairs:
-            try:
-                occurrence = next(carlos.occurrences)
-            except StopIteration:
-                self.fail("Not enough occurrences found")
-
+        occurrences = list(carlos.occurrences)
+        if len(occurrences) < len(matching_pairs):
+            self.fail("Not enough occurrences found"
+                   + "\nExpected:\n" + pformat(matching_pairs)
+                   + "\nFound:\n" + pformat(occurrences))
+        for occurrence, exp in zip(occurrences, matching_pairs):
             self.assertEqual(occurrence, exp, msg =
                     "\nFOUND:\n" + pformat(occurrence) +
                     "\nEXPECTED\n" + pformat(exp))
