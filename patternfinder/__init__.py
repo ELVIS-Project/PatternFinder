@@ -3,15 +3,12 @@ import logging.config
 import os
 import yaml
 
-MUSIC21_OUTPUT_PATH = 'patternfinder/music_files/music21_temp_output/'
-LOGGING_PATH = 'patternfinder/geometric_helsinki/logging.yaml'
+MUSIC21_OUTPUT_PATH = 'music_files/music21_temp_output/'
+LOGGING_PATH = 'patternfinder/logging.yaml'
 
 ## Music21 User Settings
 us = music21.environment.UserSettings()
 us['directoryScratch'] = MUSIC21_OUTPUT_PATH
-us['graphicsPath'] = '/usr/bin/evince'
-us['musicxmlPath'] = '/home/dgarfinkle/MuseScore-2.1-x86_64.AppImage'
-
 
 ## LOGGING
 # Add a NullHandler so that logging exceptions are silenced in this library
