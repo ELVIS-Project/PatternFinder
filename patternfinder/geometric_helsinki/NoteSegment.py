@@ -237,7 +237,7 @@ class NotePointSet(music21.stream.Stream):
         new_notes = reduce(lambda x, y: x+y,
                 [music21Chord_to_music21Notes(n, new_notes) if n.isChord else [n]
                     for n in score.flat.notes])
-        sorted(new_notes, key=sort_keyfunc)
+        new_notes.sort(key=sort_keyfunc)
 
         # Make sure to turn off stream.autoSort, since streams automatically sort on insert by
         # an internal sortTuple which prioritizes note onset (attack)
