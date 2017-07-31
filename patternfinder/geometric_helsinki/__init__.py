@@ -5,39 +5,10 @@ import yaml
 
 from algorithms import P1, P2, P3, S1, S2, W1, W2
 from finder import Finder
-from settings import Settings
-
-LOGGING_PATH = 'geometric_helsinki/logging.yaml'
-MUSIC21_OUTPUT_PATH = 'music_files/music21_temp_output/'
-
-## LOGGING
-# Add a NullHandler so that logging exceptions are silenced in this library
-logger = logging.getLogger(__name__)
-logger.addHandler(logging.NullHandler())
-
-# Load logging config file
-if os.path.exists(LOGGING_PATH):
-    with open(LOGGING_PATH, 'rt') as f:
-        config = yaml.safe_load(f.read())
-    logging.config.dictConfig(config)
-else:
-    logging.basicConfig(level=logging.INFO)
-
-
-## Music21 User Settings
-us = music21.environment.UserSettings()
-us['directoryScratch'] = MUSIC21_OUTPUT_PATH
 
 __all__ = [
         'Finder'
         ]
-
-
-# @TODO SETUP.PY
-# once we figure out the workflow, we can settle on a package structure and make our setup.py
-
-# @TODO JUPYTER !!!
-# also can't do till we settle on the workflow
 
 # @TODO ALGORITHMS Test interval settings, also why is it broken on the fugues?
 
