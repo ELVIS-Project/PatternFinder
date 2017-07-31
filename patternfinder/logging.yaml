@@ -13,10 +13,13 @@ loggers:
 
     geometric_helsinki.finder:
         level: WARNING
+        filters: [finder_function]
         propagate: yes
+
     geometric_helsinki.algorithms:
-        level: INFO
+        level: WARNING
         propagate: yes
+
     geometric_helsinki.P1:
         level: WARNING
         propagate: yes
@@ -39,19 +42,6 @@ loggers:
         level: WARNING
         propagate: yes
 
-    geomeric_algorithms.geo_algorithms.parse_scores():
-        level: WARNING
-        handlers: [console]
-        propagate: no
-    geometric_helsinki.geo_algorithms.process_settings():
-        level: WARNING
-        handlers: [console]
-        propagate: no
-    geometric_helsinki.geo_algorithms.pre_process():
-        level: WARNING
-        handlers: [console]
-        propagate: no
-
     NoteSegment:
         level: WARNING
         handlers: [console, logfile]
@@ -73,6 +63,10 @@ handlers:
         level: DEBUG
         formatter: simple
         filename: debug.log
+
+filters:
+    finder_function:
+        name: geometric_helsinki.finder.process_settings
 
 formatters:
     simple:
