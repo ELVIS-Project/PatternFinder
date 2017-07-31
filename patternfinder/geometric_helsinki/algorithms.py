@@ -1,5 +1,5 @@
 from pprint import pformat #for repr and logging
-from geometric_helsinki.NoteSegment import NotePointSet, K_entry, CmpItQueue, InterNoteVector, IntraNoteVector, music21Chord_to_music21Notes
+from patternfinder.geometric_helsinki.NoteSegment import NotePointSet, K_entry, CmpItQueue, InterNoteVector, IntraNoteVector, music21Chord_to_music21Notes
 from bisect import insort # @TODO to insert while maintaining a sorted list
 from itertools import groupby # for K table initialization
 from builtins import object # Python 2 and 3 next() compatibility
