@@ -1,8 +1,8 @@
 from unittest import TestCase, TestLoader, TextTestRunner
 from parameterized import parameterized, param
 from pprint import pformat # for pretty printing test error messages
-from geometric_helsinki import P1, P2, P3, S1, S2, W1, W2, Finder
-from geometric_helsinki.NoteSegment import NotePointSet, InterNoteVector
+from patternfinder.geometric_helsinki import P1, P2, P3, S1, S2, W1, W2, Finder
+from patternfinder.geometric_helsinki.NoteSegment import NotePointSet, InterNoteVector
 from fractions import Fraction # for scale settings
 import music21
 import pdb
@@ -230,9 +230,9 @@ class TestLemstromExample(TestCase):
         """
 
 
-LEMSTROM_EXAMPLE_SUITE = TestLoader().loadTestsFromTestCase(TestLemstromExample)
+lemstrom_example_suite = TestLoader().loadTestsFromTestCase(TestLemstromExample)
 
 if __name__ == "__main__":
-    result = TextTestRunner(verbosity=2).run(LEMSTROM_EXAMPLE_SUITE)
-    #LEMSTROM_EXAMPLE_SUITE.debug()
+    result = TextTestRunner(verbosity=2).run(lemstrom_example_suite)
+    #lemstrom_example_suite.debug()
 
