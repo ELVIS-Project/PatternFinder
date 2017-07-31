@@ -5,3 +5,5 @@ more_itertools
 future
 pyyaml
 jupyter
+matplotlib
+scipy
