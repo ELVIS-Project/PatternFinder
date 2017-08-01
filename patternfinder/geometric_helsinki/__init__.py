@@ -6,6 +6,24 @@ import yaml
 from algorithms import P1, P2, P3, S1, S2, W1, W2
 from finder import Finder
 
+## Load test suites for geometric_helsinki
+import unittest
+import doctest
+import finder
+
+from tests.test_lemstrom_example import lemstrom_example_suite
+from tests.test_finder import finder_suite
+
+geometric_helsinki_suite = unittest.TestSuite([
+    # Lemstrom queries A-F
+    lemstrom_example_suite,
+    # Test the Finder object
+    finder_suite,
+    # Doctests for the Finder object
+    doctest.DocTestSuite(finder)])
+
+
+## Define from geometric_helsinki import *
 __all__ = [
         'Finder'
         ]
