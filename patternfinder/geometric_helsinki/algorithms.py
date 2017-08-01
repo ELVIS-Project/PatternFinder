@@ -1,13 +1,15 @@
-from pprint import pformat #for repr and logging
-from patternfinder.geometric_helsinki.NoteSegment import NotePointSet, K_entry, CmpItQueue, InterNoteVector, IntraNoteVector, music21Chord_to_music21Notes
-from bisect import insort # @TODO to insert while maintaining a sorted list
-from itertools import groupby # for K table initialization
-from builtins import object # Python 2 and 3 next() compatibility
-from more_itertools import peekable # for P class ptrs
-from fractions import Fraction # for scale
 import logging
 import music21
 import pdb
+
+from builtins import object # Python 2 and 3 next() compatibility
+from bisect import insort # @TODO to insert while maintaining a sorted list
+from pprint import pformat #for repr and logging
+from itertools import groupby # algorithm P2, and for K table initialization
+from more_itertools import peekable # for P class ptrs
+from fractions import Fraction # for scale
+
+from patternfinder.geometric_helsinki.GeometricNotes import K_entry, CmpItQueue, InterNoteVector, IntraNoteVector
 
 class GeometricHelsinkiBase(object):
     """
