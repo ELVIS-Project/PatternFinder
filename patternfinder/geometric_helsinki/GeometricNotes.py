@@ -1,13 +1,10 @@
-from itertools import groupby # for use in initializing K tables
-from fractions import Fraction
-from collections import namedtuple # to make a custom Priority Queue
-from pprint import pprint, pformat #for K_enry __repr__
-from more_itertools import peekable # to peek in the priority queue
-import logging
 import queue # to make a custom Priority Queue
-import copy # for link_and_create
 import music21
 import pdb
+
+from itertools import groupby # for use in initializing K tables
+from fractions import Fraction # for scale in K entries
+from collections import namedtuple # to make a custom Priority Queue
 
 class CmpItQueue(queue.PriorityQueue):
     """
@@ -169,12 +166,6 @@ class K_entry(object):
             # Indent the backlink so it's more readable
             + "WITH BACKLINK:\n    {0}".format(str(self.y).replace('\n', '\n    ')))
 
-class Occurrence(object):
-    """
-    Wrapper class for occurrences
-    """
-    pass
-
 def music21Chord_to_music21Notes(chord):
     """
     For internal use in NotePointSet()
@@ -245,103 +236,3 @@ class NotePointSet(music21.stream.Stream):
         for n in new_notes:
             self.insert(n)
 
-    # TODO make this a part of geoAlgorithm since it's really about a pattern and a source, not just any segment stream.
-    def initialize_KtablesOld(self, source):
-        """
-        K-table data structure used in algorithms S1-2, W1-2
-        'self' should be a pattern that is to be searched for in asource
-
-        Requires that self, source intra_vectors have already been initialized with their desired windowing
-        """
-
-        """
-##
-        print("INITIALIZING KTABLES ....\n")
-        print("PATTER IVS ")
-        print(len(self.ivs))
-        print("SOURCE IVS ")
-        print(len(source.ivs))
-##
-        """
-
-        if window == 0:
-            window = len(self) # TODO see if you can't put this in the argument as a default
-        # There is one K table per note in the pattern
-        # TODO make the K table a class so you can have a PQ in it; this will make the algorithm code cleaner (no need to index PQ's)
-        self.K = [[] for note in self.flat.notes]
-
-        # Dict comprehension using groupby in order to easily access database vectors based on their pitch translations (y values)
-        intra_database_vectors = {key : list(g) for key, g in groupby(source.ivs, lambda x: x.y)}
-
-        # sort and group pattern vectors by the indices of their starting note
-        keyfunc = lambda x: x.site.index(x.start)
-        self.ivs.sort(key=keyfunc)
-        for K_index, group in groupby(self.ivs, keyfunc):
-            self.K[K_index] = [K_entry(p_vec, s_vec) for p_vec in group for s_vec in intra_database_vectors.get(p_vec.y) if K_entry(p_vec, s_vec).s is not None]
-
-            # Append the last row, denoted \sum{p_i} : the number of rows generated for table K[i]
-            self.K[K_index].append(K_entry(None, None, K_index, finalRow = True))
-
-            # Sort the K table in order {a, b, s} as per his order set "Aleph". Not totally confident in the implications of the sort order here, so it could maybe be wrong.
-            self.K[K_index].sort(key = lambda x : (x.a, x.b, x.s))
-
-
-    def report_Ktable_occurrences(self, results, source):
-        occurrences = music21.stream.Stream()
-        for r in results:
-            # Get the notes of this particular occurrence
-            result_stream = music21.stream.Stream()
-            ptr = r
-            # TODO make backtracking part of a Ktable (entry or table?) class method
-            while ptr != None:
-                result_stream.insert(ptr.source_vector.end) # use insert for the note to be placed at its proper offset
-                if ptr.y == None:
-                    first_note = ptr.source_vector.start
-                    result_stream.insert(first_note)
-                ptr = ptr.y
-            # Get the shift vector for this occurrence
-            # TODO make this a NoteVector() - but can't currently, because fist note of pattern is not necessarily contained in the same stream as source note
-            result_stream.shift = (first_note.offset - self.flat.notes[0].offset, first_note.pitch.ps - self.flat.notes[0].pitch.ps)
-            occurrences.append(result_stream)
-        return occurrences
-
-#K_entry = namedtuple('K_entry', ['a', 'b', 'y', 'c', 's', 'e', 'w', 'z', 'source_vector', 'pattern_vector'])
-#TODO make a K_entry just an extended NoteVector?
-class K_entryOld():
-    def __init__(self, p_vec, s_vec, K_index = 0, finalRow = False):
-
-        if not finalRow:
-            # Compute scale
-            if p_vec.x == 0 and s_vec.x == 0:
-                scale = 1
-            elif (p_vec.x == float("inf") and s_vec.x == float("inf")) or p_vec.x == 0 or s_vec.x == 0:
-                scale = None
-            else:
-                # Fraction(num, denom) only accepts integers as arguments, so you need to convert source_vec and pattern_vec first
-                scale = Fraction(Fraction(s_vec.x), Fraction(p_vec.x))
-
-            # K_entry data
-            a = s_vec.site.index(s_vec.start)
-            b = s_vec.site.index(s_vec.end)
-            c = p_vec.site.index(p_vec.end) # p_i'
-            s = scale # For S1, S2
-            w = 1 # length of occurrence
-            source_vector = s_vec
-            pattern_vector = p_vec
-        else:
-            a = float("inf")
-            b = float("inf")
-            c = K_index + 1 # i + 1
-            s = 0
-            w = 0
-            # y, z are not initialized in the pseudocode but an KeyError is thrown in S2 without them TODO make defaults in the K_entry __init__
-            source_vector = None
-            pattern_vector = None
-
-        y = None # backlink for building occurrences
-        e = 0 # For W1, W2
-        z = 0 # partial occurrence
-        self.a, self.b, self.c, self.s, self.y, self.e, self.w, self.z, self.source_vector, self.pattern_vector = a, b, c, s, y, e, w, z, source_vector, pattern_vector
-
-    def __repr__(self):
-        return pformat(self.__dict__)
