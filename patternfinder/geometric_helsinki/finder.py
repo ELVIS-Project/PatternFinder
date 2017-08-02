@@ -33,14 +33,8 @@ else:
             'threshold' : 'all',
             'mismatches' : 0,
             'interval_func' : 'semitones',
-            'colour' : 'red',
-            'modify_source' : False,
-            'show_pattern' : False,
-            'excerpt' : True,
-            'auto_select' : True,
             'pattern' : None,
-            'source' : None,
-            'load_defaults' : False}
+            'source' : None}
 
 class Finder(object):
     """

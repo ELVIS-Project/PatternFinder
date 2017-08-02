@@ -1,5 +1,5 @@
 algorithm:
-    'P1'
+    'auto'
 pattern_window:
     1
 source_window:
@@ -20,8 +20,6 @@ show_pattern:
     False
 excerpt:
     False
-auto_select:
-    True
 
 pattern: # we separate these in __init__ as syntactic sugar
     None
