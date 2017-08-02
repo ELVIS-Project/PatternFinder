@@ -335,6 +335,8 @@ class Finder(object):
 
         valid_options.append('positive integer > 0')
         if isinstance(arg, int) and (arg > 0):
+            if arg > len(self.patternPointSet):
+                raise ValueError("Threshold cannot be greater than length of the pattern")
             return arg
 
         valid_options.append('percentage 0 <= p <= 1')
@@ -349,15 +351,29 @@ class Finder(object):
         raise ValueError(valid_options)
 
     def _validate_mismatches(self, arg):
-        valid_options = []
+        """
+        Symmetrical to threshold
+        """
+        threshold_symmetry = 0
 
-        valid_options.append('positive integer >= 0')
         if isinstance(arg, int) and (arg >= 0):
-            return arg
+            threshold_symmetry = len(self.patternPointSet) - arg
 
-        raise ValueError(valid_options)
+        if isinstance(arg, float) and (arg <= 1):
+            threshold_symmetry = 1 - arg
+
+        if arg == 'min':
+            threshold_symmetry = 'max'
+
+        self.get_parameter_translator('threshold')(threshold_symmetry)
 
     def _validate_scale(self, arg):
+        """
+        Scale determines the time-scaling liberties used by the algorithms to find
+        an occurrence of the pattern within the source
+
+        Segregates the algorithms into three classes: (P)ure, (S)caled, (W)arped
+        """
         valid_options = []
 
         ## Integer input
