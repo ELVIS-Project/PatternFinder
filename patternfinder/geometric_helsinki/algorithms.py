@@ -26,6 +26,56 @@ class GeometricHelsinkiBaseAlgorithm(object):
         occurrence_generator -- A.K.A. "processed_results". Runs through the filtered results
                                 and applies process_result() to them
     """
+    def factory(pattern_point_set, source_point_set, settings):
+        """
+        Given (processed) user settings, returns the appropriate geometric algorithm to use
+
+        There are two import parameters in the user settings for selecting the
+        appopriate algorithm. These are time-scaling (P)ure, (S)caled, (W)arped,
+        and perfect/partial matching (check whether threshold == length of pattern)
+
+        Input
+        ------
+        pattern_point_set: the pattern for which we're looking for in the larger source
+        source_point_set
+        settings: algorithm settings, from which we'll decide the appropriate algorithm
+
+        Output
+        ------
+        class patternfinder.geometric_helsinki.algorithm.(P1, P2, P3, S1, S2, W1, or W2)
+        which has been initialized with the pattern and source point sets, as well as
+        the user settings
+
+        Note
+        -----
+        The factory also allows for manual selection by first checking for
+        settings['algorithm'] == 'auto'
+        """
+        def decide_algorithm(scale, threshold, pattern_length):
+            """Algorithm auto selection from user settings"""
+            # Condition which determines whether we're looking for pure or approximate matches
+            perfect_matching = (settings['threshold'] == pattern_length)
+            if perfect_matching:
+                if scale == 1: return P1
+                elif scale == 'warped': return W1
+                else: return S1
+            else:
+                if scale == 1: return P2
+                elif scale == 'warped': return W2
+                else: return S2
+
+        # User selected algorithm, or auto-select from the settings?
+        if settings['algorithm'] == 'auto':
+            algorithm = decide_algorithm(
+                    settings['scale'], settings['threshold'], len(pattern_point_set))
+        else:
+            import sys
+            algorithm = getattr(sys.modules[__name__], settings['algorithm'])
+
+        return algorithm(pattern_point_set, source_point_set, settings)
+    # Make the factory method static among all instances of this class
+    factory = staticmethod(factory)
+
     def __init__(self, pattern_input, source_input, settings):
         """
         Input: pattern, source NotePointSets and a settings dictionary

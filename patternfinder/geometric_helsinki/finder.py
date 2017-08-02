@@ -129,26 +129,6 @@ class Finder(object):
                     + "\n    algy:" + str(self.settings[key].algorithm))
         return output
 
-    def decide_algorithm(self, settings):
-        """
-        Given (processed) user settings, decide the appropriate geometric algorithm to use
-        Two important factors: time-scaling (P, S, or W) and perfect/partial matching (1 or 2)
-        """
-        if settings['scale'] == 1:
-            cls = 'P'
-        elif settings['scale'] == 'warped':
-            cls = 'W'
-        else:
-            cls = 'S'
-
-        if ((settings['threshold'] == len(self.patternPointSet))
-                and (settings['mismatches'] == 0)):
-            tp = '1'
-        else:
-            tp = '2'
-
-        return cls + tp
-
     def update(self, *args, **kwargs):
         """
         Runs all necessary pre-processing common to every algorithm
@@ -217,12 +197,9 @@ class Finder(object):
         ## (3) SELECT THE ALGORITHM
         # Allow the user to manually choose the algorithm rather than letting
         # the system choose the fastest one based on the settings input
-        if not self.settings['auto_select']:
-            algorithm = getattr(algorithms, self.settings['algorithm'])
-        else:
-            algorithm = getattr(algorithms, self.decide_algorithm(
-                {key : arg.algorithm for key, arg in self.settings.items()}))
-        self.algorithm = algorithm(self.patternPointSet, self.sourcePointSet,
+        self.algorithm = GeometricHelsinkiBaseAlgorithm.factory(
+                self.patternPointSet,
+                self.sourcePointSet,
                 {key : arg.algorithm for key, arg in self.settings.items()})
 
         ## (4) RUN THE ALGORITHM
