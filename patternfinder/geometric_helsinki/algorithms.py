@@ -557,12 +557,53 @@ class P3(P):
             except StopIteration:
                 pass
 
-class S1(S):
+class S1(P):
 
     def pre_process(self):
         super(S1, self).pre_process()
         self.settings['threshold'] = len(self.patternPointSet)
         self.settings['pattern_window'] = 1
+
+    """
+    def algorithm(self):
+        Antti Laaksonen's solution to problem S1
+        This algorithm theoretically runs in time O(n^2 * m), where n is the
+        length of the source, and m the length of the pattern
+
+        References
+        ------------
+        Laaksonen, Antti. "Efficient and Simple Algorithms for Time-Scaled and
+        Time-Warped Music Search". Proceedings of the 10th International Symposium
+        on Computer Music Multidisciplinary Research, Marseille, France. 2013.
+
+        from itertools import combinations
+
+        source_ptrs = [note.source_ptrs[1] for note in self.patternPointSet]
+
+        # Sweepline through the source
+        for start, end in combinations(source_ptrs[0], source_ptrs[-1]):
+            # This is the required scale for an occurrence using start, end
+            scale = Fraction((end.noteEnd.x - start.noteEnd.x),
+                    (self.patternPointSet[-1].x - self.patternPointSet[0].x))
+
+            # The list of scaled pattern notes which we hope to exist in the source
+            alleged_occurrence = tuple(
+                    (start.noteEnd.x + scale * (pattern_note.x - self.patternPointSet[0].x), # offset
+                        start.noteEnd.y + (pattern_note.y - self.patternPointSet[0].y))
+                    for pattern_note in self.patternPointSet)
+
+            for ptr, alleged_note in zip(source_ptrs[1:-1], alleged_occurrence):
+                # Not possible unless we create geometric note up there. looks like your
+                # previous old code isn't looking so bad after all...
+                #while ptr.next().noteEnd.x < alleged_note
+
+
+            peekable((lambda p:
+                (InterNoteVector(p, self.patternPointSet, s, self.sourcePointSet,
+                    self.settings['interval_func'], tp_type = 1)
+                for s in self.sourcePointSet))(note)),
+    """
+
 
 class S2(S):
     pass
