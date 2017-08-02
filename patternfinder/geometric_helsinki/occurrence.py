@@ -3,37 +3,56 @@ import pdb
 from pprint import pformat # for pretty __repr__
 
 class Occurrence(object):
-    def __init__(self, matching_pairs):
+    def __init__(self, matching_pairs, score):
         self.matching_pairs = matching_pairs
+        self.score = score
+
         # Each source note is either original or came from a chord, so 
         # we check the derivation to see which one to take. also, use 'is None'
         self.pattern_notes = [vec.noteStart if vec.noteStart.derivation.origin is None
                 else vec.noteStart.derivation.origin for vec in matching_pairs]
         self.source_notes = [vec.noteEnd if vec.noteEnd.derivation.origin is None
                 else vec.noteEnd.derivation.origin for vec in matching_pairs]
+
+        #@TODO no measure info runs into errors? check for measure info!
+        self.offset = self.source_notes[0].getOffsetBySite(self.score.flat.notes)
         self.first_measure_num = self.source_notes[0].getContextByClass('Measure').number
         self.last_measure_num = self.source_notes[-1].getContextByClass('Measure').number
-
+        self.measure_range = range(self.first_measure_num, self.last_measure_num + 1) # include last measure num
 
     def __repr__(self):
         return super(Occurrence, self).__repr__() + "\n" + pformat(self.matching_pairs)
 
+    def __eq__(self, other):
+        return self.matching_pairs == other.matching_pairs
 
-    def get_excerpt(self):
+    def __ne__(self, other):
+        return self.matching_pairs == other.matching__pairs
+
+    def get_excerpt(self, color='black'):
         """
         Returns a Score object representing the excerpt of the score which contains this occurrence
         You don't want to do this for all occurrences since deepcopy takes way too much time
         """
-        excerpt = self.source_notes[0].activeSite.derivation.origin.measures(
+        excerpt = copy.deepcopy(self.score.measures(
                 numberStart = self.first_measure_num,
-                numberEnd = self.last_measure_num)
+                numberEnd = self.last_measure_num))
+        for note in excerpt.flat.notes:
+            note.color = color
         return excerpt
 
-    def color_in(self, c, score):
-        for n in getattr(self, score + "_notes"):
+    def color_in_source(self, c):
+        for n in self.source_notes:
             n.color = c
 
         """
+        Implementation:
+        We look at the original source and gather all of the notes which have been matched.
+        First we tag these matched notes them with a group. We use groups rather than id's because
+        music21 will soon implement group-based style functions.
+        Next, we deepcopy the measure range excerpt in the score corresponding to matched notes
+        Finally we untag the matched notes in the original score and output the excerpt
+
         # Get a copied excerpt of the score
         first_measure_num = source_notes[0].getContextByClass('Measure').number
         last_measure_num = source_notes[-1].getContextByClass('Measure').number
