@@ -193,6 +193,10 @@ class Finder(object):
             setattr(self, score, self.get_parameter_translator(score)(kwargs[score]))
             setattr(self, score + 'PointSet', NotePointSet(getattr(self, score)))
 
+        # Stop here until the user re-updates with both the pattern and the source
+        if self.pattern is None or self.source is None:
+            return
+
         ## (2) PROCESS SETTINGS
         logger.debug("Processing user settings...")
 
