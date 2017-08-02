@@ -11,7 +11,7 @@ from fractions import Fraction # for scale
 
 from patternfinder.geometric_helsinki.GeometricNotes import K_entry, CmpItQueue, InterNoteVector, IntraNoteVector
 
-class GeometricHelsinkiBase(object):
+class GeometricHelsinkiBaseAlgorithm(object):
     """
     A base class for P, S, and W algorithms
 
@@ -79,7 +79,7 @@ class GeometricHelsinkiBase(object):
                 self.logger.debug("Yielding occurrence %s", pformat(occ))
             yield occ
 
-class P(GeometricHelsinkiBase):
+class P(GeometricHelsinkiBaseAlgorithm):
     """
     Implements algorithms P1, P2, and P3 from Ukkonen's 2003 papers
 
@@ -97,7 +97,6 @@ class P(GeometricHelsinkiBase):
                     (InterNoteVector(p, self.patternPointSet, s, self.sourcePointSet,
                         self.settings['interval_func'], tp_type = 0)
                     for s in self.sourcePointSet))(note)),
-
                 peekable((lambda p:
                     (InterNoteVector(p, self.patternPointSet, s, self.sourcePointSet,
                         self.settings['interval_func'], tp_type = 1)
@@ -112,7 +111,7 @@ class P(GeometricHelsinkiBase):
                     for s in self.sourcePointSet))(note))]
 
 
-class SW(GeometricHelsinkiBase):
+class SW(GeometricHelsinkiBaseAlgorithm):
     """
     Implements algorithms S1, S2, W1, and W2 from Lemstrom's 2010 and 2011 papers
 
@@ -421,7 +420,7 @@ class P2(P):
 
         # We use generators to implement line-sweeping the pointers through
         # the score. Use a lambda expression to avoid bugs caused by scope-bleeding
-        # from generator comprehensions
+        # if using generator comprehension
         # NOTE possibly a generator comprehension would work fine in python3
         for note in self.patternPointSet:
             shifts.put(note.source_ptrs[1])
