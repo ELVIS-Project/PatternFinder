@@ -557,7 +557,7 @@ class P3(P):
             except StopIteration:
                 pass
 
-class S1(P):
+class S1(S):
 
     def pre_process(self):
         super(S1, self).pre_process()
