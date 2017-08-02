@@ -233,41 +233,9 @@ class Finder(object):
         self.output = self.output_generator()
 
     def output_generator(self):
-        for occ in self.occurrences:
-            self.logger.info("Yielded {0}".format(occ))
-            #yield self.process_occurrence(occ)
-            yield Occurrence(occ)
+        return (Occurrence(occ, self.source) for occ in self.occurrences)
 
-    def process_occurrence(self, occ, ):
-        """
-        Given an occurrence, process it and produce output
-
-        Implementation:
-        We look at the original source and gather all of the notes which have been matched.
-        First we tag these matched notes them with a group. We use groups rather than id's because
-        music21 will soon implement group-based style functions.
-        Next, we deepcopy the measure range excerpt in the score corresponding to matched notes
-        Finally we untag the matched notes in the original score and output the excerpt
-
-        """
-
-        return occ
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    ## FINDER SETTINGS MANAGEMENT
     def process_and_translate(self, kwargs):
         """
         Validates user-specified or default-specified settings
