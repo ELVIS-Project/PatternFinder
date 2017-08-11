@@ -74,8 +74,8 @@ class Finder(object):
 
         >>> import music21
         >>> import patternfinder.geometric_helsinki as helsinki
-        >>> p = music21.converter.parse('tinynotation: 4/4 c4 e4')
-        >>> s = music21.converter.parse('tinynotation: 4/4 c4 e4 r2 c2 e2 c2 r2 e1')
+        >>> p = music21.converter.parse('tinynotation: 4/4 c4 e4 d4')
+        >>> s = music21.converter.parse('tinynotation: 4/4 c4 e4 d4 r4 c2 e2 d2 r2 c#2 r2 e-1 r1 g1')
         >>> my_finder = helsinki.Finder(p, s)
         >>> occ = next(my_finder) # occ is an Occurrence object
         >>> occ.measure_range
@@ -83,17 +83,12 @@ class Finder(object):
 
         >>> my_finder.update(scale=2)
         >>> next(my_finder).measure_range
-        [2]
+        [2, 3]
 
-        >>> my_finder.update(scale='warped')
+        >>> my_finder.update(scale='warped', pattern=music21.converter.parse('tinynotation: 4/4 c#4 e-4 g4'))
         >>> for occ in my_finder:
         ...     occ.measure_range
-        [1]
-        [1, 2]
-        [1, 2, 3]
-        [2]
-        [2, 3, 4]
-        [3, 4]
+        [4, 5, 6, 7]
         """
         # Log creation of this object
         self.logger = logging.getLogger(__name__)
@@ -151,31 +146,31 @@ class Finder(object):
         Usage:
 
         Can initialize with nothing; update with just the source, or just the pattern
-        >>> from tests.test_lemstrom_example import LEM_PATH_PATTERN, LEM_PATH_SOURCE
-        >>> foo = Finder()
-        >>> foo.update(source=LEM_PATH_PATTERN('a'))
+        >>> from patternfinder.geometric_helsinki.tests.test_lemstrom_example import LEM_PATH_PATTERN, LEM_PATH_SOURCE
+        >>> my_finder = Finder(LEM_PATH_PATTERN('a'), LEM_PATH_SOURCE)
+        >>> my_finder.update(pattern=LEM_PATH_PATTERN('b'))
 
         Remember all user settings until the defaults are restored
-        >>> foo.update(threshold=1)
-        >>> foo.update() # Shouldn't change anything
-        >>> foo.settings['threshold']
+        >>> my_finder.update(threshold=1)
+        >>> my_finder.update() # Shouldn't change anything
+        >>> my_finder.settings['threshold']
         Param(user=1, algorithm=1)
 
         Set up settings before importing pattern or source
-        >>> foo = Finder(threshold='all')
-        >>> foo.settings['threshold']
+        >>> my_finder = Finder(threshold='all')
+        >>> my_finder.settings['threshold']
         Param(user='all', algorithm=0)
 
         Threshold will be recalculated based on the new pattern
-        >>> foo.update(pattern=LEM_PATH_PATTERN('a'))
-        >>> foo.settings['threshold']
+        >>> my_finder.update(pattern=LEM_PATH_PATTERN('a'))
+        >>> my_finder.settings['threshold']
         Param(user='all', algorithm=6)
 
         Load defaults - use args rather than kwargs. Loading defaults should be
         a one-time operation rather than a repeated action taken at every update
-        >>> foo.update(threshold=4)
-        >>> foo.update('load_defaults')
-        >>> foo.settings['threshold'].algorithm
+        >>> my_finder.update(threshold=4)
+        >>> my_finder.update('load_defaults')
+        >>> my_finder.settings['threshold'].algorithm
         6
         """
         # Log this method with a separate logger
@@ -430,15 +425,12 @@ class Finder(object):
         valid_options = ['any hexadecimal RGB colour?']
         return arg
 
-""""
-Not used but would potentially make the code a lot cleaner
 class ValidationError(Exception):
     def __init__(self, msg, key, arg, valid_options):
         self.message = "\n".join([
             msg + " \n",
             "Parameter '{0}' has value of {1}".format(key, arg),
             "Valid arguments are: {0}".format(e.message)])
-"""
 
 if __name__ == "__main__":
     import doctest
