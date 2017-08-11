@@ -13,7 +13,7 @@ from collections import namedtuple # for use in __repr__
 #import patternfinder.geometric_helsinki.algorithms
 from patternfinder.geometric_helsinki.algorithms import GeometricHelsinkiBaseAlgorithm
 from patternfinder.geometric_helsinki.GeometricNotes import NotePointSet
-from patternfinder.geometric_helsinki.occurrence import Occurrence
+from patternfinder.geometric_helsinki.occurrence import GeometricHelsinkiOccurrence
 
 ## SETTINGS
 DEFAULT_SETTINGS_PATH = 'patternfinder/geometric_helsinki/default_settings.yaml'
@@ -222,7 +222,7 @@ class Finder(object):
         self.output = self.output_generator()
 
     def output_generator(self):
-        return (Occurrence(occ, self.source) for occ in self.occurrences)
+        return (GeometricHelsinkiOccurrence(self, 1, occ, self.source) for occ in self.occurrences)
 
     ## FINDER SETTINGS MANAGEMENT
     def process_and_translate(self, kwargs):
