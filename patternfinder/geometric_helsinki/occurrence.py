@@ -15,7 +15,7 @@ class Occurrence(object):
                 else vec.noteEnd.derivation.origin for vec in matching_pairs]
 
         #@TODO no measure info runs into errors? check for measure info!
-        self.offset = self.source_notes[0].getOffsetBySite(self.score.flat.notes)
+        self.offset = self.source_notes[0].getOffsetInHierarchy(self.score)
         self.first_measure_num = self.source_notes[0].getContextByClass('Measure').number
         self.last_measure_num = self.source_notes[-1].getContextByClass('Measure').number
         self.measure_range = range(self.first_measure_num, self.last_measure_num + 1) # include last measure num
@@ -38,7 +38,14 @@ class Occurrence(object):
                 numberStart = self.first_measure_num,
                 numberEnd = self.last_measure_num))
         for note in excerpt.flat.notes:
-            note.color = color
+            if note.derivation.origin in self.source_notes:
+                note.color = color
+
+        # XML and Lily output don't seem to preserve the measure numbers
+        # even though you can see them in stream.show('t')
+        # Quick fix: put measure numbers in the excerpt title
+        excerpt.metadata = music21.metadata.Metadata()
+        exceprt.metadata.title = (" mm. {0} - {1}".format(self.first_measure_num, self.last_measure_num))
         return excerpt
 
     def color_in_source(self, c):
