@@ -234,7 +234,7 @@ class NotePointSet(music21.stream.Stream):
 
         # Get each note or chord, convert it to a tuple of notes, and sort them by the keyfunc
         new_notes = reduce(lambda x, y: x+y,
-                [music21Chord_to_music21Notes(n, new_notes) if n.isChord else [n]
+                [music21Chord_to_music21Notes(n) if n.isChord else [n]
                     for n in score.flat.notes])
         new_notes.sort(key=sort_keyfunc)
 
