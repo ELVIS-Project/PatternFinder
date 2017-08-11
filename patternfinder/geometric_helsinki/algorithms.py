@@ -32,7 +32,7 @@ class GeometricHelsinkiBaseAlgorithm(object):
 
         There are two import parameters in the user settings for selecting the
         appopriate algorithm. These are time-scaling (P)ure, (S)caled, (W)arped,
-        and perfect/partial matching (check whether threshold == length of pattern)
+        and perfect/partial matching (checks whether threshold == length of pattern)
 
         Input
         ------
@@ -52,7 +52,7 @@ class GeometricHelsinkiBaseAlgorithm(object):
         settings['algorithm'] == 'auto'
         """
         def decide_algorithm(scale, threshold, pattern_length):
-            """Algorithm auto selection from user settings"""
+            """Helper method to auto select algorithm from the user settings"""
             # Condition which determines whether we're looking for pure or approximate matches
             perfect_matching = (settings['threshold'] == pattern_length)
             if perfect_matching:
