@@ -112,23 +112,31 @@ class InterNoteVector(NoteVector):
 
     def __repr__(self):
         # @TODO This does not have to be this ugly... Improve the note.Note repr!!!
+        measure_start = self.noteStart.getContextByClass('Measure')
+        measure_end = self.noteEnd.getContextByClass('Measure')
+
         try:
-            # Measure info
-            return  ('<'+ str(self.__class__.__name__) + '>'
-                    + " TYPE {0} (x={1}, y={2}) ".format(self.tp_type, self.x, self.y)
-                    + " #{0} Note {2} offset {6} of m.{1} --> #{3} Note {5} offset {7} of m.{4}".format(
-                        self.noteStartIndex, self.noteStart.getContextByClass('Measure').number,
-                        self.noteStart.pitch.nameWithOctave, self.noteEndIndex,
-                        self.noteEnd.getContextByClass('Measure').number, self.noteEnd.pitch.nameWithOctave,
-                        self.noteStart.getOffsetBySite(self.noteStart.getContextByClass('Measure')),
-                        self.noteEnd.getOffsetBySite(self.noteEnd.getContextByClass('Measure'))))
-        except:
-            # No Measure info available
-            return  ('<'+ str(self.__class__.__name__) + '>'
-                    + " TYPE {0} (x={1}, y={2}) ".format(self.tp_type, self.x, self.y)
-                    + " #{0} Note {1} no measure info --> #{2} Note {3} no measure info".format(
-                        self.noteStartIndex, self.noteStart.pitch.nameWithOctave,
-                        self.noteEndIndex, self.noteEnd.pitch.nameWithOctave))
+            measure_info_start = "({0} of m.{1})".format(
+                self.noteStart.offset,
+                measure_start.number)
+        except AttributeError:
+            measure_info_start = "no measure info"
+
+        try:
+            measure_info_end = "({0} of m.{1})".format(
+                    self.noteEnd.offset,
+                    measure_end.number)
+        except AttributeError:
+            measure_info_end = "no measure info"
+
+        return ('<' + str(self.__class__.__name__) + '>'
+                + " TP {0} (x={1}, y={2}) ".format(self.tp_type, self.x, self.y)
+                + " #{0} PART {1} {2} {3} -->".format(
+                    self.noteStartIndex, self.noteStart.getContextByClass('Part').partName,
+                    self.noteStart.pitch.nameWithOctave, measure_info_start)
+                + " #{0} PART {1} {2} {3}".format(
+                    self.noteEndIndex, self.noteEnd.getContextByClass('Part').partName,
+                    self.noteEnd.pitch.nameWithOctave, measure_info_end))
 
 class IntraNoteVector(InterNoteVector):
     def __init__(self, ralph, larry, site, y_func):
