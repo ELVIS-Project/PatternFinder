@@ -73,6 +73,7 @@ class GeometricHelsinkiBaseAlgorithm(object):
             algorithm = getattr(sys.modules[__name__], settings['algorithm'])
 
         return algorithm(pattern_point_set, source_point_set, settings)
+
     # Make the factory method static among all instances of this class
     factory = staticmethod(factory)
 
@@ -83,13 +84,28 @@ class GeometricHelsinkiBaseAlgorithm(object):
                 each list is one occurrence -- it represents the matching pairs between
                 pattern notes and their corresponding source notes
         """
-        self.logger = logging.getLogger("{0}.{1}".format(__name__, self.__class__.__name__))
-        self.logger.info('Creating a %s algorithm with:\n pattern %s\n source %s\n settings %s',
-                self.__class__.__name__, pattern_input, source_input, pformat(settings))
+        self.logger = logging.getLogger("{0}".format(__name__))
+        if self.logger.isEnabledFor(logging.INFO):
+            self.logger.info('Creating a %s algorithm with:\n pattern %s\n source %s\n settings %s',
+                    self.__class__.__name__, pattern_input, source_input, pformat(settings))
 
+        # input to algorithms
         self.patternPointSet = pattern_input
         self.sourcePointSet = source_input
         self.settings = settings
+
+        # Algorithm specific pre-processing
+        self.pre_process()
+        # Occurrence objects
+        self.occurrences = (self.process_result(r) for r in self.filtered_results())
+
+    def __iter__(self):
+        """Algorithm is a proper iterator, rather than returning a new generator on each call"""
+        return self
+
+    def __next__(self):
+        """Return the next occurrence"""
+        return next(self.occurrences)
 
     def pre_process(self):
         pass
@@ -104,30 +120,18 @@ class GeometricHelsinkiBaseAlgorithm(object):
         """
         A generator which filters the algorithm output based on self.filter_result
         This is the middle step in processing between algorithm output and occurrence output
-        We implement this function in case someone wants to directly access algorithm filtered output
+        We implement this function to log the output and filter of the algorithm
         """
         for r in self.algorithm():
             # Avoid calling pformat() for debug statements we don't use
             if self.logger.isEnabledFor(logging.DEBUG):
                 self.logger.debug("Algorithm yielded\n {0}...".format(pformat(r)))
+
             if self.filter_result(r):
                 self.logger.debug("Passed the filter!")
                 yield r
             else:
                 self.logger.debug("Didn't pass the filter")
-
-    def occurrence_generator(self):
-        """
-        An occurrence generator: creates Occurrence objects from the filtered algorithm results.
-        We implement this function so that users can look for occurrences again after having
-        exhausted self.occurrences (without having to create another Algorithm object)
-        """
-        results = self.filtered_results()
-        for r in results:
-            occ = self.process_result(r)
-            if self.logger.isEnabledFor(logging.DEBUG):
-                self.logger.debug("Yielding occurrence %s", pformat(occ))
-            yield occ
 
 class P(GeometricHelsinkiBaseAlgorithm):
     """
@@ -362,13 +366,6 @@ class S(SW):
         so the only thing left to check is whether any of the K_entries have a scale accepted
         by the settings.
         """
-        # Not needed since the consistency of scale within the chain is guaranteed by
-        # the S class pre_processing
-        #def helper(r):
-        #    if r.y:
-        #        return (r.scale == self.settings['scale']) and helper(r.y)
-        #    else:
-        #        return True
         return (result.scale == self.settings['scale']) and super(S, self).filter_result(result)
 
 

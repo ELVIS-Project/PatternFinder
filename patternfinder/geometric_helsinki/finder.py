@@ -36,6 +36,8 @@ else:
             'pattern' : None,
             'source' : None}
 
+Param = namedtuple('Param', ['user', 'algorithm'])
+
 class Finder(object):
     """
     A python generator responsible for the execution of geometric helsinki algorithms
@@ -55,7 +57,7 @@ class Finder(object):
     >>> next(my_finder).offset
     0.0
     """
-    def __init__(self, pattern=None, source=None, **kwargs):
+    def __init__(self, pattern_input, source_input, **kwargs):
         """
         Input (optional - can be initialized with nothing)
         ------
@@ -81,45 +83,60 @@ class Finder(object):
         >>> occ.measure_range
         [1]
 
-        >>> my_finder.update(scale=2)
-        >>> next(my_finder).measure_range
+        >>> next(helsinki.Finder(p, s, scale=2.0))
         [2, 3]
 
-        >>> my_finder.update(scale='warped', pattern=music21.converter.parse('tinynotation: 4/4 c#4 e-4 g4'))
-        >>> for occ in my_finder:
+        >>> for occ in helsinki.Finder(music21.converter.parse('tinynotation: 4/4 c#4 e-4 g4'), s, scale='warped')
         ...     occ.measure_range
         [4, 5, 6, 7]
         """
         # Log creation of this object
         self.logger = logging.getLogger(__name__)
-        self.logger.info("Creating Finder with: \npattern %s\n source %s\n settings \n%s",
-                pattern, source, pformat(kwargs))
+        if self.logger.isEnabledFor(logging.INFO):
+            self.logger.info("Creating Finder with: \npattern %s\n source %s\n settings \n%s",
+                    pattern, source, pformat(kwargs))
 
-        self.settings = {key : namedtuple("Param", ['user', 'algorithm'])._make((arg, None))
-                for key, arg in DEFAULT_SETTINGS.items()}
+        self._parse_scores()
 
-        # Load default settings in the update() function because some settings require
-        # parsed scores in order to process
-        self.update(pattern=pattern, source=source, **kwargs)
+        ## (2) SETTINGS (executed second, since some settings require the length of the note point sets)
+        self.settings = {}
+        self.settings['pattern'] = Param(pattern_input, self.patternPointSet)
+        self.settings['source'] = Param(source_input, self.sourcePointSet)
+
+        # Load the default settings, check their validity & translate them
+        self.settings.update({key : Param('default', arg)
+            for key, arg in self.process_and_translate(DEFAULT_SETTINGS).items()})
+
+        # Validate and translate user settings
+        self.settings.update({key : Param(kwargs[key], arg)
+            for key, arg in self.process_and_translate(kwargs).items()})
+
+        ## (3) Get the algorithm
+        self.algorithm = GeometricHelsinkiBaseAlgorithm.factory(
+                self.settings['pattern'].algorithm,
+                self.settings['source'].algorithm,
+                {key : arg.algorithm for key, arg in self.settings.items()})
+
+        # Instantiate the algorithm generator
+        self.output = (GeometricHelsinkiOccurrence(self, 1, occ, self.source) for occ in self.algorithm)
+
+    def _parse_scores(self):
+        """Defines self.pattern(PointSet) and self.source(PointSet)"""
+        self.pattern = self.get_parameter_translator('pattern')(pattern_input)
+        self.patternPointSet = NotePointSet(self.pattern)
+        self.source = self.get_parameter_translator('source')(source_input)
+        self.sourcePointSet = NotePointSet(self.source)
 
     def __iter__(self):
-        """
-        Built-in python function for iterators
-        """
         return self
 
     def __next__(self):
-        """
-        Built-in python function for iterators
-        """
         return next(self.output)
 
     def __repr__(self):
         return "\n".join([
-            self.algorithm.__class__.__name__,
-            # @TODO eat up the derivation chain to find the file name input?
-            "pattern = {0}".format(self.pattern),
-            "source = {0}".format(self.source),
+            super(Finder, self).__repr__(),
+            "algorithm " + self.algorithm.__class__.__name__,
             "settings are.. \n {0}".format(self.__repr_settings__())])
 
     def __repr_settings__(self):
@@ -136,94 +153,6 @@ class Finder(object):
                     + "\n    algy:" + str(self.settings[key].algorithm))
         return output
 
-    def update(self, *args, **kwargs):
-        """
-        Runs all necessary pre-processing common to every algorithm
-        (lexicographic sorting and chord flattening)
-
-        Logs before and after functions within workflow.
-
-        Usage:
-
-        Can initialize with nothing; update with just the source, or just the pattern
-        >>> from patternfinder.geometric_helsinki.tests.test_lemstrom_example import LEM_PATH_PATTERN, LEM_PATH_SOURCE
-        >>> my_finder = Finder(LEM_PATH_PATTERN('a'), LEM_PATH_SOURCE)
-        >>> my_finder.update(pattern=LEM_PATH_PATTERN('b'))
-
-        Remember all user settings until the defaults are restored
-        >>> my_finder.update(threshold=1)
-        >>> my_finder.update() # Shouldn't change anything
-        >>> my_finder.settings['threshold']
-        Param(user=1, algorithm=1)
-
-        Set up settings before importing pattern or source
-        >>> my_finder = Finder(threshold='all')
-        >>> my_finder.settings['threshold']
-        Param(user='all', algorithm=0)
-
-        Threshold will be recalculated based on the new pattern
-        >>> my_finder.update(pattern=LEM_PATH_PATTERN('a'))
-        >>> my_finder.settings['threshold']
-        Param(user='all', algorithm=6)
-
-        Load defaults - use args rather than kwargs. Loading defaults should be
-        a one-time operation rather than a repeated action taken at every update
-        >>> my_finder.update(threshold=4)
-        >>> my_finder.update('load_defaults')
-        >>> my_finder.settings['threshold'].algorithm
-        6
-        """
-        # Log this method with a separate logger
-        logger = logging.getLogger("{0}.{1}".format(self.logger.name, 'update'))
-        logger.info('Updating Finder with settings \n%s', pformat(kwargs))
-
-        ## (1) PARSE SCORES only if they are present in this round of kwargs
-        for score in (s for s in ('pattern', 'source') if s in kwargs):
-            # Remove score from 'kwargs' so it is not validated later
-            setattr(self, score, self.get_parameter_translator(score)(kwargs.pop(score)))
-            setattr(self, score + 'PointSet', NotePointSet(getattr(self, score)))
-
-        # @TODO validate that the pattern length is less than the source length.
-
-        ## (2) PROCESS SETTINGS
-        logger.debug("Processing user settings...")
-
-        if 'load_defaults' in args:
-            previous_settings = dict(DEFAULT_SETTINGS)
-        else:
-            previous_settings = {key : arg.user for key, arg in self.settings.items()}
-
-        # @TODO Don't save settings which raise errors..
-        # Merge the new input with previous user input (principally initialized with defaults)
-        previous_settings.update(kwargs)
-        # Will raise ValueError if erroneous input
-        processed_settings = self.process_and_translate(previous_settings)
-        # No error was thrown. Store the new input and its algorithm translation
-        self.settings.update({key : arg._replace(user=previous_settings[key], algorithm=processed_settings[key])
-            for key, arg in self.settings.items()})
-
-        logger.debug("Processed internal settings are: \n %s",
-                self.__repr_settings__())
-
-        ## (3) SELECT THE ALGORITHM
-        # Allow the user to manually choose the algorithm rather than letting
-        # the system choose the fastest one based on the settings input
-        self.algorithm = GeometricHelsinkiBaseAlgorithm.factory(
-                self.patternPointSet,
-                self.sourcePointSet,
-                {key : arg.algorithm for key, arg in self.settings.items()})
-
-        ## (4) RUN THE ALGORITHM
-        self.algorithm.pre_process()
-        self.results = self.algorithm.filtered_results()
-        self.occurrences = self.algorithm.occurrence_generator()
-
-        # (5) OUTPUT STUFF!
-        self.output = self.output_generator()
-
-    def output_generator(self):
-        return (GeometricHelsinkiOccurrence(self, 1, occ, self.source) for occ in self.occurrences)
-
     ## FINDER SETTINGS MANAGEMENT
     def process_and_translate(self, kwargs):
         """
@@ -234,6 +163,8 @@ class Finder(object):
         These validation and translation functions are stored as attributes of self as _'key'
         They either return the value or raise a ValueError with the valid options as the error message.
         """
+        #@TODO threshold = 'all' iff pattern_window = 1 iff mismatches = 'min'
+
         # Log this function with a separate logger
         logger = logging.getLogger("{0}.{1}".format(__name__, 'process_settings'))
 
@@ -316,24 +247,20 @@ class Finder(object):
             0 < p < 1
                 at least p (as a percentage) notes must be found
         """
-        valid_options = []
+        valid_options = ['all', 'positive_integer > 0', 'percentage 0 <= p <= 1', 'max']
 
-        valid_options.append('all')
         if arg == 'all':
             return len(self.patternPointSet)
 
-        valid_options.append('positive integer > 0')
         if isinstance(arg, int) and (arg > 0):
             if arg > len(self.patternPointSet):
                 raise ValueError("Threshold cannot be greater than length of the pattern")
             return arg
 
-        valid_options.append('percentage 0 <= p <= 1')
         if isinstance(arg, float) and (arg >= 0) and (arg <= 1):
             from math import ceil
             return int(ceil(len(self.patternPointSet) * arg))
 
-        valid_options.append('max')
         if arg == 'max':
             raise ValueError("Threshold option 'max' not yet implemented")
 
@@ -425,17 +352,8 @@ class Finder(object):
             raise ValueError(valid_options.keys())
 
     def _validate_colour(self, arg):
-        # @TODO validate colour - check valid string values
-        # xml takes hexadecimal colours, lilypond does not
-        valid_options = ['any hexadecimal RGB colour?']
+        #@TODO validate colour issue #17
         return arg
-
-class ValidationError(Exception):
-    def __init__(self, msg, key, arg, valid_options):
-        self.message = "\n".join([
-            msg + " \n",
-            "Parameter '{0}' has value of {1}".format(key, arg),
-            "Valid arguments are: {0}".format(e.message)])
 
 if __name__ == "__main__":
     import doctest
