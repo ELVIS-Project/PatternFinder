@@ -1,90 +1,48 @@
-from unittest import TestCase, TestLoader, TestSuite, skip
-from nose_parameterized import parameterized, param
-from vis.analyzers.indexers import noterest, metre
-from tests import tools
-from functools import partial # for filling in function settings prior to function call
-from LineSegment import TwoDVector, LineSegment
-import copy
-import cbrahmsGeo
-import midiparser
+import path
 import music21
-import pandas
-import pdb
-import nose
+import unittest
+import patternfinder.geometric_helsinki as geometric_helsinki
 
+from parameterized import parameterized
+from tests.custom_assertions import CustomAssertions
 
-class TestExactMatches(TestCase):
-    #TODO a vertical translation-only test. you only have a transposition only test!
-
-    algorithms = {
-        "P1_onset" : partial(cbrahmsGeo.P1, option='onset'),
-        "P1_segment" : partial(cbrahmsGeo.P1, option='segment'),
-        "P2_exact" : partial(cbrahmsGeo.P2, option=0),
-        "P2_best" : cbrahmsGeo.P2,
-        "P3" : partial(cbrahmsGeo.P3, option=0),
-        "S1" : partial(cbrahmsGeo.S1, window = 0, scale = 1, start = 0),
-        "S2" : partial(cbrahmsGeo.S2, threshold = 0, scale = 1)
-    }
+class TestExactMatches(unittest.TestCase, CustomAssertions):
 
     def setUp(self):
-        # Over the Rainbow query
-        #over_the_rainbow = [[0,4,48],[4,4,60],[8,2,59],[10,1,55],[11,1,57],[12,2,59],[14,2,60]]]
-        #self.pattern = [LineSegment(d) for d in over_the_rainbow]
-        over_the_rainbow = [(0,48,4),(4,60,4),(8,59,2),(10,55,1),(11,57,1),(12,59,2),(14,60,2)]
-        self.pattern = [LineSegment(*d) for d in over_the_rainbow]
-        self.source = copy.deepcopy(self.pattern)
-
-    def tearDown(self):
         pass
 
-    @parameterized.expand(algorithms.items())
-    def test_edgecase_source_is_smallerthan_pattern(self, _, algorithm):
-        """
-        Sources are all possible prefixes of the pattern.
-        Expected behaviour depends on the algorithm and length of prefix:
+    @parameterized.expand([
+        ((offset, transpose), settings)
+                for transpose in 'P1 d2 m2 M2 A2 d3 m3 M3 A3 P4 A4 D5 P5 A5 m6 M6 A6 d7 m7 M7 A7 P8'.split(' ')
+                for offset in (range(0, 15, 7))
+                for settings in (
+                    {
+                        'algorithm' : algy,
+                        'threshold' : 'all',
+                        'pattern_window' : 1,
+                        'source_window' : 1} for algy in 'P1 S1 S2 W1 W2'.split(' '))
+                ])
+    def test_edgecase_geometric_helsinki_identical_source_shifted_by(self, shift, settings):
+        """ Source is a shifted copy of the pattern"""
+        offset, pitch = shift
+        pattern = music21.converter.parse('tests/data/ely_lullaby.xml').measures(1,4)
 
-        P1_onset: empty list (as there is no exact match)
-        P1_segment: same as P1_onset
-        P2_exact: empty list (as there is no exact match)
-        P2_best: [(0,0)] (as (0,0) is the match with the highest multiplicity)
-            exception: when source length = 1, there are 7 matches since any note will do
-        P3: [(0,0)] (as (0,0) results in the longest intersection of line segments)
-            exception: when source length = 1, there are 2 matches since there exists a second note ([4,4,60]) with greater than or equal duration to the first note of the pattern, so it can be just as good of an intersection as the first note of the pattern.
+        # stream.transpose() returns a new stream (or at least, it should...)
+        source = pattern.transpose(pitch)
+        source.shiftElements(offset)
 
-        Special cases:
-        """
-        for i in range(len(self.pattern)):
-            list_of_shifts = algorithm(self.pattern, self.source[0:i])
-            # P1_onset, P1_segment, and P2_exact should generally return [] since there is no exact match
-            if _[:2] == "P1" or _ == "P2_exact":
-                self.assertEqual(list_of_shifts, [])
-            # Special case 1: When |S|=1, the pattern has a best match with EVERY note
-            elif _ == "P2_best" and i == 1:
-                self.assertEqual(len(list_of_shifts), 7)
-            # Special case 2: In this case, the second note at offset 4 shares the same duration as the source, so it is just as good as (0,0)
-            elif _ == "P3" and i == 1:
-                self.assertEqual(list_of_shifts, [TwoDVector(0,0), TwoDVector(-4, -12)])
-            # P2_best and P3 should generally return (0,0), as that is the best match
-            else:
-                self.assertEqual(list_of_shifts, [TwoDVector(0,0)])
+        # Get a generator
+        my_finder = geometric_helsinki.Finder(pattern, source, **settings)
 
-    @parameterized.expand(algorithms.items())
-    def test_edgecase_source_is_transposed_pattern(self, _, algorithm):
-        """
-        Pattern is a same-size copy of the source, transposed up by an octave.
-        """
-        # TODO use many transpositions, and horizontal shifts too.
-        shift = TwoDVector(0, 12)
-        self.source = [p + shift for p in self.pattern]
-        list_of_shifts = algorithm(self.pattern, self.source)
-        self.assertEqual(list_of_shifts, [shift])
+        # Assert that the first and only occurrence is made up of the shifted source 
+        self.assertEqual(next(my_finder).notes, list(source.flat.notes))
+        self.assertRaises(StopIteration, lambda: next(my_finder))
 
+    """
     @parameterized.expand(algorithms.items())
     @skip # TODO all algorithms fail this test. What is the desired behaviour? One or two occurrences?
     def test_edgecase_source_has_superimposed_note(self, _, algorithm):
-        """
         If the pattern occurs in a source, and within that passage the source has a subset of notes which are duplicated (for example, if the trumpet doubles the clarinet only on the down beats), then the algorithm should find a multiplicity of translations. How many, though? This is instead of the naive behavior, which would find just one occurrence.
-        """
         # TODO should duplicate subset of notes (more than one) as well
 
         for s in self.source:
@@ -100,9 +58,7 @@ class TestExactMatches(TestCase):
     @parameterized.expand(algorithms.items())
     @skip #Desired behaviour?
     def test_edgecase_source_is_two_superimposed_patterns(self, _, algorithm):
-        """
         Similar test to above, with the entire pattern duplicated instead of just one note
-        """
         self.source.extend(self.source)
         expected_matches = [TwoDVector(0,0), TwoDVector(0,0)]
 
@@ -113,10 +69,8 @@ class TestExactMatches(TestCase):
     # TODO P2 fails this test, but again is a result of its behaviour. This would make sense, since the translation multiplicity will be double what is expected.
     @skip # Desired behaviour?
     def test_edgecase_pattern_is_duplicated_source_is_pattern(self, _, algorithm):
-        """
         Given a source, identical to the pattern, this test tries to find an occurrence of a doubled pattern in the source. For example, if the clarinet and trumpet played in unison, can you find the doubled pattern in the piano reduction, which just has one occurrence of the pattern?
         The expected behaviour should be NO, the algorithm will not find this occurrence, since a doubled pattern should only match exactly with a doubled source.
-        """
         self.pattern.extend(self.pattern)
         expected_matches = []
         list_of_shifts = algorithm(self.pattern, self.source)
@@ -124,9 +78,7 @@ class TestExactMatches(TestCase):
 
     @parameterized.expand(algorithms.items())
     def test_source_is_repeated_pattern(self, _, algorithm):
-        """
         Creates a source which consists of many pattern repetitions, each being transposed slightly. Then tests whether the algorithm can find each sequential occurrence of the pattern.
-        """
         num_repetitions = 30
         expected_matches = [TwoDVector(0, 0)]
 
@@ -149,19 +101,19 @@ class TestExactMatches(TestCase):
 
     @parameterized.expand(algorithms.items())
     def test_midiparser_chidori(self, _, algorithm):
-        """
         Parses the Chidori Meimei Japanese folk song and searches for all four occurrences of a common four-note motif
-        """
         list_of_shifts = tools.run_algorithm_with_midiparser(algorithm, 'music_files/chidori_query.mid', 'music_files/chidori_meimei.mid')
         self.assertEqual(list_of_shifts, [TwoDVector(d[0], d[1]) for d in [[2.0, -10], [6.0, -10], [65.0, -10], [69.0, -10]]])
 
     @parameterized.expand(algorithms.items())
     def test_midiparser_bwv2(self, _, algorithm):
-        """
         Parses Bach's BWV2 chorale and searches for a V-i cadence query
-        """
         list_of_shifts = tools.run_algorithm_with_midiparser(algorithm, 'music_files/query_V-i.mid', 'music_files/bach_BWV2_chorale.krn')
         self.assertEqual(list_of_shifts, [TwoDVector(30.0, 0)])
 
+    """
 
-EXACT_MATCHES_SUITE = TestLoader().loadTestsFromTestCase(TestExactMatches)
+exact_matches_suite = unittest.TestLoader().loadTestsFromTestCase(TestExactMatches)
+
+if __name__ == '__main__':
+    exact_matches_suite.debug()
