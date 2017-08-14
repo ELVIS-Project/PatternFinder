@@ -179,12 +179,11 @@ class Finder(object):
 
         ## (1) PARSE SCORES only if they are present in this round of kwargs
         for score in (s for s in ('pattern', 'source') if s in kwargs):
-            setattr(self, score, self.get_parameter_translator(score)(kwargs[score]))
+            # Remove score from 'kwargs' so it is not validated later
+            setattr(self, score, self.get_parameter_translator(score)(kwargs.pop(score)))
             setattr(self, score + 'PointSet', NotePointSet(getattr(self, score)))
 
-        # Stop here until the user re-updates with both the pattern and the source
-        if self.pattern is None or self.source is None:
-            return
+        # @TODO validate that the pattern length is less than the source length.
 
         ## (2) PROCESS SETTINGS
         logger.debug("Processing user settings...")
@@ -194,6 +193,7 @@ class Finder(object):
         else:
             previous_settings = {key : arg.user for key, arg in self.settings.items()}
 
+        # @TODO Don't save settings which raise errors..
         # Merge the new input with previous user input (principally initialized with defaults)
         previous_settings.update(kwargs)
         # Will raise ValueError if erroneous input
@@ -329,7 +329,7 @@ class Finder(object):
             return arg
 
         valid_options.append('percentage 0 <= p <= 1')
-        if isinstance(arg, float) and (arg <= 1):
+        if isinstance(arg, float) and (arg >= 0) and (arg <= 1):
             from math import ceil
             return int(ceil(len(self.patternPointSet) * arg))
 
@@ -343,18 +343,23 @@ class Finder(object):
         """
         Symmetrical to threshold
         """
-        threshold_symmetry = 0
+        valid_options = []
+        error = ""
 
-        if isinstance(arg, int) and (arg >= 0):
-            threshold_symmetry = len(self.patternPointSet) - arg
+        valid_options.append('0 <= positive integer <= pattern length')
+        if isinstance(arg, int) and (arg >= 0) and (arg <= len(self.patternPointSet)):
+            return arg
 
-        if isinstance(arg, float) and (arg <= 1):
-            threshold_symmetry = 1 - arg
+        valid_options.append('percentage 0 <= p <= 1')
+        if isinstance(arg, float) and (arg >= 0) and (arg <= 1):
+            from math import ceil
+            return int(ceil(len(self.patternPointSet) * arg))
 
-        if arg == 'min':
-            threshold_symmetry = 'max'
+        valid_options.append('min')
+        if arg == 'max':
+            raise ValueError("Mismatches option 'min' not yet implemented")
 
-        self.get_parameter_translator('threshold')(threshold_symmetry)
+        raise ValueError(valid_options)
 
     def _validate_scale(self, arg):
         """
