@@ -18,7 +18,7 @@ class BaseOccurrence(music21.base.Music21Object):
             'offset' : start_offset,
             'priority' : 0,
             # Will sites be computed automatically if I leave it out? There may be more contexts other than score
-            'sites' : score,
+            #'sites' : score,
             'derivation' : music21.derivation.Derivation()})
             # Music21 doesn't have style or Editorial() attributes - incorrect documentation?
             # 'style' : music21.style.Style(), 
@@ -33,7 +33,7 @@ class BaseOccurrence(music21.base.Music21Object):
         return pprint.pformat(self.notes)
 
     def __eq__(self, other):
-        return self.notes == other.notes
+        return (self.notes == other.notes) and (self.score == other.score)
 
     def __ne__(self, other):
         return self.notes != other.notes
