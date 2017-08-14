@@ -378,7 +378,8 @@ class W(SW):
     """
     def pre_process(self):
         # Antecedent and Postcedent Keys for W-class algorithms
-        self.antecedentKey = lambda row: (row.sourceVec.noteEndIndex,) # pre_process uses tuple concatenation to sort K tables
+        # SW.pre_process() uses tuples to sort K tables, so here we use tuples as key values
+        self.antecedentKey = lambda row: (row.sourceVec.noteEndIndex,)
         self.postcedentKey = lambda row: (row.sourceVec.noteStartIndex,)
         super(W, self).pre_process()
 
