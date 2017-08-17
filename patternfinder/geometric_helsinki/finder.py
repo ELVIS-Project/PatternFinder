@@ -18,48 +18,49 @@ from patternfinder.geometric_helsinki.occurrence import GeometricHelsinkiOccurre
 ## SETTINGS
 DEFAULT_SETTINGS_PATH = 'patternfinder/geometric_helsinki/default_settings.yaml'
 
-## Load default settings
-if os.path.exists(DEFAULT_SETTINGS_PATH):
-    with open(DEFAULT_SETTINGS_PATH, 'rt') as f:
-        DEFAULT_SETTINGS = yaml.safe_load(f.read())
-else:
-    logging.getLogger(__name__).warning(DEFAULT_SETTINGS_PATH + "not found; we will use the hard-coded"
-            + "dictionary stored in " + __name__ + " to determine the default settings")
-    DEFAULT_SETTINGS = {
-            'algorithm' : 'auto',
-            'pattern_window' : 1,
-            'source_window' : 5,
-            'scale' : 'pure',
-            'threshold' : 'all',
-            'mismatches' : 0,
-            'interval_func' : 'semitones',
-            'pattern' : None,
-            'source' : None}
-
 Param = namedtuple('Param', ['user', 'algorithm'])
 
-class Finder(object):
+def load_default_settings():
+    """Loads default settings from yaml file. If path not found, uses a hard-coded dict"""
+    if os.path.exists(DEFAULT_SETTINGS_PATH):
+        with open(DEFAULT_SETTINGS_PATH, 'rt') as f:
+            default_settings = yaml.safe_load(f.read())
+    else:
+        logging.getLogger(__name__).warning(DEFAULT_SETTINGS_PATH + "not found; we will use the hard-coded"
+                + "dictionary stored in " + __name__ + " to determine the default settings")
+        default_settings = {
+                'algorithm' : 'auto',
+                'pattern_window' : 1,
+                'source_window' : 5,
+                'scale' : 'pure',
+                'threshold' : 'all',
+                'mismatches' : 0,
+                'interval_func' : 'semitones',
+                'pattern' : None,
+                'source' : None}
+    return default_settings
+
+class Finder(BaseFinder):
     """
     A python generator responsible for the execution of geometric helsinki algorithms
+
 
     Doctests
     ---------
     >>> import music21
-    >>> import patternfinder.geometric_helsinki as helsinki
-    >>> my_finder = helsinki.Finder()
+    >>> import patternfinder.geometric_helsinki
 
     >>> p = music21.converter.parse('tinynotation: 4/4 c4 d4 e2')
-    >>> my_finder.update(pattern=p)
-
     >>> s = music21.converter.parse('tinynotation: 4/4 c4 d4 e2')
-    >>> my_finder.update(source=s)
-
-    >>> next(my_finder).offset
-    0.0
+    >>> p_in_s = my_finder(p, s)
+    >>> next(p_in_s).notes == list(s.flat.notes)
+    True
     """
+    default_settings = load_default_settings()
+
     def __init__(self, pattern_input, source_input, **kwargs):
         """
-        Input (optional - can be initialized with nothing)
+        Input
         ------
         pattern: the query for which we are looking for in the source
             str filename pointing to a symbolic music file
