@@ -158,7 +158,7 @@ class BaseOccurrence(music21.base.Music21Object):
 
     def __init__(self, generator, identifier, list_of_notes, score):
         start_offset, end_offset = (list_of_notes[0].getOffsetInHierarchy(score),
-                list_of_notes[-1].getOffsetInHierarchy(score))
+                list_of_notes[-1].getOffsetInHierarchy(score) + list_of_notes[-1].duration.quarterLength)
 
         # Init music21 object with an unpacked dictionary rather than kwargs
         # since 'id' is a reserved python keyword
