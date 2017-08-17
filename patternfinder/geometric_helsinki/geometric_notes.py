@@ -184,7 +184,7 @@ def music21Chord_to_music21Notes(chord):
     so in theory it shoud look something like this...
 
     NOTE: this will screw up the coloring since music21 doesn't support coloring just
-    one note of a chord (I don't think?), so as compromise I'll just color the whole chord.
+    one note of a chord (I don't think?), so as a compromise I'll just color the whole chord.
     """
     note_list = []
     for pitch in chord.pitches:
