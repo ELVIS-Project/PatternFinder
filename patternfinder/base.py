@@ -140,6 +140,21 @@ class BaseFinder(object):
         return self.get_parameter_translator('pattern')(arg)
 
 class BaseOccurrence(music21.base.Music21Object):
+    """
+    Definition of a musical occurrence in the PatternFinder library
+
+    Each family of algorithms return occurrences that subclass this base class.
+    This base class provides a common API for occurrence processing in PatternFinder;
+    some algorithms may return more information (such as direct mappings between
+    pattern and source notes, rather than just the source notes)
+
+    Important attributes:
+        score - in what music21 stream was this occurrence found?
+        @TODO pattern - what were we looking for?
+        notes - what are the specific notes which form this occurrence?
+        offset - the starting offset of the first note in the occurrence
+        duration - the note release offset of the final note in the occurrence
+    """
 
     def __init__(self, generator, identifier, list_of_notes, score):
         start_offset, end_offset = (list_of_notes[0].getOffsetInHierarchy(score),
