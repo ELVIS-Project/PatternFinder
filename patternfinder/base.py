@@ -190,6 +190,9 @@ class BaseOccurrence(music21.base.Music21Object):
     def __ne__(self, other):
         return self.notes != other.notes
 
+    def __iter__(self):
+        return iter(self.notes)
+
     def get_excerpt(self, left_padding=0, right_padding=0):
         """
         Returns a Score object representing the excerpt of the score which contains this occurrence
