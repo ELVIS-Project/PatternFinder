@@ -216,6 +216,7 @@ class BaseOccurrence(music21.base.Music21Object):
         _beat, end_measure = self.score.beatAndMeasureFromOffset(self.offset + self.duration.quarterLength)
 
         # Get a deepcopy excerpt of the score so post-processing will not modify original score
+        # deepcopied music21Objects store their original parents in a derivation attribute
         excerpt = copy.deepcopy(self.score.measures(
                 numberStart = start_measure.number - left_padding,
                 numberEnd = end_measure.number + right_padding))
@@ -223,6 +224,7 @@ class BaseOccurrence(music21.base.Music21Object):
         # Tag the occurrence notes in the excerpt
         for note in excerpt.flat.notes:
             if note.derivation.origin in self.source_notes:
+                # music21 will soon implement group-based style functions
                 note.groups.append('occurrence')
 
         # @TODO
