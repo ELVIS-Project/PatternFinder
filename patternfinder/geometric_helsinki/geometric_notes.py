@@ -233,9 +233,17 @@ class NotePointSet(music21.stream.Stream):
                 if offsetSort else (n.offset, n.pitch.frequency))
 
         # Get each note or chord, convert it to a tuple of notes, and sort them by the keyfunc
-        new_notes = reduce(lambda x, y: x+y,
-                [music21Chord_to_music21Notes(n) if n.isChord else [n]
-                    for n in score.flat.notes])
+        new_notes = []
+        for note in score.flat.notes:
+            to_add = music21Chord_to_music21Notes(note)
+            # Use .original_note instead of derivation chains. It has to be consistent:
+            # you can't be checking different derivations for notes which came from chords
+            # versus notes which were not derived. If for example a source was transposed
+            # (like in the test cases), the derivation will be non-empty, which screws up
+            # the decision making for occurrences later on.
+            for n in to_add:
+                n.original_note_id = note.id
+            new_notes.extend(to_add)
         new_notes.sort(key=sort_keyfunc)
 
         # Make sure to turn off stream.autoSort, since streams automatically sort on insert by
