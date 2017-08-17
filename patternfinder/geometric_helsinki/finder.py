@@ -97,7 +97,7 @@ class Finder(BaseFinder):
             self.logger.info("Creating Finder with: \npattern %s\n source %s\n settings \n%s",
                     pattern, source, pformat(kwargs))
 
-        self._parse_scores()
+        self._parse_scores(pattern_input, source_input)
 
         ## (2) SETTINGS (executed second, since some settings require the length of the note point sets)
         self.settings = {}
@@ -121,10 +121,11 @@ class Finder(BaseFinder):
         # Instantiate the algorithm generator
         self.output = (GeometricHelsinkiOccurrence(self, 1, occ, self.source) for occ in self.algorithm)
 
-    def _parse_scores(self):
+    def _parse_scores(self, pattern_input, source_input):
         """Defines self.pattern(PointSet) and self.source(PointSet)"""
         self.pattern = self.get_parameter_translator('pattern')(pattern_input)
         self.patternPointSet = NotePointSet(self.pattern)
+
         self.source = self.get_parameter_translator('source')(source_input)
         self.sourcePointSet = NotePointSet(self.source)
 
