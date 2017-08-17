@@ -40,7 +40,7 @@ def load_default_settings():
                 'source' : None}
     return default_settings
 
-class Finder(BaseFinder):
+class Finder(object):
     """
     A python generator responsible for the execution of geometric helsinki algorithms
 
@@ -71,25 +71,21 @@ class Finder(BaseFinder):
         settings: keyword arguments which choose the algorithm and manage its execution
             keyword arguments (like an unpacked dictionary)
 
-        Output
-        ------
-        python generator which yields Occurrence objects
-
         >>> import music21
-        >>> import patternfinder.geometric_helsinki as helsinki
+        >>> import patternfinder.geometric_helsinki as gh
         >>> p = music21.converter.parse('tinynotation: 4/4 c4 e4 d4')
         >>> s = music21.converter.parse('tinynotation: 4/4 c4 e4 d4 r4 c2 e2 d2 r2 c#2 r2 e-1 r1 g1')
-        >>> my_finder = helsinki.Finder(p, s)
+        >>> my_finder = gh.Finder(p, s)
         >>> occ = next(my_finder) # occ is an Occurrence object
-        >>> occ.measure_range
-        [1]
+        >>> occ.notes
+        [<music21.note.Note F>, <music21.note.Note E>, <music21.note.Note D>]
 
-        >>> next(helsinki.Finder(p, s, scale=2.0))
-        [2, 3]
+        >>> next(gh.Finder(p, s, scale=2.0)).offset
+        4.0
 
-        >>> for occ in helsinki.Finder(music21.converter.parse('tinynotation: 4/4 c#4 e-4 g4'), s, scale='warped')
-        ...     occ.measure_range
-        [4, 5, 6, 7]
+        >>> for occ in gh.Finder(music21.converter.parse('tinynotation: 4/4 c#4 e-4 g4'), s, scale='warped')
+        ...     (occ.offset, occ.duration)
+        (12.0, 8.0)
         """
         # Log creation of this object
         self.logger = logging.getLogger(__name__)
