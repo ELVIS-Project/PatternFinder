@@ -106,7 +106,7 @@ class Finder(BaseFinder):
 
         # Load the default settings, check their validity & translate them
         self.settings.update({key : Param('default', arg)
-            for key, arg in self.process_and_translate(DEFAULT_SETTINGS).items()})
+            for key, arg in self.process_and_translate(self.default_settings).items()})
 
         # Validate and translate user settings
         self.settings.update({key : Param(kwargs[key], arg)
@@ -174,7 +174,7 @@ class Finder(BaseFinder):
         for key, arg in kwargs.items():
             logger.debug("Processing setting %s with value %s", key, arg)
             # Check to see if all user-specified settings are defined in the default settings
-            if key not in DEFAULT_SETTINGS:
+            if key not in self.default_settings:
                 raise ValueError("Parameter '{0}' is not a valid parameter.".format(key)
                         + "because it does not exist in the default settings.")
             # Validate and translate the paramter arguments
