@@ -1,6 +1,143 @@
 import music21
 import copy
 import pprint
+import logging
+
+from collections import namedtuple
+
+Pattern = namedtuple('Pattern', ['id', 'stream', 'color'])
+
+class BaseFinder(object):
+    """
+    A python generator responsible for the execution of algorithms.
+    Each family of algorithms has a Finder class which subclasses BaseFinder
+
+    Finders operate on the music21.stream.Stream level.
+    They are responsible for:
+        - parsing file paths into music21 streams
+        - processing music21 streams into algorithm-specific input
+        - validating user-specified parameters and translating these into
+        algorithm-usable values
+        - creating an algorithm generator and passing along its output
+    """
+    # each algorithm family has different parameters, so we store their default
+    # settings in their respective directories using yaml files
+    # this should be overridden by subclasses
+    default_settings = {}
+
+    def __init__(self, pattern_input, source_input, **kwargs):
+        self.logger = logging.getLogger(__name__)
+        if self.logger.isEnabledFor(logging.INFO):
+            self.logger.info("Creating Finder with: \npattern %s\n source %s\n settings \n%s",
+                    pattern, source, pformat(kwargs))
+
+        self._parse_scores(pattern_input, source_input)
+
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        return next(self.output)
+
+    def __repr__(self):
+        return "\n".join([
+            super(Finder, self).__repr__(),
+            "algorithm " + self.algorithm.__class__.__name__,
+            "settings are.. \n {0}".format(self.__repr_settings__())])
+
+    def __repr_settings__(self):
+        """
+        Output resembles yaml format
+
+        For each keyword, we provide the user-specified input and its
+        translation
+        """
+        output = ""
+        for key in self.settings:
+            output += ("\n" + key + ":"
+                    + "\n    user:" + str(self.settings[key].user)
+                    + "\n    algy:" + str(self.settings[key].algorithm))
+        return output
+
+    ## FINDER SETTINGS MANAGEMENT
+    def process_and_translate(self, kwargs):
+        """
+        Validates user-specified or default-specified settings
+        Translated keywords to algorithm-usable values
+
+        Some parameters are validated and translated before being placed into the settings dict
+        These validation and translation functions are stored as attributes of self as _'key'
+        They either return the value or raise a ValueError with the valid options as the error message.
+        """
+        #@TODO threshold = 'all' iff pattern_window = 1 iff mismatches = 'min'
+
+        # Log this function with a separate logger
+        logger = logging.getLogger("{0}.{1}".format(__name__, 'process_settings'))
+
+        processed_kwargs = {}
+        for key, arg in kwargs.items():
+            logger.debug("Processing setting %s with value %s", key, arg)
+            # Check to see if all user-specified settings are defined in the default settings
+            if key not in self.default_settings:
+                raise ValueError("Parameter '{0}' is not a valid parameter.".format(key)
+                        + "because it does not exist in the default settings.")
+            # Validate and translate the paramter arguments
+            try:
+                processed_kwargs[key] = self.get_parameter_translator(key)(arg)
+                logger.debug("'%s' : %s translates to %s", key, arg, processed_kwargs[key])
+            except ValueError as e:
+                raise ValueError("\n".join([
+                    "Parameter '{0}' has value of {1}".format(key, arg),
+                    "Valid arguments are: {0}".format(e.message)]))
+        return processed_kwargs
+
+    def get_parameter_translator(self, key):
+        """
+        Getter for the keyword validator functions
+        If a keyword does not have a validator function, return the identity function
+        """
+        return getattr(self, '_validate_' + key, lambda p: p)
+
+    def _parse_scores(self, pattern_input, source_input):
+        """Defines self.pattern(PointSet) and self.source(PointSet)"""
+        self.pattern = self.get_parameter_translator('pattern')(pattern_input)
+        self.patternPointSet = NotePointSet(self.pattern)
+
+        self.source = self.get_parameter_translator('source')(source_input)
+        self.sourcePointSet = NotePointSet(self.source)
+
+    def _validate_pattern(self, file_or_stream):
+        """
+        The input to Finder can be a symbolic music file or a music21 Stream
+
+        We check before leaping rather than duck typing because the exceptions
+        thrown by music21.converter.parse vary widely over many possible inputs
+        """
+        valid_options = []
+
+        valid_options.append("str (symbolic music filename)")
+        if isinstance(file_or_stream, str):
+            score = music21.converter.parse(file_or_stream)
+            score.derivation.origin = music21.ElementWrapper(file_or_stream)
+            score.derivation.method = 'music21.converter.parse()'
+            return score
+
+        valid_options.append("music21.stream.Stream")
+        if isinstance(file_or_stream, music21.stream.Stream):
+            score = file_or_stream
+            score.derivation.method = 'user input'
+            return score
+
+        # Allow for pattern or source to be None, which is the default value in Finder __init__()
+        valid_options.append("None")
+        if not file_or_stream:
+            return
+
+        raise ValueError(valid_options)
+
+    def _validate_source(self, arg):
+        return self.get_parameter_translator('pattern')(arg)
 
 class BaseOccurrence(music21.base.Music21Object):
 
