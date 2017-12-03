@@ -2,27 +2,42 @@ import path
 import music21
 import unittest
 import patternfinder.geometric_helsinki as geometric_helsinki
+import pdb
 
+from pprint import pformat # test fail messages 
 from parameterized import parameterized
 from tests.custom_assertions import CustomAssertions
+
+INTERVALS_UNDER_AN_OCTAVE = 'P1 d2 m2 M2 A2 d3 m3 M3 A3 P4 A4 D5 P5 A5 m6 M6 A6 d7 m7 M7 A7 P8'
 
 class TestExactMatches(unittest.TestCase, CustomAssertions):
 
     def setUp(self):
         pass
 
+    def run(self, result=None):
+        """
+        Stop after first error
+
+        Code source:
+            Kevin Sookocheff
+            <https://sookocheff.com/post/python/halting-unittest-execution-at-first-error/>
+        """
+        if not result.errors:
+            super(TestExactMatches, self).run(result)
+
     @parameterized.expand([
         ((offset, transpose), settings)
-                for transpose in 'P1 d2 m2 M2 A2 d3 m3 M3 A3 P4 A4 D5 P5 A5 m6 M6 A6 d7 m7 M7 A7 P8'.split(' ')
-                for offset in (range(0, 15, 7))
+                for transpose in INTERVALS_UNDER_AN_OCTAVE.split(' ')
+                for offset in (0, 7)
                 for settings in (
                     {
                         'algorithm' : algy,
                         'threshold' : 'all',
                         'pattern_window' : 1,
-                        'source_window' : 1} for algy in 'P1 S1 S2 W1 W2'.split(' '))
+                        'source_window' : 1} for algy in geometric_helsinki.implemented_algorithms)
                 ])
-    def test_edgecase_geometric_helsinki_identical_source_shifted_by(self, shift, settings):
+    def test_geometric_helsinki_identical_source_shifted_by(self, shift, settings):
         """ Source is a shifted copy of the pattern"""
         offset, pitch = shift
         pattern = music21.converter.parse('tests/data/ely_lullaby.xml').measures(1,4)
@@ -35,9 +50,49 @@ class TestExactMatches(unittest.TestCase, CustomAssertions):
         my_finder = geometric_helsinki.Finder(pattern, source, **settings)
 
         # Assert that the first and only occurrence is made up of the shifted source 
-        self.assertEqual(next(my_finder).notes, list(source.flat.notes))
+        found_occ = next(my_finder)
+        self.assertEqual(found_occ.notes, list(source.flat.notes), msg =
+                "\nFOUND \n{0}\n EXPECTED\n{1}".format(pformat(found_occ.notes), pformat(list(source.flat.notes))))
         self.assertRaises(StopIteration, lambda: next(my_finder))
 
+
+    @parameterized.expand([
+        ((offset, transpose), settings)
+                for transpose in INTERVALS_UNDER_AN_OCTAVE.split(' ')
+                for offset in (0, 7)
+                for settings in (
+                    {
+                        'algorithm' : algy,
+                        'threshold' : 'all',
+                        'pattern_window' : 1,
+                        'source_window' : 2} for algy in geometric_helsinki.implemented_algorithms)
+                ])
+    def test_geometric_helsinki_melodic_pattern_in_pedaled_and_chordified_source_shifted_by(self, shift, settings):
+        """Source is a transposed copy of the pattern, with an additional pedal note"""
+        offset, pitch = shift
+        pattern = music21.converter.parse('tests/data/ely_lullaby.xml').measures(1,4)
+
+        # stream.transpose() returns a new stream (or at least, it should...)
+        # Convert each note into a chord
+        source = pattern.transpose(pitch).chordify()
+        source.shiftElements(offset)
+
+        # Put a pedal in the bass at each offset
+        for chord in source.flat.notes:
+            chord.add('A2')
+
+        # Get a generator
+        my_finder = geometric_helsinki.Finder(pattern, source, **settings)
+
+        # Assert that the first and only occurrence is made up of the shifted source 
+        found_occ = next(my_finder)
+        self.assertEqual(found_occ.notes, list(source.flat.notes), msg =
+                "\nFOUND \n{0}\n EXPECTED\n{1}".format(pformat(found_occ.notes), pformat(list(source.flat.notes))))
+        self.assertRaises(StopIteration, lambda: next(my_finder))
+
+
+    #@TODO 
+    #6)python find_matches.py P1 music_files/schubert_soggettos/casulana1.xml music_files/schubert_soggettos/Casulan2-4-2.xml  will find a match at offset 18, transposition 17, with intersection length of 8. meaning hte first note of the query (c in the bass) should match to a note 17 semitones above (bottom space f in treble) - but there is no F in measure 3 of the source!! UGH
     """
     @parameterized.expand(algorithms.items())
     @skip # TODO all algorithms fail this test. What is the desired behaviour? One or two occurrences?
@@ -116,4 +171,5 @@ class TestExactMatches(unittest.TestCase, CustomAssertions):
 exact_matches_suite = unittest.TestLoader().loadTestsFromTestCase(TestExactMatches)
 
 if __name__ == '__main__':
+    # If this test script is run from the command line, let errors propagate (use .debug())
     exact_matches_suite.debug()

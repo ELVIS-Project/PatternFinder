@@ -121,9 +121,11 @@ class Finder(object):
         """Defines self.pattern(PointSet) and self.source(PointSet)"""
         self.pattern = self.get_parameter_translator('pattern')(pattern_input)
         self.patternPointSet = NotePointSet(self.pattern)
+        self.patternPointSet_offsetSort = NotePointSet(self.pattern, offsetSort=True)
 
         self.source = self.get_parameter_translator('source')(source_input)
         self.sourcePointSet = NotePointSet(self.source)
+        self.sourcePointSet_offsetSort = NotePointSet(self.source, offsetSort=True)
 
     def __iter__(self):
         return self
