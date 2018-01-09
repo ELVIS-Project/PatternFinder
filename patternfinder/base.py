@@ -2,6 +2,7 @@ import music21
 import copy
 import pprint
 import logging
+import pdb
 
 from collections import namedtuple
 
@@ -31,8 +32,27 @@ class BaseFinder(object):
             self.logger.info("Creating Finder with: \npattern %s\n source %s\n settings \n%s",
                     pattern, source, pformat(kwargs))
 
+        # Defines self.pattern and self.source music21 streams
         self._parse_scores(pattern_input, source_input)
 
+        self.settings = {}
+        self.settings['pattern'] = Param(pattern_input, self.patternPointSet)
+        self.settings['source'] = Param(source_input, self.sourcePointSet)
+        # Load the default settings, check their validity & translate them
+        self.settings.update({key : Param('default', arg)
+            for key, arg in self.process_and_translate(self.default_settings).items()})
+
+        # Validate and translate user settings
+        self.settings.update({key : Param(kwargs[key], arg)
+            for key, arg in self.process_and_translate(kwargs).items()})
+
+        self.algorithm = self._algorithm_factory(
+            self.settings['pattern'].algorithm,
+            self.settings['source'].algorithm,
+            {key : arg.algorithm for key, arg in self.settings.items()})
+
+        # Instantiate the algorithm generator
+        self.output = (GeometricHelsinkiOccurrence(self, 1, occ, self.source) for occ in self.algorithm)
 
     def __iter__(self):
         return self
@@ -99,14 +119,6 @@ class BaseFinder(object):
         """
         return getattr(self, '_validate_' + key, lambda p: p)
 
-    def _parse_scores(self, pattern_input, source_input):
-        """Defines self.pattern(PointSet) and self.source(PointSet)"""
-        self.pattern = self.get_parameter_translator('pattern')(pattern_input)
-        self.patternPointSet = NotePointSet(self.pattern)
-
-        self.source = self.get_parameter_translator('source')(source_input)
-        self.sourcePointSet = NotePointSet(self.source)
-
     def _validate_pattern(self, file_or_stream):
         """
         The input to Finder can be a symbolic music file or a music21 Stream
@@ -114,30 +126,29 @@ class BaseFinder(object):
         We check before leaping rather than duck typing because the exceptions
         thrown by music21.converter.parse vary widely over many possible inputs
         """
-        valid_options = []
+        valid_options = ["str (symbolic music filename)", "music21.stream.Stream"]
+        pattern = None
 
-        valid_options.append("str (symbolic music filename)")
         if isinstance(file_or_stream, str):
             score = music21.converter.parse(file_or_stream)
             score.derivation.origin = music21.ElementWrapper(file_or_stream)
             score.derivation.method = 'music21.converter.parse()'
-            return score
+            pattern = score
 
-        valid_options.append("music21.stream.Stream")
         if isinstance(file_or_stream, music21.stream.Stream):
             score = file_or_stream
             score.derivation.method = 'user input'
-            return score
+            pattern = score
 
-        # Allow for pattern or source to be None, which is the default value in Finder __init__()
-        valid_options.append("None")
-        if not file_or_stream:
-            return
-
-        raise ValueError(valid_options)
+        if pattern is not None:
+            self.pattern = pattern
+            return pattern
+        else:
+            raise ValueError(valid_options)
 
     def _validate_source(self, arg):
-        return self.get_parameter_translator('pattern')(arg)
+        self.source = self.get_parameter_translator('pattern')(arg)
+        return self.source
 
 class BaseOccurrence(music21.base.Music21Object):
     """
@@ -167,7 +178,7 @@ class BaseOccurrence(music21.base.Music21Object):
             'groups' : [],
             'duration' : music21.duration.Duration(end_offset - start_offset),
             # 'activeSite' : score, # can't set object active site to somewhere it does not belong
-            'offset' : start_offset,
+            'offset' : start_offset, #TODO buggy, is always set to 0
             'priority' : 0,
             # Will sites be computed automatically if I leave it out? There may be more contexts other than score
             #'sites' : score,
@@ -175,6 +186,9 @@ class BaseOccurrence(music21.base.Music21Object):
             # Music21 doesn't have style or Editorial() attributes - incorrect documentation?
             # 'style' : music21.style.Style(), 
             #'editorial' : music21.editorial.Editorial()})
+
+        self.offset = start_offset
+        self.duration = music21.duration.Duration(end_offset - start_offset)
 
         self.derivation.method = generator
         self.derivation.origin = score
@@ -193,7 +207,7 @@ class BaseOccurrence(music21.base.Music21Object):
     def __iter__(self):
         return iter(self.notes)
 
-    def get_excerpt(self, left_padding=0, right_padding=0):
+    def get_excerpt(self, color='red', left_padding=0, right_padding=0):
         """
         Returns a Score object representing the excerpt of the score which contains this occurrence
         All notes in the score which form part of the occurrence will belong to the 'occurrence' group
@@ -204,6 +218,7 @@ class BaseOccurrence(music21.base.Music21Object):
         Input
         -------
         self - Occurrence object with notes and an associated score
+        color - keyword color to color in the occurrence notes in this excerpt
         left_padding - an integer number of measures to include to the excerpt on the left side
         right_padding - an integer number of measures to include to the excerpt on the right side
 
@@ -223,9 +238,10 @@ class BaseOccurrence(music21.base.Music21Object):
 
         # Tag the occurrence notes in the excerpt
         for note in excerpt.flat.notes:
-            if note.derivation.origin in self.source_notes:
+            if note.derivation.origin.id in (obj.id for obj in self.source_notes):
                 # music21 will soon implement group-based style functions
                 note.groups.append('occurrence')
+                note.style.color = color
 
         # @TODO
         # XML and Lily output don't seem to preserve the measure numbers
