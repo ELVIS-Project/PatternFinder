@@ -15,3 +15,7 @@ class GeometricHelsinkiOccurrence(BaseOccurrence):
 
         super(GeometricHelsinkiOccurrence, self).__init__(
                 generator, identifier, self.source_notes, score)
+
+    def color_source_notes(self, c):
+        for note in self.source_notes:
+            note.color = c
