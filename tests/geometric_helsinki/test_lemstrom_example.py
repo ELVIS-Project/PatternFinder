@@ -8,8 +8,8 @@ import music21
 import pdb
 
 
-LEM_PATH_PATTERN = lambda x: 'music_files/lemstrom2011_test/query_' + x + '.mid'
-LEM_PATH_SOURCE = 'music_files/lemstrom2011_test/leiermann.xml'
+LEM_PATH_PATTERN = lambda x: 'tests/data/lemstrom2011/query_' + x + '.mid'
+LEM_PATH_SOURCE = 'tests/data/lemstrom2011/leiermann.xml'
 
 MATCHING_INDICES = (
         ((0,12), (1,14), (2,16), (3,17), (4,18), (5,21)),
@@ -113,9 +113,8 @@ class TestLemstromExample(TestCase):
         self.longMessage = True
         #carlos = algorithm(pattern, source, **settings)
         # @TODO put algorithm name in settings
-        # @TODO use long zip
         # @TODO add tests to measure runtime and make sure it's consistently small!
-        carlos = Finder(pattern, source, auto_select = False, algorithm=algorithm.__name__, **settings)
+        carlos = Finder(pattern, source, algorithm=algorithm.__name__, **settings)
         occurrences = list(carlos.occurrences)
         if len(occurrences) < len(matching_pairs):
             self.fail("Not enough occurrences found"
@@ -137,14 +136,10 @@ class TestLemstromExample(TestCase):
                 for pairs in expected]
 
         self.longMessage = True
-        #@ TODO How can I call .update with (pattern, source, **settings) rather than
-        # having to update settings first?
-        settings.update({
-            'pattern' : LEM_PATH_PATTERN(query),
-            'source' : LEM_PATH_SOURCE,
-            'auto_select' : False,
-            'algorithm' : algorithm.__name__})
-        self.frederick.update(**settings)
+        self.frederick.update(
+            pattern = LEM_PATH_PATTERN(query),
+            source = LEM_PATH_SOURCE,
+            algorithm = 'auto', **settings)
         for exp in matching_pairs:
             try:
                 occurrence = next(self.frederick.occurrences)

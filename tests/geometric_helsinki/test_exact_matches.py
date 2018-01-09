@@ -1,4 +1,3 @@
-import path
 import music21
 import unittest
 import patternfinder.geometric_helsinki as geometric_helsinki

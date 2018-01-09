@@ -5,10 +5,10 @@ import unittest
 from parameterized import parameterized
 from pprint import pformat # for test fail error messages
 
-from patternfinder.geometric_helsinki.tests.test_lemstrom_example import LEM_PATH_PATTERN, LEM_PATH_SOURCE
+from tests.custom_assertions import CustomAssertions
+from tests.geometric_helsinki.test_lemstrom_example import LEM_PATH_PATTERN, LEM_PATH_SOURCE
 from patternfinder.geometric_helsinki.finder import Finder
 from patternfinder.geometric_helsinki.GeometricNotes import NotePointSet, InterNoteVector
-
 
 TESTS = [
         ('scale', '4/4 c4 e4 g4', '4/4 c4 e4 g4 c2 e2 g2',
@@ -32,7 +32,7 @@ TESTS = [
                 },
             [((0,3), (1,4), (2,5))])]
 
-class TestFinder(unittest.TestCase):
+class TestFinder(unittest.TestCase, CustomAssertions):
 
     def setUp(self):
         self.longMessage = True
@@ -57,7 +57,7 @@ class TestFinder(unittest.TestCase):
             self.assertEqual(note, expected)
 
     @parameterized.expand(TESTS)
-    def test_(self, name, pattern, source, settings, matching_pairs):
+    def test(self, name, pattern, source, settings, matching_pairs):
         p = music21.converter.parse('tinynotation: ' + pattern)
         s = music21.converter.parse('tinynotation: ' + source)
 
@@ -69,16 +69,10 @@ class TestFinder(unittest.TestCase):
             for p_i, s_i in occ] for occ in matching_pairs]
         occurrences = [occ.matching_pairs for occ in my_finder]
 
-        if len(occurrences) != len(expected):
-            self.fail("Not enough occurrences found"
-                   + "\nExpected:\n" + pformat(expected)
-                   + "\nFound:\n" + pformat(occurrences))
-        for occurrence, exp in zip(occurrences, expected):
-            self.assertEqual(occurrence, exp, msg =
-                    "\nFOUND:\n" + pformat(occurrence) +
-                    "\nEXPECTED\n" + pformat(exp))
+        self.assert_equal_occurrences(occurrences, expected)
 
 finder_suite = unittest.TestLoader().loadTestsFromTestCase(TestFinder)
 
 if __name__ == "__main__":
     result = unittest.TextTestRunner(verbosity=2).run(finder_suite)
+

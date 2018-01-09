@@ -2,16 +2,14 @@ import unittest
 import testtools
 import path
 
-from patternfinder.geometric_helsinki import *
+import tests.geometric_helsinki
 
-from test_exact_matches import exact_matches_suite
-from geometric_helsinki import geometric_helsinki_suite
+from patternfinder.geometric_helsinki import *
 
 testrunner = unittest.TextTestRunner(verbosity=2)
 
 suites = [
-        (2, geometric_helsinki_suite),
-        (2, exact_matches_suite)
+        (2, tests.geometric_helsinki.suite),
     ]
 
 def run_all():
@@ -22,6 +20,6 @@ def run_all():
 __all__ = [
         'run_all',
         'testrunner',
-        'geometric_helsinki_suite',
-        'exact_matches_suite'
+        'suites',
+        'geometric_helsinki'
         ]
