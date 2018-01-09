@@ -6,67 +6,49 @@ root:
     handlers: [console]
 
 loggers:
-    geometric_helsinki:
+    patternfinder.geometric_helsinki:
         level: WARNING
         handlers: [console, logfile]
         propagate: no
 
-    geometric_helsinki.finder:
-        level: WARNING
-        filters: [finder_function]
-        propagate: yes
-
-    geometric_helsinki.algorithms:
+    patternfinder.geometric_helsinki.finder:
         level: WARNING
         propagate: yes
 
-    geometric_helsinki.P1:
+    patternfinder.geometric_helsinki.algorithms:
         level: WARNING
-        propagate: yes
-    geometric_helsinki.algorithms.P2:
-        level: WARNING
-        propagate: yes
-    geometric_helsinki.P3:
-        level: WARNING
-        propagate: yes
-    geometric_helsinki.S1:
-        level: WARNING
-        propagate: yes
-    geometric_helsinki.S2:
-        level: WARNING
-        propagate: yes
-    geometric_helsinki.W1:
-        level: WARNING
-        propagate: yes
-    geometric_helsinki.W2:
-        level: WARNING
-        propagate: yes
-
-    NoteSegment:
-        level: WARNING
-        handlers: [console, logfile]
-        propagate: no
-    VectorCreation:
-        level: WARNING
-        handlers: [console]
+        handlers: [logfile]
+        filters: []
         propagate: no
 
 handlers:
     console:
         class: logging.StreamHandler
-        level: DEBUG
+        level: WARNING
+        formatter: simple
+        stream: ext://sys.stdout
+
+    algorithm_handler:
+        class: logging.StreamHandler
+        level: WARNING
         formatter: simple
         stream: ext://sys.stdout
 
     logfile:
         class: logging.FileHandler
-        level: DEBUG
+        level: WARNING
         formatter: simple
         filename: debug.log
 
 filters:
-    finder_function:
-        name: geometric_helsinki.finder.process_settings
+    P1:
+        name: patternfinder.geometric_helsinki.algorithms.P1
+    P2:
+        name: patternfinder.geometric_helsinki.algoritms.P2
+    P3:
+        name: patternfinder.geometric_helsinki.algorithms.P3
+    S1:
+        name: patternfinder.geometric_helsinki.algorithms.S1
 
 formatters:
     simple:
