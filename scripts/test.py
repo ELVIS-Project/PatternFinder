@@ -230,3 +230,11 @@ def find_generic_semitone_difference(dest='find_modules', masses=palestrina_move
 #lassus_full = Finder('music_files/lupi/module_A2.xml', 'music_files/lupi/OMR_Missa_Je_suys_desheritee_Lassus.xml')
 
 #lupi = Finder('music_files/lupi/module_A2.xml', 'music_files/lupi/Je_suys_desheritee.xml')
+import pdb
+import music21
+from geometric_helsinki import Finder
+
+p = music21.converter.parse('tinynotation: 4/4 c4 e4 g4')
+s = music21.converter.parse('tinynotation: 4/4 c4 e4 g4 c2 e2 g2')
+
+foo = Finder(p, s, scale=2.0)
