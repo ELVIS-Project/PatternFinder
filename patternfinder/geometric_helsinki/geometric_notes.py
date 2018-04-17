@@ -45,6 +45,7 @@ class NoteVector(music21.interval.Interval):
         super(NoteVector, self).__init__(*args, **kwargs)
         self.x = 0
         self.y = y_func(self)
+        self.y_func = y_func
 
         self.sortTupleOrder = ['x', 'y']
         self.sortTuple = lambda: tuple(getattr(self, attr) for attr in self.sortTupleOrder)
@@ -203,6 +204,12 @@ def music21Chord_to_music21Notes(chord):
         note.derivation.method = 'chord_to_notes'
     return note_list
 
+class GeometricNote(music21.note.Note):
+    def __init__(self, pitch_func, site, *args, **kwargs):
+        super(GeometricNote, self).__init__(*args, **kwargs)
+        self.x = self.getOffsetBySite(site)
+        self.y = pitch_func(self)
+
 class NotePointSet(music21.stream.Stream):
     """
     A container for the notes of a music21 parsed score.
@@ -251,4 +258,17 @@ class NotePointSet(music21.stream.Stream):
         self.autoSort = False
         for n in new_notes:
             self.insert(n)
+
+    def make_queue(score):
+        notes = CmpItQueue(lambda n: (n.offset, n.pitch.frequency))
+
+        for maybe_chord in score.flat.notes:
+            for n in music21Chord_to_music21Notes(maybe_chord):
+                n.original_note = maybe_chord
+                notes.put(n)
+
+        return notes
+
+    make_queue = staticmethod(make_queue)
+    #pd.DataFrame.from_records(((n.offset, pitch.ps, n.id) for n in my_score.flat.notes for pitch in n.pitches)).sort_values([0, 1])
 
