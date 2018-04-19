@@ -12,7 +12,7 @@ from collections import namedtuple # for use in __repr__
 
 #import patternfinder.geometric_helsinki.algorithms
 from patternfinder.geometric_helsinki.algorithms import GeometricHelsinkiBaseAlgorithm
-from patternfinder.geometric_helsinki.GeometricNotes import NotePointSet
+from patternfinder.geometric_helsinki.geometric_notes import NotePointSet
 from patternfinder.geometric_helsinki.occurrence import GeometricHelsinkiOccurrence
 
 ## SETTINGS
