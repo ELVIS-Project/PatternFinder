@@ -7,3 +7,6 @@ pyyaml
 jupyter
 matplotlib
 scipy
+vprof
+pandas
+pylint

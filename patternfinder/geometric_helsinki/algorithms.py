@@ -8,23 +8,24 @@ from pprint import pformat #for repr and logging
 from itertools import groupby # algorithm P2, and for K table initialization
 from more_itertools import peekable # for P class ptrs
 from fractions import Fraction # for scale
+from collections import namedtuple # used in P3 algorithm
 
-from patternfinder.geometric_helsinki.GeometricNotes import K_entry, CmpItQueue, InterNoteVector, IntraNoteVector
+from patternfinder.geometric_helsinki.geometric_notes import K_entry, CmpItQueue, InterNoteVector, IntraNoteVector, NotePointSet
 
 class GeometricHelsinkiBaseAlgorithm(object):
     """
-    A base class for P, S, and W algorithms
+    A base algorithm class for P, S, and W algorithms
+    When instantiated, these classes return generators which iterate over occurrences of
+    the pattern within the source
 
-    Demands:
+    Demands of its subclasses:
         pre_process -- unique pre processing for each algorithm or algorithm class
         filter_result -- decision making on whether an algorithm result should be outputted
                         based on user settings
-        process_result -- since not all algorithm output is uniform, we need to process them
-                        separately
-        filtered_results -- generator which runs the algorithm and applies filter_result()
+        process_result -- since not all algorithm output is uniform, we need to convert them
+                        separately to common output format
+        filtered_results -- returns a generator which runs the algorithm and applies filter_result()
                             on its output
-        occurrence_generator -- A.K.A. "processed_results". Runs through the filtered results
-                                and applies process_result() to them
     """
     def factory(pattern_point_set, source_point_set, settings):
         """
@@ -67,7 +68,7 @@ class GeometricHelsinkiBaseAlgorithm(object):
         # User selected algorithm, or auto-select from the settings?
         if settings['algorithm'] == 'auto':
             algorithm = decide_algorithm(
-                    settings['scale'], settings['threshold'], len(pattern_point_set))
+                settings['scale'], settings['threshold'], len(pattern_point_set))
         else:
             import sys
             algorithm = getattr(sys.modules[__name__], settings['algorithm'])
@@ -77,21 +78,34 @@ class GeometricHelsinkiBaseAlgorithm(object):
     # Make the factory method static among all instances of this class
     factory = staticmethod(factory)
 
-    def __init__(self, pattern_input, source_input, settings):
+    def __init__(self, pattern_point_set, source_point_set, settings):
         """
-        Input: pattern, source NotePointSets and a settings dictionary
-        Output: a generator of InterNoteVector lists
-                each list is one occurrence -- it represents the matching pairs between
-                pattern notes and their corresponding source notes
+        Algorithm objects are generators which return lists of InterNoteVectors
+            each list is one occurrence -- each InterNoteVector represeents one
+            matching pair linking a pattern note and its corresponding source note
+
+        Input
+        ------
+        pattern_point_set - an instance of geometric_notes.NotePointSet
+        source_point_set - ""
+        settings - dictates the kind of occurrences of the pattern that will be found in the source
+
+        Output
+        ------
+        a generator which returns lists of InterNoteVectors
         """
         self.logger = logging.getLogger("{0}".format(__name__))
         if self.logger.isEnabledFor(logging.INFO):
             self.logger.info('Creating a %s algorithm with:\n pattern %s\n source %s\n settings %s',
-                    self.__class__.__name__, pattern_input, source_input, pformat(settings))
+                self.__class__.__name__, pattern_point_set, source_point_set, pformat(settings))
 
         # input to algorithms
-        self.patternPointSet = pattern_input
-        self.sourcePointSet = source_input
+        self.patternPointSet = pattern_point_set
+        self.patternPointSet_offsetSort = NotePointSet(pattern_point_set, offsetSort=True)
+
+        self.sourcePointSet = source_point_set
+        self.sourcePointSet_offsetSort = NotePointSet(source_point_set, offsetSort=True)
+
         self.settings = settings
 
         # Algorithm specific pre-processing
@@ -108,12 +122,15 @@ class GeometricHelsinkiBaseAlgorithm(object):
         return next(self.occurrences)
 
     def pre_process(self):
+        """Runs algorithm-specific pre processing on point set inputs"""
         pass
 
     def filter_result(self, result):
+        """Filters result of the algorithm according to user settings"""
         return True
 
     def process_result(self, result):
+        """Creates consistent output out of result formats which vary between algorithms"""
         return result
 
     def filtered_results(self):
@@ -144,7 +161,9 @@ class P(GeometricHelsinkiBaseAlgorithm):
     def pre_process(self):
         super(P, self).pre_process()
 
-        # Compute InterNoteVector generator pointers
+        # Compute four inter vectors generators for each pattern note, with four turning point types
+        # tp_types 0, 1 iterate through a source sorted by onset (attack)
+        # while types 2, 3 iterate through a source sorted by offset (release)
         for note in self.patternPointSet:
             note.source_ptrs = [
                 peekable((lambda p:
@@ -158,11 +177,11 @@ class P(GeometricHelsinkiBaseAlgorithm):
                 peekable((lambda p:
                     (InterNoteVector(p, self.patternPointSet, s, self.sourcePointSet_offsetSort,
                         self.settings['interval_func'], tp_type = 2)
-                    for s in self.sourcePointSet))(note)),
+                    for s in self.sourcePointSet_offsetSort))(note)),
                 peekable((lambda p:
                     (InterNoteVector(p, self.patternPointSet, s, self.sourcePointSet_offsetSort,
                         self.settings['interval_func'], tp_type = 3)
-                    for s in self.sourcePointSet))(note))]
+                    for s in self.sourcePointSet_offsetSort))(note))]
 
 
 class SW(GeometricHelsinkiBaseAlgorithm):
@@ -405,7 +424,7 @@ class P1(P):
             for inter_vector_gen in ptrs[1:]:
                 # Take the first intervec that's too big.
                 # If you use itertools.takewhile, it will consume the first one that's
-                # too big, # but you want to keep it in the generator for subsequent cur_shifts.
+                # too big, but you want to keep it in the generator for subsequent cur_shifts.
                 try:
                     while inter_vector_gen.peek() < cur_shift:
                         inter_vector_gen.next()
@@ -448,8 +467,8 @@ class P2(P):
         threshold value : indicates the minimum number of matching pairs that
         a shift must yield to be considered an occurrence
 
-
-    Summary of implementation: count the multiplicity of each possible vector
+    Summary of implementation:
+        count the multiplicity of each possible vector
 
     Each intervector represents a matching pair between the pattern and source
     Since they come out of the PQ in increasing order (and the generators also
@@ -464,7 +483,7 @@ class P2(P):
     def algorithm(self):
 
         # Priority Queue of pattern note to source note vector pointers
-        shifts = CmpItQueue(lambda x: (x.peek(),), len(self.patternPointSet))
+        shifts = CmpItQueue(lambda x: (x.peek(), x.peek().noteEndIndex), len(self.patternPointSet))
 
         # We use generators to implement line-sweeping the pointers through
         # the score. Use a lambda expression to avoid bugs caused by scope-bleeding
@@ -492,20 +511,23 @@ class P3(P):
     def pre_process(self):
         #TODO merge overlapping notes using stream.getOverlaps()
         super(P3, self).pre_process()
-
+        # Threshold must be expressed as a percentage for P3
+        # (temp fix: assume threshold is expressed as # of notes required to be found)
+        self.settings['threshold'] = float(self.settings['threshold']) / len(self.patternPointSet)
 
     def process_result(self, result):
         # TODO insert sort (using bisect_insort) vectors to matching_pairs rather than sorting them after
         return sorted(result['matching_pairs'], key=lambda x: x.noteStartIndex)
 
     def filter_result(self, result):
+        """Filters results based on summed note length; requires a percentage of the threshold"""
         total_pattern_value = sum(map(lambda x: x.duration.quarterLength, self.patternPointSet))
-        return (result['value'] >= self.settings['%threshold'] * total_pattern_value)
+        return (result['value'] >= self.settings['threshold'] * total_pattern_value)
 
     def algorithm(self):
         pattern = self.patternPointSet
-        source_onsetSort = self.sourcePointSet
-        source_offsetSort = self.sourcePointSet_offsetSort
+        #source_onsetSort = self.sourcePointSet
+        #source_offsetSort = self.sourcePointSet_offsetSort
         settings = self.settings
 
         shifts = CmpItQueue(lambda x: (x.peek(),), 4 * len(pattern))
@@ -518,19 +540,24 @@ class P3(P):
             # while types 2, 3 iterate through a source sorted by offset (release)
             for ptr in note.source_ptrs:
                 shifts.put(ptr)
-            #shifts.put(peekable((lambda p: (InterNoteVector(p, pattern, s, source_onsetSort, tp_type=0) for s in source_onsetSort))(note)))
-            #shifts.put(peekable((lambda p: (InterNoteVector(p, pattern, s, source_onsetSort, tp_type=1) for s in source_onsetSort))(note)))
-            #shifts.put(peekable((lambda p: (InterNoteVector(p, pattern, s, source_offsetSort, tp_type=2) for s in source_offsetSort))(note)))
-            #shifts.put(peekable((lambda p: (InterNoteVector(p, pattern, s, source_offsetSort, tp_type=3) for s in source_offsetSort))(note)))
 
         for turning_point_generator in shifts:
             inter_vec = turning_point_generator.next()
 
             # Get the current bucket, or initialize it
-            cur_bucket = score_buckets.setdefault(inter_vec.y, {'value' : 0, 'last_value': 0, 'slope' : 0, 'prev_tp' : None, 'matching_pairs' : []})
+            cur_bucket = score_buckets.setdefault(
+                    inter_vec.y,
+                    {
+                        'value' : 0,
+                        'last_value': 0,
+                        'slope' : 0,
+                        'prev_tp' : None,
+                        'matching_pairs' : []})
 
-            # Each turning point dictates the behaviour (slope) of the score up until the next turning point. So the very first thing we need to do is update the score (especially before updating the slope!)
-            cur_bucket['value'] += cur_bucket['slope'] * (inter_vec.x - cur_bucket['prev_tp'].x) if cur_bucket['prev_tp'] else 0
+            # Each turning point dictates the behaviour (slope) of the score up until the next turning point.
+            # So the very first thing we need to do is update the score (especially before updating the slope!)
+            cur_bucket['value'] += (cur_bucket['slope'] * (inter_vec.x - cur_bucket['prev_tp'].x)
+                    if cur_bucket['prev_tp'] else 0)
 
             # Update the slope after we update the value
             cur_bucket['slope'] += 1 if inter_vec.tp_type in [0,3] else -1
@@ -539,10 +566,16 @@ class P3(P):
 
             # Keep track of the matching pairs
             if inter_vec.tp_type == 0:
+                # Type 0 turning points are just becoming part of the intersection
                 cur_bucket['matching_pairs'].append(inter_vec)
+                if self.logger.isEnabledFor(logging.DEBUG):
+                    self.logger.debug("Appending to bucket %s matching_pairs list: \n%s", inter_vec.y, inter_vec)
+
             elif inter_vec.tp_type == 3:
-                cur_bucket['matching_pairs'].remove(
-                        InterNoteVector(inter_vec.noteStart, inter_vec.noteStartSite, inter_vec.noteEnd, inter_vec.noteEndSite, 0))
+                # Type 3 turning points are no longer part of the intersection
+                cur_bucket['matching_pairs'] = [vec for vec in cur_bucket['matching_pairs'] if
+                        not (vec.noteStartIndex == inter_vec.noteStartIndex and
+                            vec.noteEndIndex == inter_vec.noteEndIndex)]
 
             # Only return occurrences if the intersection is increasing (necessarily must return non-zero intersections since 'last_value' starts at 0
             if cur_bucket['value'] > cur_bucket['last_value']:

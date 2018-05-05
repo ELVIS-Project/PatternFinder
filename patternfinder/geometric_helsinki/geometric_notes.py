@@ -45,6 +45,7 @@ class NoteVector(music21.interval.Interval):
         super(NoteVector, self).__init__(*args, **kwargs)
         self.x = 0
         self.y = y_func(self)
+        self.y_func = y_func
 
         self.sortTupleOrder = ['x', 'y']
         self.sortTuple = lambda: tuple(getattr(self, attr) for attr in self.sortTupleOrder)
@@ -184,7 +185,7 @@ def music21Chord_to_music21Notes(chord):
     so in theory it shoud look something like this...
 
     NOTE: this will screw up the coloring since music21 doesn't support coloring just
-    one note of a chord (I don't think?), so as compromise I'll just color the whole chord.
+    one note of a chord (I don't think?), so as a compromise I'll just color the whole chord.
     """
     note_list = []
     for pitch in chord.pitches:
@@ -202,6 +203,12 @@ def music21Chord_to_music21Notes(chord):
         note.derivation.origin = chord
         note.derivation.method = 'chord_to_notes'
     return note_list
+
+class GeometricNote(music21.note.Note):
+    def __init__(self, pitch_func, site, *args, **kwargs):
+        super(GeometricNote, self).__init__(*args, **kwargs)
+        self.x = self.getOffsetBySite(site)
+        self.y = pitch_func(self)
 
 class NotePointSet(music21.stream.Stream):
     """
@@ -233,9 +240,17 @@ class NotePointSet(music21.stream.Stream):
                 if offsetSort else (n.offset, n.pitch.frequency))
 
         # Get each note or chord, convert it to a tuple of notes, and sort them by the keyfunc
-        new_notes = reduce(lambda x, y: x+y,
-                [music21Chord_to_music21Notes(n) if n.isChord else [n]
-                    for n in score.flat.notes])
+        new_notes = []
+        for note in score.flat.notes:
+            to_add = music21Chord_to_music21Notes(note)
+            # Use .original_note instead of derivation chains. It has to be consistent:
+            # you can't be checking different derivations for notes which came from chords
+            # versus notes which were not derived. If for example a source was transposed
+            # (like in the test cases), the derivation will be non-empty, which screws up
+            # the decision making for occurrences later on.
+            for n in to_add:
+                n.original_note_id = note.id
+            new_notes.extend(to_add)
         new_notes.sort(key=sort_keyfunc)
 
         # Make sure to turn off stream.autoSort, since streams automatically sort on insert by
@@ -243,4 +258,17 @@ class NotePointSet(music21.stream.Stream):
         self.autoSort = False
         for n in new_notes:
             self.insert(n)
+
+    def make_queue(score):
+        notes = CmpItQueue(lambda n: (n.offset, n.pitch.frequency))
+
+        for maybe_chord in score.flat.notes:
+            for n in music21Chord_to_music21Notes(maybe_chord):
+                n.original_note = maybe_chord
+                notes.put(n)
+
+        return notes
+
+    make_queue = staticmethod(make_queue)
+    #pd.DataFrame.from_records(((n.offset, pitch.ps, n.id) for n in my_score.flat.notes for pitch in n.pitches)).sort_values([0, 1])
 

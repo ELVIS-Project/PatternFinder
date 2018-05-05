@@ -1,11 +1,25 @@
 import unittest
+import testtools
 import path
-from patternfinder.geometric_helsinki.tests import geometric_helsinki_suite
 
-tests = [
-        (2, geometric_helsinki_suite)
+import tests.geometric_helsinki
+
+from patternfinder.geometric_helsinki import *
+
+testrunner = unittest.TextTestRunner(verbosity=2)
+
+suites = [
+        (2, tests.geometric_helsinki.suite),
     ]
 
-for test in tests:
-    result = unittest.TextTestRunner(verbosity=test[0]).run(test[1])
+def run_all():
+    for test in suites:
+        result = unittest.TextTestRunner(verbosity=test[0]).run(test[1])
 
+
+__all__ = [
+        'run_all',
+        'testrunner',
+        'suites',
+        'geometric_helsinki'
+        ]

@@ -12,54 +12,55 @@ from collections import namedtuple # for use in __repr__
 
 #import patternfinder.geometric_helsinki.algorithms
 from patternfinder.geometric_helsinki.algorithms import GeometricHelsinkiBaseAlgorithm
-from patternfinder.geometric_helsinki.GeometricNotes import NotePointSet
+from patternfinder.geometric_helsinki.geometric_notes import NotePointSet
 from patternfinder.geometric_helsinki.occurrence import GeometricHelsinkiOccurrence
 
 ## SETTINGS
 DEFAULT_SETTINGS_PATH = 'patternfinder/geometric_helsinki/default_settings.yaml'
 
-## Load default settings
-if os.path.exists(DEFAULT_SETTINGS_PATH):
-    with open(DEFAULT_SETTINGS_PATH, 'rt') as f:
-        DEFAULT_SETTINGS = yaml.safe_load(f.read())
-else:
-    logging.getLogger(__name__).warning(DEFAULT_SETTINGS_PATH + "not found; we will use the hard-coded"
-            + "dictionary stored in " + __name__ + " to determine the default settings")
-    DEFAULT_SETTINGS = {
-            'algorithm' : 'auto',
-            'pattern_window' : 1,
-            'source_window' : 5,
-            'scale' : 'pure',
-            'threshold' : 'all',
-            'mismatches' : 0,
-            'interval_func' : 'semitones',
-            'pattern' : None,
-            'source' : None}
-
 Param = namedtuple('Param', ['user', 'algorithm'])
+
+def load_default_settings():
+    """Loads default settings from yaml file. If path not found, uses a hard-coded dict"""
+    if os.path.exists(DEFAULT_SETTINGS_PATH):
+        with open(DEFAULT_SETTINGS_PATH, 'rt') as f:
+            default_settings = yaml.safe_load(f.read())
+    else:
+        logging.getLogger(__name__).warning(DEFAULT_SETTINGS_PATH + "not found; we will use the hard-coded"
+                + "dictionary stored in " + __name__ + " to determine the default settings")
+        default_settings = {
+                'algorithm' : 'auto',
+                'pattern_window' : 1,
+                'source_window' : 5,
+                'scale' : 'pure',
+                'threshold' : 'all',
+                'mismatches' : 0,
+                'interval_func' : 'semitones',
+                'pattern' : None,
+                'source' : None}
+    return default_settings
 
 class Finder(object):
     """
     A python generator responsible for the execution of geometric helsinki algorithms
 
+
     Doctests
     ---------
     >>> import music21
-    >>> import patternfinder.geometric_helsinki as helsinki
-    >>> my_finder = helsinki.Finder()
+    >>> import patternfinder.geometric_helsinki
 
     >>> p = music21.converter.parse('tinynotation: 4/4 c4 d4 e2')
-    >>> my_finder.update(pattern=p)
-
     >>> s = music21.converter.parse('tinynotation: 4/4 c4 d4 e2')
-    >>> my_finder.update(source=s)
-
-    >>> next(my_finder).offset
-    0.0
+    >>> p_in_s = my_finder(p, s)
+    >>> next(p_in_s).notes == list(s.flat.notes)
+    True
     """
+    default_settings = load_default_settings()
+
     def __init__(self, pattern_input, source_input, **kwargs):
         """
-        Input (optional - can be initialized with nothing)
+        Input
         ------
         pattern: the query for which we are looking for in the source
             str filename pointing to a symbolic music file
@@ -70,25 +71,21 @@ class Finder(object):
         settings: keyword arguments which choose the algorithm and manage its execution
             keyword arguments (like an unpacked dictionary)
 
-        Output
-        ------
-        python generator which yields Occurrence objects
-
         >>> import music21
-        >>> import patternfinder.geometric_helsinki as helsinki
+        >>> import patternfinder.geometric_helsinki as gh
         >>> p = music21.converter.parse('tinynotation: 4/4 c4 e4 d4')
         >>> s = music21.converter.parse('tinynotation: 4/4 c4 e4 d4 r4 c2 e2 d2 r2 c#2 r2 e-1 r1 g1')
-        >>> my_finder = helsinki.Finder(p, s)
+        >>> my_finder = gh.Finder(p, s)
         >>> occ = next(my_finder) # occ is an Occurrence object
-        >>> occ.measure_range
-        [1]
+        >>> occ.notes
+        [<music21.note.Note F>, <music21.note.Note E>, <music21.note.Note D>]
 
-        >>> next(helsinki.Finder(p, s, scale=2.0))
-        [2, 3]
+        >>> next(gh.Finder(p, s, scale=2.0)).offset
+        4.0
 
-        >>> for occ in helsinki.Finder(music21.converter.parse('tinynotation: 4/4 c#4 e-4 g4'), s, scale='warped')
-        ...     occ.measure_range
-        [4, 5, 6, 7]
+        >>> for occ in gh.Finder(music21.converter.parse('tinynotation: 4/4 c#4 e-4 g4'), s, scale='warped')
+        ...     (occ.offset, occ.duration)
+        (12.0, 8.0)
         """
         # Log creation of this object
         self.logger = logging.getLogger(__name__)
@@ -96,7 +93,7 @@ class Finder(object):
             self.logger.info("Creating Finder with: \npattern %s\n source %s\n settings \n%s",
                     pattern, source, pformat(kwargs))
 
-        self._parse_scores()
+        self._parse_scores(pattern_input, source_input)
 
         ## (2) SETTINGS (executed second, since some settings require the length of the note point sets)
         self.settings = {}
@@ -105,7 +102,7 @@ class Finder(object):
 
         # Load the default settings, check their validity & translate them
         self.settings.update({key : Param('default', arg)
-            for key, arg in self.process_and_translate(DEFAULT_SETTINGS).items()})
+            for key, arg in self.process_and_translate(self.default_settings).items()})
 
         # Validate and translate user settings
         self.settings.update({key : Param(kwargs[key], arg)
@@ -120,12 +117,15 @@ class Finder(object):
         # Instantiate the algorithm generator
         self.output = (GeometricHelsinkiOccurrence(self, 1, occ, self.source) for occ in self.algorithm)
 
-    def _parse_scores(self):
+    def _parse_scores(self, pattern_input, source_input):
         """Defines self.pattern(PointSet) and self.source(PointSet)"""
         self.pattern = self.get_parameter_translator('pattern')(pattern_input)
         self.patternPointSet = NotePointSet(self.pattern)
+        self.patternPointSet_offsetSort = NotePointSet(self.pattern, offsetSort=True)
+
         self.source = self.get_parameter_translator('source')(source_input)
         self.sourcePointSet = NotePointSet(self.source)
+        self.sourcePointSet_offsetSort = NotePointSet(self.source, offsetSort=True)
 
     def __iter__(self):
         return self
@@ -172,7 +172,7 @@ class Finder(object):
         for key, arg in kwargs.items():
             logger.debug("Processing setting %s with value %s", key, arg)
             # Check to see if all user-specified settings are defined in the default settings
-            if key not in DEFAULT_SETTINGS:
+            if key not in self.default_settings:
                 raise ValueError("Parameter '{0}' is not a valid parameter.".format(key)
                         + "because it does not exist in the default settings.")
             # Validate and translate the paramter arguments
