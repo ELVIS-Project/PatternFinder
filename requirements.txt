@@ -10,3 +10,4 @@ scipy
 vprof
 pandas
 pylint
+pytest
