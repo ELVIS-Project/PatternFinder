@@ -16,6 +16,9 @@ import pdb
 us = music21.environment.UserSettings()
 us['directoryScratch'] = 'music_files/music21_temp_output'
 
+query.insert(0, music21.chord.Chord(['G3', 'G4', 'B4', 'E5']))
+query.insert(1, music21.chord.Chord(['F3', 'C4', 'C5', 'F5']))
+
 module = lambda p: 'music_files/lupi/module_' + p + '.xml'
 melody = lambda p: 'music_files/lupi/melody_' + p + '.xml'
 palestrina_mass = lambda p: 'music_files/lupi/palestrina/Je_suis_desheritee_' + p + '.xml'

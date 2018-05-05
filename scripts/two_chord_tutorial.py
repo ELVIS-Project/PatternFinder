@@ -4,10 +4,15 @@ import patternfinder.geometric_helsinki
 
 PALESTRINA_CORPUS = 'music_files/corpus/Palestrina/'
 
+us = music21.environment.UserSettings()
+us['directoryScratch']='/home/dgarfinkle/PatternFinder/music_files/music21_temp_output'
+
 # Construct our query
 query = music21.stream.Score()
-query.insert(0, music21.chord.Chord(['C4', 'E4', 'A4', 'C5']))
-query.insert(1, music21.chord.Chord(['B-3', 'F4', 'B-4', 'D5']))
+#query.insert(0, music21.chord.Chord(['C4', 'E4', 'A4', 'C5']))
+#query.insert(1, music21.chord.Chord(['B-3', 'F4', 'B-4', 'D5']))
+query.insert(0, music21.chord.Chord(['G3', 'G4', 'B4', 'E5']))
+query.insert(1, music21.chord.Chord(['F3', 'A4', 'C5', 'F5']))
 
 #for mass_path in music21.corpus.getComposer('Palestrina'):
 for mass_path in [mass_file for mass_file in os.listdir(PALESTRINA_CORPUS) if mass_file[-3:] == 'xml']:
