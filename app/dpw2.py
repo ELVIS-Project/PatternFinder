@@ -1,6 +1,11 @@
+import sys
+sys.path.insert(0, '/home/dgarfinkle/PatternFinder')
+
 import pandas as pd
 import numpy as np
 import music21
+
+from patternfinder.geometric_helsinki.geometric_notes import NotePointSet
 
 def chrpitch(note):
     return note.pitch.ps
@@ -8,10 +13,12 @@ def chrpitch(note):
 def init_matrix(pattern, target, window):
     d = {
             #'last_p_offset': pd.Series([-1] * len(pattern)),
-            'last_t_offset': pd.Series([-1] * window),
+            #'last_t_offset': pd.Series([-1] * window),
             'pattern': pd.Series([-1] * len(pattern)),
             'target': pd.Series([-1] * len(target))}
-    return pd.DataFrame(d)
+
+    #index = pd.MultiIndex.from_product([range(len(pattern)), range(len(target)), range(window)], names=['pattern', 'target', 'patternwindow'])
+    return pd.DataFrame(np.array([[-1] * len(target)] * len(pattern)), columns=range(len(target)), index=range(len(pattern)))
 
 def algorithm(pattern, target):
 
@@ -53,18 +60,19 @@ def algorithm(pattern, target):
         M[last_t_offset - 1][cur_p][cur_t] = best
         return best
 
-    pattern = sorted(list(pattern.flat.notes), key=lambda n: (n.offset, chrpitch(n)))
-    target = sorted(list(target.flat.notes), key=lambda n: (n.offset, chrpitch(n)))
-    window = len(target) - 1
+    pattern = list(NotePointSet(pattern).flat.notes)
+    target = list(NotePointSet(target).flat.notes)
+    window = 10
 
-    M = init_matrix(pattern, target, window)
-
-    print(M)
+    #M = init_matrix(pattern, target, window)
+    #print(M)
 
     M = [[[-1 for p in range(len(target))] for s in range(len(pattern))] for w in range(window)]
 
     for i in range(len(pattern)):
         for j in range(len(target)):
+            print("filling i={}, j={}".format(i, j), end='\r')
             fill_M(M, i + 1, j + 1, 1)
+    print()
 
     return M

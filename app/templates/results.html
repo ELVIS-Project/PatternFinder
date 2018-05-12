@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Results Page</h1>
+    <div class="pull right" id="query"></div>
+</div>
+
+<div class="container-fluid">
+    {% for query, result, url in data %}
+    {% include "occurrence.html" %}
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{super()}}
+<script type="text/javascript">
+var vrvToolkit = new verovio.toolkit();
+
+// Render query
+$.get(
+    "{{query_url}}",
+    function(data) {
+        var svg = vrvToolkit.renderData(data, {});
+        $("#query").html(svg);
+    },
+    'text');
+
+// Render results
+options = {
+    scale: 40,
+    pageHeight: 1200
+}
+vrvToolkit.setOptions(options)
+
+{% for query, result, url in data %}
+    /* Load the file using HTTP GET */
+    $.get(
+        "{{url}}",
+        function(data) {
+            var svg = vrvToolkit.renderData(data, {});
+            $("#occ{{query}}_{{result}}").html(svg);
+        },
+        'text');
+{% endfor %}
+</script>
+{% endblock %}
