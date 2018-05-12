@@ -1,4 +1,5 @@
 import sys
+# TODO figure out how to do proper python imports:
 sys.path.insert(0, '/home/dgarfinkle/PatternFinder')
 
 import music21

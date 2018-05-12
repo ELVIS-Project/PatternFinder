@@ -91,7 +91,7 @@ class Finder(object):
         self.logger = logging.getLogger(__name__)
         if self.logger.isEnabledFor(logging.INFO):
             self.logger.info("Creating Finder with: \npattern %s\n source %s\n settings \n%s",
-                    pattern, source, pformat(kwargs))
+                    pattern_input, source_input, pformat(kwargs))
 
         self._parse_scores(pattern_input, source_input)
 
