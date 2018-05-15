@@ -228,7 +228,8 @@ class BaseOccurrence(music21.base.Music21Object):
         """
         # beatAndMeasureFromOffset() will raise a StreamException if self.score has no measure info
         _beat, start_measure = self.score.beatAndMeasureFromOffset(self.offset)
-        _beat, end_measure = self.score.beatAndMeasureFromOffset(self.offset + self.duration.quarterLength)
+        # Minus 1, otherwise the last note will push the offset out of bounds
+        _beat, end_measure = self.score.beatAndMeasureFromOffset(self.offset + self.duration.quarterLength - 1)
 
         # Get a deepcopy excerpt of the score so post-processing will not modify original score
         # deepcopied music21Objects store their original parents in a derivation attribute

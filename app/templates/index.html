@@ -14,6 +14,7 @@
         <ul class="nav nav-tabs">
             <li class="active"><a data-target="#queries" data-toggle="tab" id="querytab">Queries</a></li>
             <li><a data-target="#results" data-toggle="tab" id="resultstab">Results</a></li>
+            <li><a data-target="#upload" data-toggle="tab" id="uploadtab">Upload</a></li>
         </ul>
     </div>
 </div>
@@ -21,23 +22,32 @@
 <!-- BODY -->
 <div class="tab-content">
 
+    <!-- UPLOAD TAB -->
+    <div class="container-fluid tab-pane" id="upload">
+        <h1>Upload new File</h1>
+        <form method=post action="/upload" enctype=multipart/form-data>
+            <input type=file name=file>
+            <input type=submit value=Upload>
+        </form>
+    </div>
+
     <!-- QUERIES TAB -->
     <div class="container-fluid tab-pane active" id="queries">
         {% for query_id, query_url in queries %}
         <div class="col-md-4">
             <div class="panel panel-default">
                 <div class="panel panel-header">
-                    <form class="form-inline">
+                    <form class="form-inline" id="query_{{query_id}}_form" onSubmit="return load_results(this)">
                         <div class="form-group">
-                            <label for="query_{{query_id}}threshold">Threshold</label>
-                            <input type="text" class="form-control" id="query_{{query_id}}_threshold">
+                            <label for="query_{{query_id}}_threshold">Threshold</label>
+                            <input type="text" class="form-control" id="query_{{query_id}}_threshold" name="threshold">
                         </div>
                         <div class="form-group">
                             <label for="query_{{query_id}}_window">Max Window</label>
-                            <input type="text" class="form-control" id="query_{{query_id}}_window">
+                            <input type="text" class="form-control" id="query_{{query_id}}_window" name="window">
                         </div>
                     </form>
-                    <button type="button" class="btn btn-primary" data-toggle="button" id="querybtn{{query_id}}">Load</button>
+                    <button type="button" class="btn btn-primary" id="querybtn{{query_id}}">Load</button>
                 </div>
                 <div class="panel panel-body" id="query{{query_id}}"></div>
             </div>
@@ -54,6 +64,12 @@
     {{super()}}
     <script>
         var vrvToolkit = new verovio.toolkit();
+        // Render results
+        options = {
+            scale: 30,
+            pageHeight: 1200
+        }
+        vrvToolkit.setOptions(options)
 
         /* LOAD QUERIES */
         {% for query_id, query_url in queries %}
@@ -67,13 +83,15 @@
 
             /* LOAD RESULTS ON CLICK */
             $("#querybtn{{query_id}}").on('click', function (){
+                form = document.getElementById("query_{{query_id}}_form")
                 $.get(
-                    "{{results_url}}/{{query_id}}",
+                    "{{results_url}}/{{query_id}}?threshold=" + form.threshold.value + "&max_window=" + form.window.value,
                     function(data) {
                         $("#results").html(data);
                     },
                 'text');
             })
         {% endfor %}
+
     </script>
 {% endblock %}

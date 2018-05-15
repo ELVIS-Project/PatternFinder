@@ -1,31 +1,23 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
 {% block content %}
-<div class="page-header">
-    <h1>Results Page</h1>
-    <div class="pull right" id="query"></div>
-</div>
-
 <div class="container-fluid">
-    {% for query, result, url in data %}
-    {% include "occurrence.html" %}
+    <h1>#{{total_num}} results</h1>
+    {% for query, result, score, url in data %}
+    <div class="col-md-6">
+        <div class="panel panel-default">
+        <div class="panel panel-header">{{score}}</div>
+        <div class="panel panel-body" id="occ{{query}}_{{result}}"></div>
+        </div>
+    </div>
     {% endfor %}
 </div>
-{% endblock %}
+{% endblock content %}
 
 {% block scripts %}
 {{super()}}
 <script type="text/javascript">
 var vrvToolkit = new verovio.toolkit();
-
-// Render query
-$.get(
-    "{{query_url}}",
-    function(data) {
-        var svg = vrvToolkit.renderData(data, {});
-        $("#query").html(svg);
-    },
-    'text');
 
 // Render results
 options = {
@@ -34,7 +26,7 @@ options = {
 }
 vrvToolkit.setOptions(options)
 
-{% for query, result, url in data %}
+{% for query, result, score, url in data %}
     /* Load the file using HTTP GET */
     $.get(
         "{{url}}",
@@ -45,4 +37,4 @@ vrvToolkit.setOptions(options)
         'text');
 {% endfor %}
 </script>
-{% endblock %}
+{% endblock scripts %}

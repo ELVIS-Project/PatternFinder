@@ -115,7 +115,8 @@ class Finder(object):
                 {key : arg.algorithm for key, arg in self.settings.items()})
 
         # Instantiate the algorithm generator
-        self.output = (GeometricHelsinkiOccurrence(self, 1, occ, self.source) for occ in self.algorithm)
+        self.output = (GeometricHelsinkiOccurrence(self, 1, occ, self.source, self.sourcePointSet)
+                       for occ in self.algorithm)
 
     def _parse_scores(self, pattern_input, source_input):
         """Defines self.pattern(PointSet) and self.source(PointSet)"""
