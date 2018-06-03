@@ -1,0 +1,15 @@
+{% extends "bootstrap/base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h1>PatternFinder for Schubert</h1>
+</div>
+
+<div id="vueapp">Loading Vue.js app...</div>
+{% endblock content %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+<script src="http://verovio-script.humdrum.org/scripts/verovio-toolkit.js"></script>
+<script src="{{ url_for('static', filename='main.js') }}" defer></script>
+{% endblock scripts %}
