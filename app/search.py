@@ -21,6 +21,8 @@ us['directoryScratch'] = '/home/dgarfinkle/PatternFinder/music_files/music21_tem
 app = Flask(__name__)
 Bootstrap(app)
 
+app.config.update(TEMPLATES_AUTO_RELOAD=True)
+
 QUERY_PATH = 'app/queries/'
 RESULTS_PATH = 'app/results/'
 PALESTRINA_PATH = 'music_files/corpus/Palestrina/'
@@ -77,6 +79,10 @@ def find(query_id):
         with open(RESULTS_PATH + '{}-{}'.format(query_id, mass), 'w') as f:
             json.dump(matrix, f)
 """
+
+@app.route('/vue')
+def vueapp():
+    return render_template('vue.html')
 
 @app.route('/')
 def index():

@@ -11,3 +11,4 @@ vprof
 pandas
 pylint
 pytest
+pysolr
