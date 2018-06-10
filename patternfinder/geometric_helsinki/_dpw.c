@@ -71,6 +71,10 @@ void save_matrix_to_json(int ***M, int best, int target_window, int pattern_leng
 int max(int a, int b){
     return (a > b) ? a : b;
 }
+
+int min(int a, int b){
+    return (a < b) ? a : b;
+}
     
 void print_notes(struct Note *notes, int length){
     printf("Query has %d notes:\n", length);
@@ -157,7 +161,6 @@ int*** init_M(int target_window, int pattern_length, int target_length){
 }
 
 int main(int argc, char **argv) {
-    int target_window = 10;
     char *output_dest = argv[3];
 
     #ifdef DEBUG
@@ -177,6 +180,8 @@ int main(int argc, char **argv) {
     #endif
     int target_length;
     struct Note *target = load_notes_from_csv(argv[2], &target_length); 
+
+    int target_window = min(10, target_length - 1);
 
     // Initialize matrix to -1
     int ***M = init_M(target_window, pattern_length, target_length);

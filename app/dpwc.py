@@ -14,48 +14,15 @@ def dpw_wrapper(pattern, target, result_path):
 def gdb_dpw_wrapper(pattern, target, result_path):
     subprocess.call('gdb --args {} {} {} {}'.format(dpwc_path, pattern, target, result_path), shell=True)
 
-def search():
+def search_palestrina(pattern_path):
     for mass in (m for m in os.listdir(palestrina_path) if m[-5:] == 'notes'):
+        result_path = os.path.join('c_test', mass + 'res')
         print("Processing " + mass)
         dpw_wrapper(
-            pattern='app/queries/1.xml.notes',
+            pattern=pattern_path,
             target='"' + os.path.join(palestrina_path, mass) + '"',
-            result_output='"' + os.path.join('c_test', mass + '.matrix_q1') + '"')
-
-def test_lemstrom():
-    lem_path = os.path.join(patternfinder_path, "tests", "data", "lemstrom2011")
-    dpw_wrapper(
-        pattern = os.path.join(lem_path, "query_a.mid.notes"),
-        target = os.path.join(lem_path, "leiermann.xml.notes"),
-        result_path = "lemstrom_test.res")
-
-
-def build_chains_test1(matrix, i, j, k):
-    #TODO BROKEN # i -> last target note offset. j -> pattern index. k -> target index
-    def recurse(last_t_offset, cur_p, cur_t, value, chain):
-
-        #window_vals = [i for i in range(len(matrix)) if matrix[i][j][k] == value]
-        next_p = cur_p - 1
-        next_t = cur_t - last_t_offset
-
-        next_offset = [o for o in range(len(matrix)) if matrix[o][next_p][next_t] == value + 1]
-
-        # Try taking the first,  next possible offset
-        import pdb; pdb.set_trace()
-        if next_offset:
-            recurse(next_offset[0], next_p, next_t, value + 1, chain + [cur_t])
-        else:
-            return chain
-
-        #lst_of_lsts = []
-        #for possible_next_offset in range(len(matrix)):
-        #    if matrix[possible_next_offset][next_p][next_t] == value + 1:
-        #        lst_of_lsts.append(recurse(possible_next_offset, next_p, next_t, value + 1, chain + [cur_t]))
-        #
-        #return lst_of_lsts or chain
-
-    # couldn't you have a return [] base case instead of this statement?
-    return recurse(i, j, k, matrix[i][j][k], [])
+            result_path='"' + result_path + '"')
+        print(get_occurrences_from_matrix(result_path))
 
 def build_chains(matrix, last_t_offset, cur_p, cur_t):
 
@@ -66,18 +33,14 @@ def build_chains(matrix, last_t_offset, cur_p, cur_t):
             next_t = min(cur_t + possible_next_offset, len(matrix[possible_next_offset][next_p]) - 1)
             next_val = matrix[possible_next_offset][next_p][next_t]
             if next_val == value - 1 and next_val > 0:
-                #pdb.set_trace()
                 chain = recurse(possible_next_offset, next_p, next_t, value - 1)
                 if len(chain) == value - 1:
-                    import pdb; pdb.set_trace()
                     return [cur_t] + chain
         return [cur_t]
 
 
     value = matrix[last_t_offset][cur_p][cur_t]
     return [cur_t - last_t_offset] + recurse(last_t_offset, cur_p, cur_t, value)
-
-
 
 
 def get_occurrences_from_matrix(result_path):
@@ -88,12 +51,15 @@ def get_occurrences_from_matrix(result_path):
 
     results = []
 
-    for i in range(len(matrix))[::-1]:
-        j = len(matrix[i]) - 1
-        for k in range(len(matrix[i][j]))[::-1]:
-            if matrix[i][j][k] == 1:
-                import pdb; pdb.set_trace()
-                results.append(build_chains(matrix, i, j, k))
+    for i in range(len(matrix)):
+        j = 1
+        for k in range(len(matrix[i][j])):
+            if matrix[i][j][k] == result['best']:
+                chain = build_chains(matrix, i, j, k)
+                if len(chain) == result['best'] + 1:
+                    results.append(chain)
+
+    return results
 
 
 if __name__ == '__main__':

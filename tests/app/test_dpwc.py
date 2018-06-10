@@ -2,7 +2,7 @@ import json
 import subprocess
 import music21
 from patternfinder.geometric_helsinki.indexer import csv_notes
-from app.dpwc import dpw_wrapper, gdb_dpw_wrapper, build_chains
+from app.dpwc import dpw_wrapper, gdb_dpw_wrapper, build_chains, get_occurrences_from_matrix
 
 us = music21.environment.UserSettings()
 us['directoryScratch'] = '/home/dgarfinkle/PatternFinder/music_files/music21_temp_output/'
@@ -19,6 +19,7 @@ def test_lemstrom():
         matrix = json.load(f)['matrix']
 
     print(build_chains(matrix, 2, 1, 14))
+    print(get_occurrences_from_matrix(result_path))
 
 def gdb_lemstrom():
     dpw_pattern_path = csv_notes(lemstrom_pattern)
