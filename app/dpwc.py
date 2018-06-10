@@ -9,6 +9,10 @@ dpwc_path = "/home/dgarfinkle/PatternFinder/patternfinder/geometric_helsinki/_dp
 
 def dpw_wrapper(pattern, target, result_path):
     subprocess.call(' '.join([dpwc_path, pattern, target, result_path]), shell=True)
+    return result_path
+
+def gdb_dpw_wrapper(pattern, target, result_path):
+    subprocess.call('gdb --args {} {} {} {}'.format(dpwc_path, pattern, target, result_path), shell=True)
 
 def search():
     for mass in (m for m in os.listdir(palestrina_path) if m[-5:] == 'notes'):
@@ -53,17 +57,21 @@ def build_chains_test1(matrix, i, j, k):
     # couldn't you have a return [] base case instead of this statement?
     return recurse(i, j, k, matrix[i][j][k], [])
 
-def build_chain(matrix, last_t_offset, cur_p, cur_t):
+def build_chains(matrix, last_t_offset, cur_p, cur_t):
 
-    import pdb; pdb.set_trace()
     def recurse(last_t_offset, cur_p, cur_t, value):
-        next_p = cur_p + 1
+        possible_next_offsets = []
         for possible_next_offset in range(1, len(matrix)):
-            next_t = min(cur_t + possible_next_offset, len(matrix[possible_next_offset][next_p]))
-            if matrix[possible_next_offset][next_p][next_t] == value - 1:
-                return [cur_t] + recurse(possible_next_offset, next_p, next_t, value - 1)
-        else:
-            return [cur_t]
+            next_p = min(cur_p + 1, len(matrix[possible_next_offset]) - 1)
+            next_t = min(cur_t + possible_next_offset, len(matrix[possible_next_offset][next_p]) - 1)
+            next_val = matrix[possible_next_offset][next_p][next_t]
+            if next_val == value - 1 and next_val > 0:
+                #pdb.set_trace()
+                chain = recurse(possible_next_offset, next_p, next_t, value - 1)
+                if len(chain) == value - 1:
+                    import pdb; pdb.set_trace()
+                    return [cur_t] + chain
+        return [cur_t]
 
 
     value = matrix[last_t_offset][cur_p][cur_t]
@@ -94,4 +102,4 @@ if __name__ == '__main__':
         res = json.load(f)
 
     m = res['matrix']
-    foo = build_chain(m, 2, 1, 14)
+    foo = build_chains(m, 2, 1, 14)
