@@ -8,7 +8,7 @@ import multiprocessing
 import music21
 import yaml
 
-from flask import Flask, request, redirect, url_for, render_template, send_from_directory
+from flask import Flask, request, redirect, url_for, render_template, send_from_directory, Response
 from flask_bootstrap import Bootstrap
 from werkzeug.utils import secure_filename
 
@@ -80,9 +80,56 @@ def find(query_id):
             json.dump(matrix, f)
 """
 
+@app.route('/vue/excerpt/<mass>/<note_indices>')
+def vue_excerpt(mass, note_indices):
+    from patternfinder.geometric_helsinki.geometric_notes import NotePointSet
+    score = music21.converter.parse(PALESTRINA_PATH + mass + '.mid.xml')
+    pointset = list(NotePointSet(score).flat.notes)
+
+    pointset_indices = [int(i) for i in note_indices.split(',')]
+    score_note_ids = [pointset[i].original_note_id for i in pointset_indices]
+
+    _, start_measure = score.beatAndMeasureFromOffset(pointset[pointset_indices[0]].offset)
+    _, end_measure = score.beatAndMeasureFromOffset(pointset[pointset_indices[-1]].offset + pointset[-1].duration.quarterLength - 1)
+
+    excerpt = score.measures(numberStart=start_measure.number, numberEnd=end_measure.number)
+    for note in excerpt.flat.notes:
+        if note.id in score_note_ids:
+            note.style.color = 'red'
+
+    sx = music21.musicxml.m21ToXml.ScoreExporter(excerpt)
+    musicxml = sx.parse()
+
+    from io import StringIO
+    import sys
+    bfr = StringIO()
+    sys.stdout = bfr
+    sx.dump(musicxml)
+    output = bfr.getvalue()
+    sys.stdout = sys.__stdout__
+    return Response(output, mimetype='application/xml')
+
+
+@app.route('/vue/search', methods=['POST'])
+def vue_search():
+    from app.dpwc import search_palestrina
+    from patternfinder.geometric_helsinki.indexer import csv_notes
+
+    query = request.form['krnText']
+    input_type = request.form['inputType']
+    tmp_query_path = '.'.join(['app/queries/query', input_type])
+    print("Received query: \n{}".format(query))
+    with open(tmp_query_path, 'w') as f:
+        f.write(query)
+
+    csv_notes(tmp_query_path)
+    print("Query written to {} and indexed with suffix .notes".format(tmp_query_path))
+    response = search_palestrina(tmp_query_path + '.notes')
+    return render_template('vue.html', response = response)
+
 @app.route('/vue')
 def vueapp():
-    return render_template('vue.html')
+    return render_template('vue.html', response = '')
 
 @app.route('/')
 def index():

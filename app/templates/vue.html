@@ -9,7 +9,9 @@
 {% endblock content %}
 
 {% block scripts %}
+<script id="response" type="application/json">{{response | tojson}}</script>
+<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
 <script src="http://verovio-script.humdrum.org/scripts/verovio-toolkit.js"></script>
-<script src="{{ url_for('static', filename='main.js') }}" defer></script>
+<script src="{{ url_for('static', filename='main.js') }}"></script>
 {% endblock scripts %}

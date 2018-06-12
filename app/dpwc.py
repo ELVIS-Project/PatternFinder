@@ -1,7 +1,10 @@
 import subprocess
 import os
 import json
+import music21
 
+us = music21.environment.UserSettings()
+us['directoryScratch'] = '/home/dgarfinkle/PatternFinder/music_files/music21_temp_output/'
 
 patternfinder_path = "/home/dgarfinkle/PatternFinder/"
 palestrina_path = "/home/dgarfinkle/PatternFinder/music_files/corpus/Palestrina"
@@ -15,14 +18,20 @@ def gdb_dpw_wrapper(pattern, target, result_path):
     subprocess.call('gdb --args {} {} {} {}'.format(dpwc_path, pattern, target, result_path), shell=True)
 
 def search_palestrina(pattern_path):
+    response = {}
+
     for mass in (m for m in os.listdir(palestrina_path) if m[-5:] == 'notes'):
         result_path = os.path.join('c_test', mass + 'res')
-        print("Processing " + mass)
+        #print("Processing " + mass)
         dpw_wrapper(
             pattern=pattern_path,
             target='"' + os.path.join(palestrina_path, mass) + '"',
             result_path='"' + result_path + '"')
-        print(get_occurrences_from_matrix(result_path))
+        result = get_occurrences_from_matrix(result_path)
+        #print(result)
+        if result:
+            response[mass.split('.')[0]] = result
+    return response
 
 def build_chains(matrix, last_t_offset, cur_p, cur_t):
 
