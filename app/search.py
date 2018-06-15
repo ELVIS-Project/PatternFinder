@@ -113,7 +113,7 @@ def vue_excerpt(mass, note_indices):
 @app.route('/vue/search', methods=['POST'])
 def vue_search():
     from app.dpwc import search_palestrina
-    from patternfinder.geometric_helsinki.indexer import csv_notes
+    from patternfinder.geometric_helsinki.indexer import csv_notes, intra_vectors
 
     query = request.form['krnText']
     input_type = request.form['inputType']
@@ -122,9 +122,9 @@ def vue_search():
     with open(tmp_query_path, 'w') as f:
         f.write(query)
 
-    csv_notes(tmp_query_path)
+    intra_vectors(tmp_query_path)
     print("Query written to {} and indexed with suffix .notes".format(tmp_query_path))
-    response = search_palestrina(tmp_query_path + '.notes')
+    response = search_palestrina(tmp_query_path + '.vectors')
     return render_template('vue.html', response = response)
 
 @app.route('/vue')

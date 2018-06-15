@@ -9,6 +9,11 @@ us['directoryScratch'] = '/home/dgarfinkle/PatternFinder/music_files/music21_tem
 patternfinder_path = "/home/dgarfinkle/PatternFinder/"
 palestrina_path = "/home/dgarfinkle/PatternFinder/music_files/corpus/Palestrina"
 dpwc_path = "/home/dgarfinkle/PatternFinder/patternfinder/geometric_helsinki/_dpw"
+w_path = "/home/dgarfinkle/PatternFinder/patternfinder/geometric_helsinki/_w"
+
+def w_wrapper(pattern, target, result_path):
+    subprocess.call(' '.join([w_path, pattern, target, result_path]), shell=True)
+    return result_path
 
 def dpw_wrapper(pattern, target, result_path):
     subprocess.call(' '.join([dpwc_path, pattern, target, result_path]), shell=True)
@@ -20,15 +25,16 @@ def gdb_dpw_wrapper(pattern, target, result_path):
 def search_palestrina(pattern_path):
     response = {}
 
-    for mass in (m for m in os.listdir(palestrina_path) if m[-5:] == 'notes'):
-        result_path = os.path.join('c_test', mass + 'res')
-        #print("Processing " + mass)
-        dpw_wrapper(
+    for mass in (m for m in os.listdir(palestrina_path) if m[-7:] == 'vectors'):
+        result_path = os.path.join('c_test', mass + '.chains')
+        print("Processing " + mass)
+        w_wrapper(
             pattern=pattern_path,
             target='"' + os.path.join(palestrina_path, mass) + '"',
             result_path='"' + result_path + '"')
-        result = get_occurrences_from_matrix(result_path)
-        #print(result)
+        #result = get_occurrences_from_matrix(result_path)
+        with open(result_path, 'r') as f:
+            result = json.load(f)
         if result:
             response[mass.split('.')[0]] = result
     return response

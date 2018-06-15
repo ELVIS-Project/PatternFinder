@@ -51,8 +51,12 @@ Vue.component("verovio-humdrum-viewer", {
     </form>`
 });
 
+var vanillaVerovio = document.createElement('script');
+vanillaVerovio.setAttribute('src', 'http://www.verovio.org/javascript/latest/verovio-toolkit.js')
+document.head.appendChild(vanillaVerovio)
+var vrvToolkitVanilla = new verovio.toolkit();
+
 var xml_verovio_options = {
-    inputFormat: "xml",
     scale: 40,
     font: "Leipzig"
 };
@@ -69,7 +73,7 @@ Vue.component("result", {
                 console.log(res)
                 sr = new XMLSerializer()
                 xml = sr.serializeToString(res.documentElement)
-                svg = vrvToolkit.renderData(xml, xml_verovio_options)
+                svg = vrvToolkitVanilla.renderData(xml, xml_verovio_options)
                 $("#" + resultid).html(svg);
             });
         }
@@ -93,15 +97,20 @@ var vm = new Vue({
             console.log(res.responseText)
             });
         },
-        maxWindow: function(notes){
-            max = 0
-            for (i = 1; i < notes.length; i++){
-                cur = notes[i] - notes[i - 1]
-                if (cur > max){
-                    max = cur
+        filterForMaxWindow: function(occs){
+            function maxWindow(notes){
+                max = 0
+                for (i = 1; i < notes.length; i++){
+                    cur = notes[i] - notes[i - 1]
+                    if (cur > max){
+                        max = cur
+                    }
                 }
+                return max
             }
-            return max
+            return occs.filter(function(occ){
+                return maxWindow(occ) == 1
+            })
         }
     },
     computed: {
@@ -113,8 +122,8 @@ var vm = new Vue({
         <div>
             <verovio-humdrum-viewer></verovio-humdrum-viewer>
             <div v-for="occs, mass in response">
-                <div v-for="(occ, index) in occs">
-                    <result v-if="maxWindow(occ) == 1" v-bind:resultid="mass + '_' + index" v-bind:mass="mass" v-bind:note_list="occ"></result>
+                <div v-for="(occ, index) in filterForMaxWindow(occs)">
+                    <result v-bind:resultid="mass.replace('(','').replace(')','') + '_' + index" v-bind:mass="mass" v-bind:note_list="occ"></result>
                 </div>
             </div>
         </div>

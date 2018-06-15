@@ -53,22 +53,24 @@ def run_1():
 
 
 def run_2():
-    for mass in mass_files.keys():
+    for mass in list(mass_files.keys())[:10]:
         print("Now processing " + mass)
-        for occ in geometric_helsinki.Finder(query, PALESTRINA_CORPUS + mass,
+        my_finder = geometric_helsinki.Finder(query, PALESTRINA_CORPUS + mass,
                 threshold = 'all',
                 scale = 'warped',
-                interval_func = 'generic'):
+                interval_func = 'generic')
+        return my_finder
+        for occ in my_finder:
             for note in occ.notes:
                 note.color = 'red'
             mass_files[mass] += 1
-        if mass_files[mass] > 0:
-            output = my_finder.source.write('lily.png')
-            os.rename(output,
-                    'music_files/schubert_tasks_new/'
-                    + "_".join([
-                        't',
-                        str(my_finder.settings['threshold'].algorithm),
-                        str(mass_files[mass]),
-                        mass])
-                    + '.png')
+        #if mass_files[mass] > 0:
+        #    output = my_finder.source.write('lily.png')
+        #    os.rename(output,
+        #            'music_files/schubert_tasks_new/'
+        #            + "_".join([
+        #                't',
+        #                str(my_finder.settings['threshold'].algorithm),
+        #                str(mass_files[mass]),
+        #                mass])
+        #            + '.png')
