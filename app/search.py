@@ -27,6 +27,15 @@ QUERY_PATH = 'app/queries/'
 RESULTS_PATH = 'app/results/'
 PALESTRINA_PATH = 'music_files/corpus/Palestrina/'
 
+DEFAULT_KRN_QUERY = """**kern
+*clefG2
+*k[]
+*M4/4
+=-
+4c 4e 4a 4cc
+4B- f b- dd
+"""
+
 def find(query, lock=multiprocessing.Lock()):
     progress_file = "{}{}.yml".format(RESULTS_PATH, query)
 
@@ -89,13 +98,19 @@ def vue_excerpt(mass, note_indices):
     pointset_indices = [int(i) for i in note_indices.split(',')]
     score_note_ids = [pointset[i].original_note_id for i in pointset_indices]
 
+    # Get stream excerpt
     _, start_measure = score.beatAndMeasureFromOffset(pointset[pointset_indices[0]].offset)
     _, end_measure = score.beatAndMeasureFromOffset(pointset[pointset_indices[-1]].offset + pointset[-1].duration.quarterLength - 1)
-
     excerpt = score.measures(numberStart=start_measure.number, numberEnd=end_measure.number)
+
+    # Colour notes
     for note in excerpt.flat.notes:
         if note.id in score_note_ids:
             note.style.color = 'red'
+
+    # Delete part names (midi files have bad data)
+    for part in excerpt:
+        part.partName = ''
 
     sx = music21.musicxml.m21ToXml.ScoreExporter(excerpt)
     musicxml = sx.parse()
@@ -109,14 +124,13 @@ def vue_excerpt(mass, note_indices):
     sys.stdout = sys.__stdout__
     return Response(output, mimetype='application/xml')
 
-
-@app.route('/vue/search', methods=['POST'])
+@app.route('/vue/search', methods=['GET'])
 def vue_search():
     from app.dpwc import search_palestrina
     from patternfinder.geometric_helsinki.indexer import csv_notes, intra_vectors
 
-    query = request.form['krnText']
-    input_type = request.form['inputType']
+    query = request.args['krnText']
+    input_type = request.args['inputType']
     tmp_query_path = '.'.join(['app/queries/query', input_type])
     print("Received query: \n{}".format(query))
     with open(tmp_query_path, 'w') as f:
@@ -125,11 +139,12 @@ def vue_search():
     intra_vectors(tmp_query_path)
     print("Query written to {} and indexed with suffix .notes".format(tmp_query_path))
     response = search_palestrina(tmp_query_path + '.vectors')
-    return render_template('vue.html', response = response)
+    print("serving krn " + query or DEFAULT_KRN_QUERY)
+    return render_template('vue.html', response = response, default_krn = query or DEFAULT_KRN_QUERY)
 
 @app.route('/vue')
 def vueapp():
-    return render_template('vue.html', response = '')
+    return render_template('vue.html', response = [], default_krn = DEFAULT_KRN_QUERY)
 
 @app.route('/')
 def index():
