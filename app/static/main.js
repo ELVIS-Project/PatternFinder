@@ -40,26 +40,35 @@ Vue.component("verovio-humdrum-viewer", {
     },
     mounted: function(){
         var onChange = this.update
+        var editorId = "editor"
+        var editorDiv = document.getElementById(editorId)
 
-        var editor = ace.edit("editor", {
+        var editor = ace.edit(editorId, {
             autoScrollEditorIntoView: true,
-            maxLines: 10,
-            value: this.input
+            value: this.input,
+            minLines: 10,
+            maxLines: 10
         })
         editor.session.on('change', function(delta){
             onChange(editor.getValue())
         })
+
     },
     template: `
     <form name="inputForm" action="/vue/search" method="get">
+        <input name="krnText" type="hidden" v-model="input"/>
+        <input name="inputType" type="hidden" value="krn"/>
         <div class="container">
             <div class="row">
-                <span class="col-md-3"></span>
                 <pre class="col-md-3" id="editor"></pre>
                 <div class="col-md-3">
-                    <span v-html="verovioOutput"></span>
-                    <input class="btn btn-primary form-control" type="submit" value="Search!">
+                    <span id="verovioOutput" v-html="verovioOutput"></span>
                 </div>
+            </div>
+            <div class="row">
+                <span class="col-md-6">
+                    <input class="btn btn-primary form-control" type="submit" value="Search!">
+                </span>
             </div>
         </div>
     </form>`
@@ -117,27 +126,37 @@ var vm = new Vue({
     data: {
         searchResponse: JSON.parse($('#searchResponse').html()),
         loadedOccs: [],
-        infiniteScrollBusy: false
+        infiniteScrollBusy: false,
+        numNotes: 0,
+        targetWindow: 0,
+        patternWindow: 0
     },
     computed: {
         filteredOccs: function(){
             return this.searchResponse.filter(this.filterOccForAll)
         }
     },
-    filters: {
-        deleteParentheses: function(string){
-            return mass.replace('(','').replace(')','')
-        }
-    },
     methods: {
         filterOccForAll: function(occ) {
-            return this.filterForMaxWindow(occ)
+            return this.filterForTargetWindow(occ)
         },
         loadMoreOccs: function(){
             this.infiniteScrollBusy = true;
 
             setTimeout(() => {
                 console.log('Loading more occs!')
+                var numPushed = 0;
+                for (occ of this.filteredOccs){
+                    if (!occ.loaded){
+                        console.log("loading occ: " + occ)
+                        this.loadedOccs.push(occ);
+                        numPushed++;
+                    }
+                    if (numPushed > 10){
+                        break;
+                    }
+                }
+                /*
                 for (var i=0; i < 10; i++){
                     nextOccIndex = this.loadedOccs.length + i
                     if (nextOccIndex > this.filteredOccs.length - 1) {
@@ -150,6 +169,7 @@ var vm = new Vue({
                         this.loadedOccs.push(this.filteredOccs[nextOccIndex])
                     }
                 }
+                */
                 this.infiniteScrollBusy = false;
             }, 1000)
         },
@@ -161,7 +181,7 @@ var vm = new Vue({
             results.push(svg)
             });
         },
-        filterForMaxWindow: function(occ){
+        filterForTargetWindow: function(occ){
             notes = occ['notes']
             max = 0
             for (i = 1; i < notes.length; i++){
@@ -170,12 +190,23 @@ var vm = new Vue({
                     max = cur
                 }
             }
-            return max == 1
+            return max <= this.targetWindow
         }
     },
     template: `
         <div>
             <verovio-humdrum-viewer></verovio-humdrum-viewer>
+
+            <label for="numNotesInput"># Notes Found {{numNotes}}</label>
+            <input id="numNotesInput" type="range" class="form-control-range" v-model="numNotes"/>
+
+            <label for="targetWindowInput">Target Window {{targetWindow}}</label>
+            <input input="targetWindowInput" type="range" class="form-control-range" v-model="targetWindow"/>
+
+            <label for="patternWindowInput">Pattern Window {{patternWindow}}</label>
+            <input input="patternWindowInput" type="range" class="form-control-range" v-model="patternWindow"/>
+
+            <p>#{{filteredOccs.length}} Occurrences</p>
             <div v-infinite-scroll="loadMoreOccs" infinite-scroll-disabled="infiniteScrollBusy" infinite-scroll-distance="10">
             <div class="container-fluid">
                 <div v-for="(occ, index) in loadedOccs">
