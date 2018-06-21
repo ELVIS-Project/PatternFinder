@@ -1,6 +1,8 @@
 #include<stdio.h>
 #include<string.h>
 
+#include <nlohmann/json.hpp>
+
 #include <fstream>
 #include <iostream>
 #include <vector>
@@ -10,6 +12,8 @@
 #include <queue>
 
 using namespace std;
+
+using namespace nlohmann;
 
 class IntraVector {
 
@@ -60,6 +64,7 @@ public:
     IntraVector targetVec;
     float scale;
     int w = 0; // length of occurrence
+    int id = 0;
     int e;
     KEntry* y = nullptr; // backlink for building chains
 };
@@ -179,6 +184,7 @@ void fillKTables(vector<KEntry>* KTables, Score pattern, Score target){
 void algorithm(vector <KEntry>* KTables, Score pattern, Score target){
     
     priority_queue<KEntry, vector<KEntry>, orderKEntriesByEndIndex> queues[pattern.numNotes];
+    int occId = 1; // Occurrence id
 
     // PQs hold chains which end at pattern note i
     // We intend to extend them with entries in a subsequent KTable
@@ -212,6 +218,9 @@ void algorithm(vector <KEntry>* KTables, Score pattern, Score target){
                     }
                 }
                 // Binding of Extension
+                if (KTables[i][j].id == 0) {
+                    KTables[i][j].id = occId++;
+                }
                 KTables[i][j].w = q.w + 1;
                 KTables[i][j].y = (KEntry*) malloc(sizeof(KEntry));
                 memcpy(KTables[i][j].y, &q, sizeof(KEntry));
@@ -223,6 +232,86 @@ void algorithm(vector <KEntry>* KTables, Score pattern, Score target){
     }
 }
 
+void extractChain(KEntry row, vector<pair<int, int>> &chain) {
+    int noteEnd = row.targetVec.endIndex;
+    if (row.y == nullptr) {
+        pair<int, int> first (row.patternVec.startIndex, row.targetVec.startIndex);
+        pair<int, int> second (row.patternVec.endIndex, row.targetVec.endIndex);
+        chain.push_back(first);
+        chain.push_back(second);
+    }
+    else {
+        pair<int, int> matchingPair (row.patternVec.startIndex, row.targetVec.startIndex);
+        chain.push_back(matchingPair);
+        // Recurse on the backlink
+        extractChain(*(row.y), chain);
+    }
+}
+
+pair<int, int> getMaxWindowsFromChain(vector<pair<int, int>> chain){
+    int maxPattern = 0;
+    int maxTarget = 0;
+    for (int i=1; i < chain.size(); i++){
+        int newPatternDiff = chain[i].first - chain[i-1].first;
+        int newTargetDiff = chain[i].first - chain[i-1].second;
+        if (newPatternDiff > maxPattern){
+            maxPattern = newPatternDiff;
+        }
+        if (newTargetDiff > maxTarget){
+            maxTarget = newTargetDiff;
+        }
+    }
+    pair<int,int> res (maxPattern, maxTarget); 
+    return res;
+}
+
+vector<int> filterVectorPairForSecond(vector<pair<int, int>> p){
+    vector<int> res;
+    for (int i=0; i < p.size(); i++){
+        res.push_back(p[i].second);
+    }
+    return res;
+}
+
+
+void writeChainsToJson(vector<KEntry>* KTables, Score pattern, Score target, string file_path) {
+    map<int, vector<pair<int, int>>> chains;
+    
+    // Inspect all KTables
+    for (int i=0; i < pattern.numNotes - 1; i++){
+        for (int j=0; j<KTables[i].size(); j++){
+            // The size of w is # intra vectors - 1, which becomes # of notes - 2
+            if (KTables[i][j].w + 2 > chains[KTables[i][j].id].size()){
+                vector<pair<int, int>> chain;
+                vector<pair<int, int>>& ptr = chain;
+                extractChain(KTables[i][j], ptr);
+                chains[KTables[i][j].id] = chain;
+            }
+        }
+    }
+
+    ifstream output;
+    output.open(file_path, ifstream::out);
+    int numOccs = chains.size();
+
+    json result;
+
+    for (int i=0; i < chains.size(); i++){
+        json occ;
+        pair<int, int> maxWindows (getMaxWindowsFromChain(chains[i]));
+        occ["matchingPairs"] = chains[i];
+        vector<int> targetNotes = filterVectorPairForSecond(chains[i]);
+        occ["targetNotes"] = targetNotes;
+        occ["size"] = chains[i].size();
+        occ["maxPatternWindow"] = maxWindows.first;
+        occ["maxTargetWindow"] = maxWindows.second;
+        result.push_back(occ);
+    }
+            
+    cout << result;
+    output.close();
+}
+            
 
 int main(int argc, char** argv){
 
@@ -230,16 +319,18 @@ int main(int argc, char** argv){
 
     printf("Loading pattern from indexed path: %s\n", argv[1]);
     Score pattern (argv[1]);
-    pattern.printVectors();
+    //pattern.printVectors();
 
     printf("Loading target from indexed path: %s\n", argv[2]);
     Score target (argv[2]);
-    target.printVectors();
+    //target.printVectors();
 
     vector<KEntry> KTables[pattern.numNotes];
     fillKTables(KTables, pattern, target);
 
-    printKTables(KTables, pattern.numNotes - 1);
+    //printKTables(KTables, pattern.numNotes - 1);
 
     algorithm(KTables, pattern, target);
+
+    writeChainsToJson(KTables, pattern, target, argv[3]);
 }
