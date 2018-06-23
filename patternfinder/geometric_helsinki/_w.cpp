@@ -78,11 +78,11 @@ void KEntry::print(){
 
 struct orderKEntriesByEndIndex{
     // PQueue takes a _Compare class for > operator
-    bool operator()(const KEntry& left, const KEntry& right){
-        if (left.targetVec.endIndex == right.targetVec.endIndex){
-            return left.targetVec.startIndex > right.targetVec.startIndex;
+    bool operator()(KEntry* left, KEntry* right){
+        if ((*left).targetVec.endIndex == (*right).targetVec.endIndex){
+            return (*left).targetVec.startIndex > (*right).targetVec.startIndex;
         }
-        return left.targetVec.endIndex > right.targetVec.endIndex;
+        return (*left).targetVec.endIndex > (*right).targetVec.endIndex;
     }
 };
 
@@ -177,43 +177,48 @@ void fillKTables(vector<KEntry>* KTables, Score pattern, Score target){
                 KTables[i].push_back(KEntry (curPatternVec, curTargetVec));
             }
         }
+        // TODO use priority queue for sort speedup (sort on insert)
         sort(KTables[i].begin(), KTables[i].end(), sortKEntriesByStartIndex);
     }
 }
 
 int algorithm(vector <KEntry>* KTables, Score pattern, Score target){
     
-    priority_queue<KEntry, vector<KEntry>, orderKEntriesByEndIndex> queues[pattern.numNotes];
+    priority_queue<KEntry*, vector<KEntry*>, orderKEntriesByEndIndex> queues[pattern.numNotes];
     int occId = 1; // Occurrence id
+
+    KEntry* q; // antecedent pointer
+    KEntry* r; // alternative antecedent pointer
 
     // PQs hold chains which end at pattern note i
     // We intend to extend them with entries in a subsequent KTable
     // Initialize the first PQ
     for (int i=0; i < pattern.numNotes - 2; i++){
         for (int j=0; j < KTables[i].size(); j++){
-            queues[KTables[i][j].patternVec.endIndex].push(KTables[i][j]);
+            KEntry* cur = &KTables[i][j];
+            queues[cur->patternVec.endIndex].push(cur);
         }
     }
 
     // For all K tables except the first (already copied to queue) (there are m - 1 Ktables)
     for (int i=1; i <= pattern.numNotes - 2; i++){
-        KEntry q = queues[i].top();
+        q = (KEntry*) &queues[i].top();
         queues[i].pop();
         
         // For all rows in the current K Table
         for (int j=0; j < KTables[i].size(); j++){
             // Advance the possible antecedent until it matches our first postcedent
-            while (q.targetVec.endIndex < KTables[i][j].targetVec.startIndex && !queues[i].empty()){
-                q = queues[i].top();
+            while ((*q).targetVec.endIndex < KTables[i][j].targetVec.startIndex && !queues[i].empty()){
+                q = (KEntry *) &queues[i].top();
                 queues[i].pop();
             }
 
-            if (q.targetVec.endIndex == KTables[i][j].targetVec.startIndex){
+            if ((*q).targetVec.endIndex == KTables[i][j].targetVec.startIndex){
                 // For multiple possible antecedents (multiple chains), take the longest one
-                while (queues[i].top().targetVec.endIndex == q.targetVec.endIndex && !queues[i].empty()){
-                    KEntry r = queues[i].top();
+                while ((*queues[i].top()).targetVec.endIndex == (*q).targetVec.endIndex && !queues[i].empty()){
+                    r = (KEntry*) &queues[i].top();
                     queues[i].pop();
-                    if (r.w >= q.w){
+                    if ((*r).w >= (*q).w){
                         q = r;
                     }
                 }
@@ -221,14 +226,15 @@ int algorithm(vector <KEntry>* KTables, Score pattern, Score target){
                 if (KTables[i][j].id == 0) {
                     KTables[i][j].id = occId++;
                 }
-                KTables[i][j].w = q.w + 1;
-                KTables[i][j].y = (KEntry*) malloc(sizeof(KEntry));
-                memcpy(KTables[i][j].y, &q, sizeof(KEntry));
-                queues[KTables[i][j].patternVec.endIndex].push(KTables[i][j]);
+                KTables[i][j].w = (*q).w + 1;
+                KTables[i][j].y = q;
+                KEntry* nextAntecedent = &KTables[i][j];
+                queues[KTables[i][j].patternVec.endIndex].push(nextAntecedent);
             }
         }
         KTables[i][KTables[i].size() - 1].e = 1;
-        queues[i+1].push(KTables[i][KTables[i].size() - 1]);
+        KEntry* lastAntecedent = &KTables[i][KTables[i].size() - 1];
+        queues[i+1].push(lastAntecedent);
     }
     return occId;
 }
@@ -355,11 +361,11 @@ void writeChainsToJson(vector<KEntry>* KTables, Score pattern, Score target, str
         occ["size"] = chains[i].size() + 1; 
         occ["maxPatternWindow"] = maxWindows.first;
         occ["maxTargetWindow"] = maxWindows.second;
+        */
 
         result.push_back(occ);
     }
             
-        */
     output << std::setw(4) << result << std::endl;
     output.close();
 }
@@ -384,5 +390,5 @@ int main(int argc, char** argv){
 
     int numOccs = algorithm(KTables, pattern, target);
 
-    //writeChainsToJson(KTables, pattern, target, argv[3], numOccs);
+    writeChainsToJson(KTables, pattern, target, argv[3], numOccs);
 }
