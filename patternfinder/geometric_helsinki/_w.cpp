@@ -290,8 +290,7 @@ void writeChainsToJson(vector<KEntry>* KTables, Score pattern, Score target, str
         }
     }
 
-    ifstream output;
-    output.open(file_path, ifstream::out);
+    ofstream output (file_path);
     int numOccs = chains.size();
 
     json result;
@@ -308,7 +307,7 @@ void writeChainsToJson(vector<KEntry>* KTables, Score pattern, Score target, str
         result.push_back(occ);
     }
             
-    cout << result;
+    output << std::setw(4) << result << std::endl;
     output.close();
 }
             

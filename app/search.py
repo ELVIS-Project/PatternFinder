@@ -132,13 +132,13 @@ def vue_search():
     query = request.args['krnText']
     input_type = request.args['inputType']
     tmp_query_path = '.'.join(['app/queries/query', input_type])
-    print("Received query: \n{}".format(query))
     with open(tmp_query_path, 'w') as f:
         f.write(query)
 
-    intra_vectors(tmp_query_path)
+    intra_vectors(tmp_query_path, pw=1, tw=1)
     print("Query written to {} and indexed with suffix .notes".format(tmp_query_path))
     response = search_palestrina(tmp_query_path + '.vectors')
+    print("Received query: \n{}".format(query))
     print("serving krn " + query or DEFAULT_KRN_QUERY)
     return render_template('vue.html', response = response, default_krn = query or DEFAULT_KRN_QUERY)
 

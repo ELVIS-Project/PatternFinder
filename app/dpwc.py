@@ -29,7 +29,7 @@ def search_palestrina(pattern_path):
     for mass in (m for m in os.listdir(palestrina_path) if m[-3:] == 'xml'):
         mass_vector_path = mass + '.vectors'
         result_path = os.path.join('c_test', mass + '.chains')
-        print("Processing " + mass)
+        #print("Processing " + mass)
         w_wrapper(
             pattern=pattern_path,
             target='"' + os.path.join(palestrina_path, mass_vector_path) + '"',
@@ -39,9 +39,13 @@ def search_palestrina(pattern_path):
             result = json.load(f)
         if result:
             for occ in result:
+                #print("THAT WAS " + mass)
+                #occ['mass'] = mass.split('.')[0]
+                #occ['loaded'] = False
+                #response.append(occ)
                 response.append({
                     'mass': mass.split('.')[0],
-                    'notes': occ,
+                    'targetNotes': occ,
                     'loaded': False
                 })
     return response

@@ -1,6 +1,16 @@
-{% extends "bootstrap/base.html" %}
-
-{% block scripts %}
-    {{super()}}
-    <script src="http://www.verovio.org/javascript/latest/verovio-toolkit.js"></script>
-{% endblock %}
+<!doctype html>
+<html>
+  <head>
+    {% block header %}
+    {% endblock %}
+  </head>
+  <body>
+    <div id="content">{% block content %}{% endblock %}</div>
+    <div id="footer">
+      {% block footer %}
+      {% endblock %}
+    </div>
+    {% block scripts %}
+    {% endblock %}
+  </body>
+</html>
