@@ -1,8 +1,8 @@
 import json
 import subprocess
 import music21
-from patternfinder.geometric_helsinki.indexer import csv_notes
-from app.dpwc import dpw_wrapper, gdb_dpw_wrapper, build_chains, get_occurrences_from_matrix
+from patternfinder.geometric_helsinki.indexer import csv_notes, intra_vectors
+from app.dpwc import dpw_wrapper, gdb_dpw_wrapper, w_wrapper, wcpp_wrapper, build_chains, get_occurrences_from_matrix
 
 us = music21.environment.UserSettings()
 us['directoryScratch'] = '/home/dgarfinkle/PatternFinder/music_files/music21_temp_output/'
@@ -10,16 +10,27 @@ us['directoryScratch'] = '/home/dgarfinkle/PatternFinder/music_files/music21_tem
 lemstrom_pattern = 'tests/data/lemstrom2011/query_a.mid'
 lemstrom_target = 'tests/data/lemstrom2011/leiermann.xml'
 
-def test_lemstrom():
-    dpw_pattern_path = csv_notes(lemstrom_pattern)
-    dpw_target_path = csv_notes(lemstrom_target)
+def test_wcpp(pattern, target):
+    w_pattern_path = intra_vectors(pattern, window = 1)
+    w_target_path = intra_vectors(target)
+    result_path = 'tests/app/query_a.res'
 
-    result_path = dpw_wrapper(dpw_pattern_path, dpw_target_path, 'tests/app/query_a.res')
+    result_path = wcpp_wrapper(w_pattern_path, w_target_path, result_path)
     with open(result_path, 'r') as f:
-        matrix = json.load(f)['matrix']
+        result = f.read()
 
-    print(build_chains(matrix, 2, 1, 14))
-    print(get_occurrences_from_matrix(result_path))
+    print(result)
+
+def test_w(pattern, target):
+    w_pattern_path = intra_vectors(pattern, window = 1)
+    w_target_path = intra_vectors(target)
+    result_path = 'tests/app/query_a.res'
+
+    result_path = w_wrapper(w_pattern_path, w_target_path, result_path)
+    with open(result_path, 'r') as f:
+        result = f.read()
+
+    print(result)
 
 def gdb_lemstrom():
     dpw_pattern_path = csv_notes(lemstrom_pattern)
@@ -61,9 +72,10 @@ def test_identical_twice():
 
 
 if __name__ == '__main__':
-    test_identical()
-    test_identical_twice()
+    #test_identical()
+    #est_identical_twice()
 
     #gdb_lemstrom()
 
-    test_lemstrom()
+    test_w(lemstrom_pattern, lemstrom_target)
+    test_wcpp(lemstrom_pattern, lemstrom_target)

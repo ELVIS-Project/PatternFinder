@@ -10,9 +10,16 @@ patternfinder_path = "/home/dgarfinkle/PatternFinder/"
 palestrina_path = "/home/dgarfinkle/PatternFinder/music_files/corpus/Palestrina"
 dpwc_path = "/home/dgarfinkle/PatternFinder/patternfinder/geometric_helsinki/_dpw"
 w_path = "/home/dgarfinkle/PatternFinder/patternfinder/geometric_helsinki/_w"
+wcpp_path = "/home/dgarfinkle/PatternFinder/patternfinder/geometric_helsinki/_wcpp"
 
 def w_wrapper(pattern, target, result_path):
+    print("calling " + w_path)
     subprocess.call(' '.join([w_path, pattern, target, result_path]), shell=True)
+    return result_path
+
+def wcpp_wrapper(pattern, target, result_path):
+    print("calling " + wcpp_path)
+    subprocess.call(' '.join([wcpp_path, pattern, target, result_path]), shell=True)
     return result_path
 
 def dpw_wrapper(pattern, target, result_path):

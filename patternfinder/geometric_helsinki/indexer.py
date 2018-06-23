@@ -22,12 +22,12 @@ def csv_notes(xml_input_path: str, dest: str = ''):
     return dest
 
 
-def intra_vectors(xml_input_path: str, dest: str = '', pw = 1, tw = 15):
+def intra_vectors(xml_input_path: str, dest: str = '', window = 15):
 
     my_finder = Finder(music21.stream.Stream(), xml_input_path,
             threshold = 'all',
-            pattern_window = pw,
-            source_window = tw,
+            pattern_window = 1,
+            source_window = window,
             scale = 'warped')
             #interval_func = 'generic')
 
