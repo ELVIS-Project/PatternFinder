@@ -233,12 +233,9 @@ void algorithm(vector <KEntry>* KTables, Score pattern, Score target){
 }
 
 void extractChain(KEntry row, vector<pair<int, int>> &chain) {
-    int noteEnd = row.targetVec.endIndex;
     if (row.y == nullptr) {
         pair<int, int> first (row.patternVec.startIndex, row.targetVec.startIndex);
-        pair<int, int> second (row.patternVec.endIndex, row.targetVec.endIndex);
         chain.push_back(first);
-        chain.push_back(second);
     }
     else {
         pair<int, int> matchingPair (row.patternVec.startIndex, row.targetVec.startIndex);
@@ -281,7 +278,8 @@ void writeChainsToJson(vector<KEntry>* KTables, Score pattern, Score target, str
     for (int i=0; i < pattern.numNotes - 1; i++){
         for (int j=0; j<KTables[i].size(); j++){
             // The size of w is # intra vectors - 1, which becomes # of notes - 2
-            if (KTables[i][j].w + 2 > chains[KTables[i][j].id].size()){
+            int occSize = KTables[i][j].w + 2;
+            if ((occSize > chains[KTables[i][j].id].size()) && ((pattern.numNotes - occSize) <= 3)){
                 vector<pair<int, int>> chain;
                 vector<pair<int, int>>& ptr = chain;
                 extractChain(KTables[i][j], ptr);
@@ -296,6 +294,7 @@ void writeChainsToJson(vector<KEntry>* KTables, Score pattern, Score target, str
     json result;
 
     for (int i=0; i < chains.size(); i++){
+        if (chains[i].size() == 0) continue;
         json occ;
         pair<int, int> maxWindows (getMaxWindowsFromChain(chains[i]));
         occ["matchingPairs"] = chains[i];
