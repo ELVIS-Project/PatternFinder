@@ -173,15 +173,15 @@ void fillKTables(vector<KEntry>* KTables, Score pattern, Score target){
             for (int k=0; k < target.hashedVectorsToY[curPatternVec.y].size(); k++){
                 IntraVector curTargetVec = target.hashedVectorsToY[curPatternVec.y][k];
 
-                KEntry newEntry (curPatternVec, curTargetVec);
-                KTables[i].push_back(newEntry);
+                //KEntry newEntry (curPatternVec, curTargetVec);
+                KTables[i].push_back(KEntry (curPatternVec, curTargetVec));
             }
         }
         sort(KTables[i].begin(), KTables[i].end(), sortKEntriesByStartIndex);
     }
 }
 
-void algorithm(vector <KEntry>* KTables, Score pattern, Score target){
+int algorithm(vector <KEntry>* KTables, Score pattern, Score target){
     
     priority_queue<KEntry, vector<KEntry>, orderKEntriesByEndIndex> queues[pattern.numNotes];
     int occId = 1; // Occurrence id
@@ -230,36 +230,60 @@ void algorithm(vector <KEntry>* KTables, Score pattern, Score target){
         KTables[i][KTables[i].size() - 1].e = 1;
         queues[i+1].push(KTables[i][KTables[i].size() - 1]);
     }
+    return occId;
 }
 
-void extractChain(KEntry row, vector<pair<int, int>> &chain) {
+void extractChain(KEntry row, vector<pair<int, int>>& matchingPairs, vector<int>& targetNotes, int* maxPatternWindow, int* maxTargetWindow, int* transposition) {
+    // Target Window
+    int curTargetWindow = row.targetVec.endIndex - row.targetVec.startIndex;
+    if (curTargetWindow > *maxTargetWindow)
+        *maxTargetWindow = curTargetWindow;
+
+    // Pattern Window
+    int curPatternWindow = row.patternVec.endIndex - row.patternVec.startIndex;
+    if (curPatternWindow > *maxPatternWindow)
+        *maxPatternWindow = curPatternWindow;
+
+
     if (row.y == nullptr) {
+        // Matching Pairs
         pair<int, int> first (row.patternVec.startIndex, row.targetVec.startIndex);
-        chain.push_back(first);
+        pair<int, int> second (row.patternVec.endIndex, row.targetVec.endIndex);
+        matchingPairs.push_back(second);
+        matchingPairs.push_back(first);
+
+        // Just Target Note Indices
+        targetNotes.push_back(row.targetVec.endIndex); 
+        targetNotes.push_back(row.targetVec.startIndex); 
+
     }
     else {
-        pair<int, int> matchingPair (row.patternVec.startIndex, row.targetVec.startIndex);
-        chain.push_back(matchingPair);
+        // Matching Pairs
+        pair<int, int> matchingPair (row.patternVec.endIndex, row.targetVec.endIndex);
+        matchingPairs.push_back(matchingPair);
+
+        // Just Target Note Indices
+        targetNotes.push_back(row.targetVec.endIndex); 
+
         // Recurse on the backlink
-        extractChain(*(row.y), chain);
+        extractChain(*(row.y), matchingPairs, targetNotes, maxPatternWindow, maxTargetWindow, transposition);
     }
 }
 
-pair<int, int> getMaxWindowsFromChain(vector<pair<int, int>> chain){
-    int maxPattern = 0;
-    int maxTarget = 0;
-    for (int i=1; i < chain.size(); i++){
-        int newPatternDiff = chain[i].first - chain[i-1].first;
-        int newTargetDiff = chain[i].first - chain[i-1].second;
-        if (newPatternDiff > maxPattern){
-            maxPattern = newPatternDiff;
-        }
-        if (newTargetDiff > maxTarget){
-            maxTarget = newTargetDiff;
-        }
+/*
+void extractChainMatchingPairs(KEntry row, vector<pair<int, int>> &matchingPairs) {
+    if (row.y == nullptr) {
+        pair<int, int> first (row.patternVec.startIndex, row.targetVec.startIndex);
+        pair<int, int> second (row.patternVec.endIndex, row.targetVec.endIndex);
+        matchingPairs.push_back(second);
+        matchingPairs.push_back(first);
     }
-    pair<int,int> res (maxPattern, maxTarget); 
-    return res;
+    else {
+        pair<int, int> matchingPair (row.patternVec.endIndex, row.targetVec.endIndex);
+        matchingPairs.push_back(matchingPair);
+        // Recurse on the backlink
+        extractChainMatchingPairs(*(row.y), matchingPairs);
+    }
 }
 
 vector<int> filterVectorPairForSecond(vector<pair<int, int>> p){
@@ -269,43 +293,73 @@ vector<int> filterVectorPairForSecond(vector<pair<int, int>> p){
     }
     return res;
 }
+*/
 
 
-void writeChainsToJson(vector<KEntry>* KTables, Score pattern, Score target, string file_path) {
-    map<int, vector<pair<int, int>>> chains;
+void writeChainsToJson(vector<KEntry>* KTables, Score pattern, Score target, string file_path, int numOccs) {
+    //map<int, KEntry> goodKEntries;
+    KEntry* goodKEntries = (KEntry*) calloc(numOccs, sizeof(KEntry));
     
     // Inspect all KTables
     for (int i=0; i < pattern.numNotes - 1; i++){
-        for (int j=0; j<KTables[i].size(); j++){
+        for (int j=0; j < KTables[i].size(); j++){
             // The size of w is # intra vectors - 1, which becomes # of notes - 2
-            int occSize = KTables[i][j].w + 2;
-            if ((occSize > chains[KTables[i][j].id].size()) && ((pattern.numNotes - occSize) <= 3)){
-                vector<pair<int, int>> chain;
-                vector<pair<int, int>>& ptr = chain;
-                extractChain(KTables[i][j], ptr);
-                chains[KTables[i][j].id] = chain;
-            }
+            KEntry& cur = KTables[i][j];
+            int occSize = cur.w + 2;
+
+            // Skip occurrences that have more than 3 notes missing
+            if ((pattern.numNotes - occSize) > 3) continue;
+
+            if (goodKEntries[cur.id].w >= cur.w) continue;
+
+            goodKEntries[cur.id] = cur;
+            //if (goodKEntries.find(cur.id) == goodKEntries.end()){// || goodKEntries[cur.id].w < cur.w){
+            //    goodKEntries.insert(pair<int, KEntry> (cur.id, cur));
+            //}
         }
     }
 
     ofstream output (file_path);
-    int numOccs = chains.size();
 
     json result;
 
-    for (int i=0; i < chains.size(); i++){
-        if (chains[i].size() == 0) continue;
+    for (int i=0; i < numOccs; i++){
+        if (goodKEntries[i].w == 0) continue; // Skip occurrences of 2 notes and less
+
+        vector<pair<int, int>> matchingPairs;
+        vector<pair<int, int>>& mpPtr = matchingPairs;
+        vector<int> targetNotes;
+        vector<int>& tnPtr = targetNotes;
+        int maxPatternWindow = 0;
+        int maxTargetWindow = 0;
+        int transposition = 0;
+
+        extractChain(goodKEntries[i], mpPtr, tnPtr, &maxPatternWindow, &maxTargetWindow, &transposition);
         json occ;
+
+        occ["targetNotes"] = targetNotes;
+        occ["matchingPairs"] = matchingPairs;
+        occ["maxPatternWindow"] = maxPatternWindow;
+        occ["maxTargetWindow"] = maxTargetWindow;
+        occ["size"] = goodKEntries[i].w + 1; // there are x+1 notes in x intravectors 
+        occ["transposition"] = transposition;
+
+    /*
+        vector<pair<int, int>> chain;
+        vector<pair<int, int>>& ptr = chain;
+        extractChainMatchingPairs(KTables[i][j], ptr);
         pair<int, int> maxWindows (getMaxWindowsFromChain(chains[i]));
         occ["matchingPairs"] = chains[i];
         vector<int> targetNotes = filterVectorPairForSecond(chains[i]);
         occ["targetNotes"] = targetNotes;
-        occ["size"] = chains[i].size();
+        occ["size"] = chains[i].size() + 1; 
         occ["maxPatternWindow"] = maxWindows.first;
         occ["maxTargetWindow"] = maxWindows.second;
+
         result.push_back(occ);
     }
             
+        */
     output << std::setw(4) << result << std::endl;
     output.close();
 }
@@ -328,7 +382,7 @@ int main(int argc, char** argv){
 
     //printKTables(KTables, pattern.numNotes - 1);
 
-    algorithm(KTables, pattern, target);
+    int numOccs = algorithm(KTables, pattern, target);
 
-    writeChainsToJson(KTables, pattern, target, argv[3]);
+    //writeChainsToJson(KTables, pattern, target, argv[3], numOccs);
 }
