@@ -28,35 +28,36 @@ Vue.component("verovio-humdrum-viewer", {
             }
         }
     },
-    props: ['targetWindowFilter'],
+    props: ['targetWindowFilter', 'transpositionFilter'],
     methods: {
         update: function(newstr) {
             this.input = newstr
         },
         updateProp(eventName, value){
-            console.log("update " + eventName + ": " + value)
+            console.log("update " + eventName + ": ")
+            console.log(value)
             this.$emit(eventName, value)
         }
     },
     computed: {
         verovioOutput: function() {
-            return vrvToolkit.renderData(this.input, this.vrv_options)
+            return vrvToolkit.renderData(this.input, this.vrv_options);
         }
     },
     mounted: function(){
-        var onChange = this.update
-        var editorId = "editor"
-        var editorDiv = document.getElementById(editorId)
+        var onChange = this.update;
+        var editorId = "editor";
+        var editorDiv = document.getElementById(editorId);
 
         var editor = ace.edit(editorId, {
             autoScrollEditorIntoView: true,
             value: this.input,
             minLines: 10,
             maxLines: 10
-        })
+        });
         editor.session.on('change', function(delta){
             onChange(editor.getValue())
-        })
+        });
 
         var onPropChange = this.updateProp
         $("#targetWindowSlider").slider({
@@ -67,9 +68,19 @@ Vue.component("verovio-humdrum-viewer", {
             slide: function(event, ui){
                 onPropChange('targetWindowFilter', ui.values)
             }
-        })
+        });
 
-        $("#diatonicOccFilter").checkboxradio()
+        $("#transpositionSlider").slider({
+            range: true,
+            min: -12,
+            max: 12,
+            values: [-12, 12],
+            slide: function(event, ui){
+                onPropChange('transpositionFilter', ui.values)
+            }
+        });
+
+        $("#diatonicOccFilter").checkboxradio();
     },
     template: `
     <form name="inputForm" action="/vue/search" method="get">
@@ -91,16 +102,22 @@ Vue.component("verovio-humdrum-viewer", {
                 </div>
 
                 <div class="col-md-3" id="filters">
-                    <!-- TARGET WINDOW -->
-                    # of inbetween target notes
-                    {{targetWindowFilter[0]}} - {{targetWindowFilter[1]}}
-                    <div id="targetWindowSlider"></div>
-
                     <!-- DIATONIC OCCS -->
                     <label>
                         Filter out diatonic occurrences?
                         <input type="checkbox" class="form-control" id="diatonicOccFilter" v-on:click="updateProp('diatonicOccFilter', $('#diatonicOccFilter').is(':checked'))"/>
                     </label>
+
+                    <!-- TARGET WINDOW -->
+                    {{targetWindowFilter[0]}} - {{targetWindowFilter[1]}}
+                    # of inbetween target notes
+                    <div id="targetWindowSlider"></div>
+
+                    <!-- TRANSPOSITIONS -->
+                    {{transpositionFilter[0]}} - {{transpositionFilter[1]}}
+                    Chromatic transpositions mod 12
+                    <div id="transpositionSlider"></div>
+
                 </div>
             </div>
         </div>
@@ -167,6 +184,7 @@ var vm = new Vue({
         searchResponse: JSON.parse($('#searchResponse').html()),
         loadedOccs: [],
         infiniteScrollBusy: false,
+        transpositionFilter: [-12, 12],
         numNotesFilter: 1,
         diatonicOccFilter: false,
         targetWindowFilter: [1, 2],
@@ -183,7 +201,7 @@ var vm = new Vue({
             //console.log(occ)
             //console.log("window filter " + this.filterForTargetWindow(occ))
             //console.log("diatonic filter " + this.filterForDiatonicOccs(occ))
-            return this.filterForTargetWindow(occ) && this.filterForDiatonicOccs(occ)
+            return this.filterForTargetWindow(occ) && this.filterForDiatonicOccs(occ) && this.filterForTransposition(occ)
         },
         loadMoreOccs: function(){
             this.infiniteScrollBusy = true;
@@ -242,6 +260,15 @@ var vm = new Vue({
                 }
             }
             return (max >= this.targetWindowFilter[0]) && (max <= this.targetWindowFilter[1])
+        },
+        filterForTransposition: function(occ){
+            var res = ((occ['transposition'] % 12 >= this.transpositionFilter[0]) && ((occ['transposition'] % 12)  <= this.transpositionFilter[1]))
+            if (!res){
+                console.log(occ)
+                console.log(occ['transposition'] % 12)
+                console.log(this.transpositionFilter)
+            }
+            return res
         }
     },
     template: `
@@ -266,11 +293,13 @@ var vm = new Vue({
                 v-bind:targetWindowFilter="targetWindowFilter"
                 v-on:targetWindowFilter="targetWindowFilter = arguments[0]"
                 v-bind:diatonicOccFilter="diatonicOccFilter"
-                v-on:diatonicOccFilter="diatonicOccFilter = arguments[0]">
+                v-on:diatonicOccFilter="diatonicOccFilter = arguments[0]"
+                v-bind:transpositionFilter="transpositionFilter"
+                v-on:transpositionFilter="transpositionFilter = arguments[0]">
             </verovio-humdrum-viewer>
 
-            <div class="align-middle font-weight-light">#{{filteredOccs.length}} Occurrences</div>
-            <div v-infinite-scroll="loadMoreOccs" infinite-scroll-disabled="infiniteScrollBusy" infinite-scroll-distance="10">
+            <div class="align-middle font-weight-light text-center">#{{filteredOccs.length}} Occurrences</div>
+            <div v-init="loadMoreOccs" v-infinite-scroll="loadMoreOccs" infinite-scroll-disabled="infiniteScrollBusy" infinite-scroll-distance="10">
             <div class="container-fluid">
                 <div class="row">
                     <div v-for="(occ, index) in loadedOccs" class="col-md-6 pl-0 pr-0"><result v-show="filterOccForAll(occ)" v-bind:occ="occ"></result></div>
