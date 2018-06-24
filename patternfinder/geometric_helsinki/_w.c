@@ -26,6 +26,10 @@ struct IntraVector {
     int y;
     int startIndex;
     int endIndex;
+    char startPitch[3];
+    char endPitch[3];
+    int diatonicDiff;
+    int chromaticDiff;
 };
 
 struct KEntry {
@@ -62,6 +66,10 @@ struct Score* load_indexed_score(char *filePath){
         score->vectors[i].y = atoi(strtok(NULL, ",")); 
         score->vectors[i].startIndex = atoi(strtok(NULL, ",")); 
         score->vectors[i].endIndex = atoi(strtok(NULL, ",")); 
+        strcpy(score->vectors[i].startPitch, strtok(NULL, ",")); 
+        strcpy(score->vectors[i].endPitch, strtok(NULL, ",")); 
+        score->vectors[i].diatonicDiff = atoi(strtok(NULL, ",")); 
+        score->vectors[i].chromaticDiff = atoi(strtok(NULL, ",")); 
     }
     fclose(data);
     return score;
@@ -75,16 +83,24 @@ void print_score(struct Score* score){
     }
 }
 
-void extract_chain(struct KEntry row, int* chain) {
-    int noteEnd = row.targetVec.endIndex;
+void extract_chain(struct KEntry row, int* chain, int* maxTargetWindow, int* transposition, int* diatonicOcc) {
+    int curTargetWindow = row.targetVec.endIndex - row.targetVec.startIndex; 
+    if (curTargetWindow > *maxTargetWindow) *maxTargetWindow = curTargetWindow;
+
+    if (row.targetVec.chromaticDiff != row.patternVec.chromaticDiff && row.targetVec.diatonicDiff == row.patternVec.diatonicDiff) {
+        *diatonicOcc = 1;
+    }
+
     if (row.y == 0x0) {
         chain[0] = row.targetVec.startIndex;
         chain[1] = row.targetVec.endIndex;
+
+        *transposition = row.patternVec.startIndex - row.targetVec.endIndex;
     }
     else {
         chain[row.w + 1] = row.targetVec.endIndex;
         // Recurse on the backlink
-        extract_chain(*(row.y), chain);
+        extract_chain(*(row.y), chain, maxTargetWindow, transposition, diatonicOcc);
     }
 }
 
@@ -92,6 +108,9 @@ void write_chains_to_json(struct KEntry** KTables, struct Score* pattern, struct
     FILE* output = fopen(file_path, "w");
     int chain[pattern->num_notes];
     int num_occs = 0;
+    int transposition = 0;
+    int maxTargetWindow = 0;
+    int diatonicOcc = 0;
 
     fprintf(output, "[");
     // Inspect all rows of the final K Table
@@ -101,23 +120,32 @@ void write_chains_to_json(struct KEntry** KTables, struct Score* pattern, struct
             continue;
         }
 
-        extract_chain(KTables[pattern->num_notes - 2][i], chain);
+        extract_chain(KTables[pattern->num_notes - 2][i], chain, &maxTargetWindow, &transposition, &diatonicOcc);
         num_occs++;
 
         // Print one occurrence
         if (num_occs == 1) {
-            fprintf(output, "[");
+            fprintf(output, "{");
         }
         else {
-            fprintf(output, ",\n [");
+            fprintf(output, ",\n {");
         }
+
+        fprintf(output, "'targetNotes': [");
         for (int j=0; j < pattern->num_notes; j++){
             fprintf(output, "%d", chain[j]);
             if (j + 1 != pattern->num_notes){
                 fprintf(output, ", ");
             }
         }
-        fprintf(output, "]");
+        fprintf(output, "],");
+
+        fprintf(output, "'transposition': %d,", transposition);
+
+        fprintf(output, "'diatonicOcc': %s,", diatonicOcc ? "true" : "false");
+
+
+        fprintf(output, "}");
     }
     fprintf(output, "]");
 
@@ -130,7 +158,7 @@ int compare_K_entries_startIndex(const void* x, const void* y){
     struct KEntry left = *((struct KEntry*) x);
     struct KEntry right = *((struct KEntry*) y);
     if (left.targetVec.startIndex == right.targetVec.startIndex) {
-        return left.targetVec.endIndex < right.targetVec.endIndex;
+        return left.targetVec.endIndex > right.targetVec.endIndex;
     }
     else {
         return left.targetVec.startIndex > right.targetVec.startIndex;
@@ -171,13 +199,14 @@ struct KEntry** init_K_tables(struct Score* pattern, struct Score* target){
         // Find all db vectors which match the Pi -> Pi+1
         // Could spead up by taking advantage of sorted vectors, or by hashing to y value
         for(int j=0; j < target->num_vectors; j++){
-            if (target->vectors[j].y == curPatternVec.y){
+            if (target->vectors[j].diatonicDiff == curPatternVec.diatonicDiff){
                 KTables[i][numMatching].targetVec = target->vectors[j];
                 KTables[i][numMatching].patternVec = curPatternVec;
                 KTables[i][numMatching].y = NULL;
                 numMatching++;
             }
         }
+        qsort(KTables[i], target->num_vectors, sizeof(struct KEntry), compare_K_entries_startIndex);
     }
     return KTables;
 }
@@ -212,9 +241,12 @@ void algorithm(struct KEntry** KTables, struct Score* pattern, struct Score* tar
     }
 
 
+    struct KEntry* q;
     // For all K tables except the first (already copied to queue) (there are m - 1 Ktables)
     for (int i=1; i <= pattern->num_notes - 2; i++){
-        struct KEntry* q = pqueue_dequeue(Queues[i]);
+        if (Queues[i]->size > 0){
+            q = pqueue_dequeue(Queues[i]);
+        }
         
         // For all rows in the current K Table
         for (int j=0; j < target->num_vectors; j++){
