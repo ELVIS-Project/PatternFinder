@@ -26,8 +26,8 @@ struct IntraVector {
     int y;
     int startIndex;
     int endIndex;
-    char startPitch[3];
-    char endPitch[3];
+    int startPitch;
+    int endPitch;
     int diatonicDiff;
     int chromaticDiff;
 };
@@ -66,8 +66,10 @@ struct Score* load_indexed_score(char *filePath){
         score->vectors[i].y = atoi(strtok(NULL, ",")); 
         score->vectors[i].startIndex = atoi(strtok(NULL, ",")); 
         score->vectors[i].endIndex = atoi(strtok(NULL, ",")); 
-        strcpy(score->vectors[i].startPitch, strtok(NULL, ",")); 
-        strcpy(score->vectors[i].endPitch, strtok(NULL, ",")); 
+        score->vectors[i].startPitch = atoi(strtok(NULL, ",")); 
+        score->vectors[i].endPitch = atoi(strtok(NULL, ",")); 
+        //strcpy(score->vectors[i].startPitch, strtok(NULL, ",")); 
+        //strcpy(score->vectors[i].endPitch, strtok(NULL, ",")); 
         score->vectors[i].diatonicDiff = atoi(strtok(NULL, ",")); 
         score->vectors[i].chromaticDiff = atoi(strtok(NULL, ",")); 
     }
@@ -87,7 +89,7 @@ void extract_chain(struct KEntry row, int* chain, int* maxTargetWindow, int* tra
     int curTargetWindow = row.targetVec.endIndex - row.targetVec.startIndex; 
     if (curTargetWindow > *maxTargetWindow) *maxTargetWindow = curTargetWindow;
 
-    if (row.targetVec.chromaticDiff != row.patternVec.chromaticDiff && row.targetVec.diatonicDiff == row.patternVec.diatonicDiff) {
+    if ((row.targetVec.chromaticDiff != row.patternVec.chromaticDiff) && (row.targetVec.diatonicDiff == row.patternVec.diatonicDiff)) {
         *diatonicOcc = 1;
     }
 
@@ -95,7 +97,7 @@ void extract_chain(struct KEntry row, int* chain, int* maxTargetWindow, int* tra
         chain[0] = row.targetVec.startIndex;
         chain[1] = row.targetVec.endIndex;
 
-        *transposition = row.patternVec.startIndex - row.targetVec.endIndex;
+        *transposition = row.patternVec.startPitch - row.targetVec.startPitch;
     }
     else {
         chain[row.w + 1] = row.targetVec.endIndex;
@@ -106,15 +108,16 @@ void extract_chain(struct KEntry row, int* chain, int* maxTargetWindow, int* tra
 
 void write_chains_to_json(struct KEntry** KTables, struct Score* pattern, struct Score* target, char* file_path) {
     FILE* output = fopen(file_path, "w");
-    int chain[pattern->num_notes];
     int num_occs = 0;
-    int transposition = 0;
-    int maxTargetWindow = 0;
-    int diatonicOcc = 0;
 
     fprintf(output, "[");
     // Inspect all rows of the final K Table
     for (int i=0; i < target->num_vectors; i++){
+        int chain[pattern->num_notes];
+        int transposition = 0;
+        int maxTargetWindow = 0;
+        int diatonicOcc = 0;
+
         // Full occurrence will be m - 1 vectors, indexed at 0 ==> check for m - 2
         if (KTables[pattern->num_notes - 2][i].w != pattern->num_notes - 2) {
             continue;
@@ -131,18 +134,18 @@ void write_chains_to_json(struct KEntry** KTables, struct Score* pattern, struct
             fprintf(output, ",\n {");
         }
 
-        fprintf(output, "'targetNotes': [");
+        fprintf(output, "\"targetNotes\": [");
         for (int j=0; j < pattern->num_notes; j++){
             fprintf(output, "%d", chain[j]);
             if (j + 1 != pattern->num_notes){
                 fprintf(output, ", ");
             }
         }
-        fprintf(output, "],");
+        fprintf(output, "], ");
 
-        fprintf(output, "'transposition': %d,", transposition);
+        fprintf(output, "\"transposition\": %d, ", transposition);
 
-        fprintf(output, "'diatonicOcc': %s,", diatonicOcc ? "true" : "false");
+        fprintf(output, "\"diatonicOcc\": %s", diatonicOcc ? "true" : "false");
 
 
         fprintf(output, "}");

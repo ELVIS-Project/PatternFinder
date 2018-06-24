@@ -13,13 +13,15 @@ w_path = "/home/dgarfinkle/PatternFinder/patternfinder/geometric_helsinki/_w"
 wcpp_path = "/home/dgarfinkle/PatternFinder/patternfinder/geometric_helsinki/_wcpp"
 
 def w_wrapper(pattern, target, result_path):
-    print("calling " + w_path)
-    subprocess.call(' '.join([w_path, pattern, target, result_path]), shell=True)
+    args = ' '.join([w_path, pattern, target, result_path])
+    print("calling " + args)
+    subprocess.call(args, shell=True)
     return result_path
 
 def wcpp_wrapper(pattern, target, result_path):
-    print("calling " + wcpp_path)
-    subprocess.call(' '.join([wcpp_path, pattern, target, result_path]), shell=True)
+    args = ' '.join([wcpp_path, pattern, target, result_path])
+    print("calling " + args)
+    subprocess.call(args, shell=True)
     return result_path
 
 def dpw_wrapper(pattern, target, result_path):
@@ -36,7 +38,7 @@ def search_palestrina(pattern_path):
     for mass in (m for m in os.listdir(palestrina_path) if m[-3:] == 'xml'):
         mass_vector_path = mass + '.vectors'
         result_path = os.path.join('c_test', mass + '.chains')
-        #print("Processing " + mass)
+        print("Processing " + mass)
         w_wrapper(
             pattern=pattern_path,
             target='"' + os.path.join(palestrina_path, mass_vector_path) + '"',
@@ -46,15 +48,14 @@ def search_palestrina(pattern_path):
             result = json.load(f)
         if result:
             for occ in result:
-                #print("THAT WAS " + mass)
-                #occ['mass'] = mass.split('.')[0]
-                #occ['loaded'] = False
-                #response.append(occ)
-                response.append({
-                    'mass': mass.split('.')[0],
-                    'targetNotes': occ,
-                    'loaded': False
-                })
+                occ['mass'] = mass.split('.')[0]
+                occ['loaded'] = False
+                response.append(occ)
+                #response.append({
+                #    'mass': mass.split('.')[0],
+                #    'targetNotes': occ,
+                #    'loaded': False
+                #})
     return response
 
 def build_chains(matrix, last_t_offset, cur_p, cur_t):

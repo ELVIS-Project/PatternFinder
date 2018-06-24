@@ -39,10 +39,14 @@ def intra_vectors(xml_input_path: str, dest: str = '', window = 15):
 
     with open(dest, 'w', newline='') as f:
         csv_writer = csv.writer(f, delimiter=',')
-        csv_writer.writerow(['x', 'y', 'startIndex', 'endIndex'])
+        csv_writer.writerow(['x', 'y', 'startIndex', 'endIndex', 'startPitch', 'endPitch', 'diatonicDiff', 'chromaticDiff'])
         csv_writer.writerow([len(notes)])
         csv_writer.writerow([len(vectors)])
         for v in vectors:
-            csv_writer.writerow([v.x, v.y, v.noteStartIndex, v.noteEndIndex])
+            csv_writer.writerow([v.x, v.y, v.noteStartIndex, v.noteEndIndex,
+                                 v.noteStart.pitch.ps,
+                                 v.noteEnd.pitch.ps,
+                                 v.noteEnd.pitch.diatonicNoteNum - v.noteStart.pitch.diatonicNoteNum,
+                                 int(v.noteEnd.pitch.ps - v.noteStart.pitch.ps)])
 
     return dest

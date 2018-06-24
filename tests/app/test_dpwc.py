@@ -11,8 +11,10 @@ lemstrom_pattern = 'tests/data/lemstrom2011/query_a.mid'
 lemstrom_target = 'tests/data/lemstrom2011/leiermann.xml'
 
 def test_wcpp(pattern, target):
-    w_pattern_path = intra_vectors(pattern, window = 1)
-    w_target_path = intra_vectors(target)
+    #w_pattern_path = intra_vectors(pattern, window = 1)
+    w_pattern_path = pattern + '.vectors'
+    #w_target_path = intra_vectors(target, window = 8)
+    w_target_path = target + '.vectors'
     result_path = 'tests/app/query_a.res'
 
     result_path = wcpp_wrapper(w_pattern_path, w_target_path, result_path)
@@ -22,8 +24,10 @@ def test_wcpp(pattern, target):
     print(result)
 
 def test_w(pattern, target):
-    w_pattern_path = intra_vectors(pattern, window = 1)
-    w_target_path = intra_vectors(target)
+    #w_pattern_path = intra_vectors(pattern, window = 1)
+    w_pattern_path = pattern + '.vectors'
+    #w_target_path = intra_vectors(target)
+    w_target_path = target + '.vectors'
     result_path = 'tests/app/query_a.res'
 
     result_path = w_wrapper(w_pattern_path, w_target_path, result_path)
@@ -78,4 +82,4 @@ if __name__ == '__main__':
     #gdb_lemstrom()
 
     test_w(lemstrom_pattern, lemstrom_target)
-    test_wcpp(lemstrom_pattern, lemstrom_target)
+    #test_wcpp(lemstrom_pattern, lemstrom_target)
