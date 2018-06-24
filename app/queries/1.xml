@@ -96,7 +96,7 @@
       <note default-x="75.17" default-y="-25.00">
         <chord/>
         <pitch>
-          <step>A</step>
+          <step>E</step>
           <octave>4</octave>
           </pitch>
         <duration>1</duration>
@@ -107,8 +107,8 @@
       <note default-x="75.17" default-y="-15.00">
         <chord/>
         <pitch>
-          <step>C</step>
-          <octave>5</octave>
+          <step>A</step>
+          <octave>4</octave>
           </pitch>
         <duration>1</duration>
         <voice>1</voice>
@@ -118,7 +118,7 @@
       <note default-x="75.17" default-y="-5.00">
         <chord/>
         <pitch>
-          <step>E</step>
+          <step>C</step>
           <octave>5</octave>
           </pitch>
         <duration>1</duration>

@@ -1,4 +1,5 @@
 import subprocess
+from multiprocessing import Pool
 import os
 import json
 import music21
@@ -31,31 +32,32 @@ def dpw_wrapper(pattern, target, result_path):
 def gdb_dpw_wrapper(pattern, target, result_path):
     subprocess.call('gdb --args {} {} {} {}'.format(dpwc_path, pattern, target, result_path), shell=True)
 
-def search_palestrina(pattern_path):
-    from patternfinder.geometric_helsinki.occurrence import get_excerpt_from_note_list
-    response = []
+def search(pattern_path, mass):
+    mass_vector_path = mass + '.vectors'
+    result_path = os.path.join('c_test', mass + '.chains')
+    print("Processing " + mass)
+    w_wrapper(
+        pattern=pattern_path,
+        target='"' + os.path.join(palestrina_path, mass_vector_path) + '"',
+        result_path='"' + result_path + '"')
+    with open(result_path, 'r') as f:
+        result = json.load(f)
+    if result:
+        # Result is a JSON list of objects
+        for occ in result:
+            # occ is a JSON object
+            occ['mass'] = mass.split('.')[0]
+            occ['loaded'] = False
+    return result
 
-    for mass in (m for m in os.listdir(palestrina_path) if m[-3:] == 'xml'):
-        mass_vector_path = mass + '.vectors'
-        result_path = os.path.join('c_test', mass + '.chains')
-        print("Processing " + mass)
-        w_wrapper(
-            pattern=pattern_path,
-            target='"' + os.path.join(palestrina_path, mass_vector_path) + '"',
-            result_path='"' + result_path + '"')
-        #result = get_occurrences_from_matrix(result_path)
-        with open(result_path, 'r') as f:
-            result = json.load(f)
-        if result:
-            for occ in result:
-                occ['mass'] = mass.split('.')[0]
-                occ['loaded'] = False
-                response.append(occ)
-                #response.append({
-                #    'mass': mass.split('.')[0],
-                #    'targetNotes': occ,
-                #    'loaded': False
-                #})
+def search_palestrina(pattern_path):
+
+    response = []
+    masses = [m for m in os.listdir(palestrina_path) if m[-3:] == 'xml']
+
+    with Pool(2) as p:
+        response = [occ for sublst in p.starmap(search, zip([pattern_path] * len(masses), masses)) for occ in sublst]
+
     return response
 
 def build_chains(matrix, last_t_offset, cur_p, cur_t):

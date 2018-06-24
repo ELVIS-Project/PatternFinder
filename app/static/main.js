@@ -33,9 +33,9 @@ Vue.component("verovio-humdrum-viewer", {
         update: function(newstr) {
             this.input = newstr
         },
-        updateProp(value){
-            console.log("updateProp: " + value)
-            this.$emit('input', value)
+        updateProp(eventName, value){
+            console.log("update " + eventName + ": " + value)
+            this.$emit(eventName, value)
         }
     },
     computed: {
@@ -65,9 +65,11 @@ Vue.component("verovio-humdrum-viewer", {
             max: 15,
             values: [1, 2],
             slide: function(event, ui){
-                onPropChange(ui.values)
+                onPropChange('targetWindowFilter', ui.values)
             }
         })
+
+        $("#diatonicOccFilter").checkboxradio()
     },
     template: `
     <form name="inputForm" action="/vue/search" method="get">
@@ -93,6 +95,12 @@ Vue.component("verovio-humdrum-viewer", {
                     # of inbetween target notes
                     {{targetWindowFilter[0]}} - {{targetWindowFilter[1]}}
                     <div id="targetWindowSlider"></div>
+
+                    <!-- DIATONIC OCCS -->
+                    <label>
+                        Filter out diatonic occurrences?
+                        <input type="checkbox" class="form-control" id="diatonicOccFilter" v-on:click="updateProp('diatonicOccFilter', $('#diatonicOccFilter').is(':checked'))"/>
+                    </label>
                 </div>
             </div>
         </div>
@@ -160,6 +168,7 @@ var vm = new Vue({
         loadedOccs: [],
         infiniteScrollBusy: false,
         numNotesFilter: 1,
+        diatonicOccFilter: false,
         targetWindowFilter: [1, 2],
         patternWindowFilter: 1
     },
@@ -170,7 +179,11 @@ var vm = new Vue({
     },
     methods: {
         filterOccForAll: function(occ) {
-            return this.filterForTargetWindow(occ)
+            //console.log("checking filters on occ ")
+            //console.log(occ)
+            //console.log("window filter " + this.filterForTargetWindow(occ))
+            //console.log("diatonic filter " + this.filterForDiatonicOccs(occ))
+            return this.filterForTargetWindow(occ) && this.filterForDiatonicOccs(occ)
         },
         loadMoreOccs: function(){
             this.infiniteScrollBusy = true;
@@ -213,6 +226,12 @@ var vm = new Vue({
             results.push(svg)
             });
         },
+        filterForDiatonicOccs: function(occ){
+            /* Returns false if the occ is to be filtered out based on being a diatonic occurence*/
+            // if the filter's off, take anything
+            // otherwise, only take chromatic (flagged as not diatonic) occs
+            return (!this.diatonicOccFilter || (!occ['diatonicOcc']))
+        },
         filterForTargetWindow: function(occ){
             notes = occ['targetNotes']
             max = 0
@@ -245,7 +264,9 @@ var vm = new Vue({
             <!-- Listen for $emit.('input') event to change values -->
             <verovio-humdrum-viewer
                 v-bind:targetWindowFilter="targetWindowFilter"
-                v-on:input="targetWindowFilter = arguments[0]">
+                v-on:targetWindowFilter="targetWindowFilter = arguments[0]"
+                v-bind:diatonicOccFilter="diatonicOccFilter"
+                v-on:diatonicOccFilter="diatonicOccFilter = arguments[0]">
             </verovio-humdrum-viewer>
 
             <div class="align-middle font-weight-light">#{{filteredOccs.length}} Occurrences</div>

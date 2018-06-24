@@ -135,7 +135,7 @@ def vue_search():
     with open(tmp_query_path, 'w') as f:
         f.write(query)
 
-    intra_vectors(tmp_query_path, pw=1, tw=1)
+    intra_vectors(tmp_query_path, window=1)
     print("Query written to {} and indexed with suffix .notes".format(tmp_query_path))
     response = search_palestrina(tmp_query_path + '.vectors')
     print("Received query: \n{}".format(query))
