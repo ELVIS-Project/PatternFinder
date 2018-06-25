@@ -123,9 +123,6 @@ void write_chains_to_json(struct KEntry** KTables, struct Score* pattern, struct
             continue;
         }
 
-        printf("num target vectors: %d, num pattern notes: %d\n", target->num_vectors, pattern->num_notes);
-        printf("extracting kentry %d, %d\n", pattern->num_notes - 2, i);
-        printf("KEntry %d; j %d; y %d; tStart %d; tEnd %d; pStart %d; pEnd %d;\n", pattern->num_notes - 2, i, KTables[pattern->num_notes - 2][i].targetVec.y, KTables[pattern->num_notes - 2][i].targetVec.startIndex, KTables[pattern->num_notes - 2][i].targetVec.endIndex, KTables[pattern->num_notes - 2][i].patternVec.startIndex, KTables[pattern->num_notes - 2][i].patternVec.endIndex);
         extract_chain(KTables[pattern->num_notes - 2][i], chain, &maxTargetWindow, &transposition, &diatonicOcc);
         num_occs++;
 
@@ -321,12 +318,11 @@ int main(int argc, char **argv) {
         printf("Starting algorithm...\n");
     #endif
 
-    printf("algorithm\n");
-    fflush(stdout);
     algorithm(KTables, pattern, target);
 
-    printf("chain analysis\n");
-    fflush(stdout);
+    #ifdef DEBUG_W
+        printf("chain analysis\n");
+    #endif
     write_chains_to_json(KTables, pattern, target, output_dest);
 
     return 0;
