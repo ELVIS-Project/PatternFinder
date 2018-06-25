@@ -123,6 +123,9 @@ void write_chains_to_json(struct KEntry** KTables, struct Score* pattern, struct
             continue;
         }
 
+        printf("num target vectors: %d, num pattern notes: %d\n", target->num_vectors, pattern->num_notes);
+        printf("extracting kentry %d, %d\n", pattern->num_notes - 2, i);
+        printf("KEntry %d; j %d; y %d; tStart %d; tEnd %d; pStart %d; pEnd %d;\n", pattern->num_notes - 2, i, KTables[pattern->num_notes - 2][i].targetVec.y, KTables[pattern->num_notes - 2][i].targetVec.startIndex, KTables[pattern->num_notes - 2][i].targetVec.endIndex, KTables[pattern->num_notes - 2][i].patternVec.startIndex, KTables[pattern->num_notes - 2][i].patternVec.endIndex);
         extract_chain(KTables[pattern->num_notes - 2][i], chain, &maxTargetWindow, &transposition, &diatonicOcc);
         num_occs++;
 
@@ -180,7 +183,6 @@ int compare_K_entries_endIndex(const void* x, const void* y){
 
 struct KEntry** init_K_tables(struct Score* pattern, struct Score* target){
 
-    //TODO SORT IT
     // Each K table is a list of K entries
     // We have as many K tables as there are notes in the pattern
     struct KEntry** KTables = malloc(pattern->num_vectors * sizeof(struct KEntry*));
@@ -188,7 +190,6 @@ struct KEntry** init_K_tables(struct Score* pattern, struct Score* target){
     // For now, allocate the max possible size of any K table
     for (int i=0; i < pattern->num_notes - 1; i++) {
         KTables[i] = malloc(target->num_vectors * sizeof(struct KEntry));
-        int numMatching = 0;
 
         // For W1 only. Filter out for the single pattern vec which goes from i to i + 1
         struct IntraVector curPatternVec;
@@ -201,7 +202,9 @@ struct KEntry** init_K_tables(struct Score* pattern, struct Score* target){
 
         // Find all db vectors which match the Pi -> Pi+1
         // Could spead up by taking advantage of sorted vectors, or by hashing to y value
+        int numMatching = 0;
         for(int j=0; j < target->num_vectors; j++){
+            int x = 5;
             if (target->vectors[j].diatonicDiff == curPatternVec.diatonicDiff){
                 KTables[i][numMatching].targetVec = target->vectors[j];
                 KTables[i][numMatching].patternVec = curPatternVec;
@@ -209,7 +212,7 @@ struct KEntry** init_K_tables(struct Score* pattern, struct Score* target){
                 numMatching++;
             }
         }
-        qsort(KTables[i], target->num_vectors, sizeof(struct KEntry), compare_K_entries_startIndex);
+        qsort(KTables[i], numMatching, sizeof(struct KEntry), compare_K_entries_startIndex);
     }
     return KTables;
 }
@@ -300,6 +303,10 @@ int main(int argc, char **argv) {
     #endif
 
     // Initialize K tables
+    #ifdef DEBUG_W
+        printf("init ktables\n");
+    #endif
+
     struct KEntry** KTables = init_K_tables(pattern, target);
     #ifdef DEBUG_W
         for (int i=0; i < pattern->num_notes - 1; i++){
@@ -314,8 +321,12 @@ int main(int argc, char **argv) {
         printf("Starting algorithm...\n");
     #endif
 
+    printf("algorithm\n");
+    fflush(stdout);
     algorithm(KTables, pattern, target);
 
+    printf("chain analysis\n");
+    fflush(stdout);
     write_chains_to_json(KTables, pattern, target, output_dest);
 
     return 0;

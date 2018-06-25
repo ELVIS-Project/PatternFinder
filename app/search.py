@@ -88,6 +88,16 @@ def find(query_id):
         with open(RESULTS_PATH + '{}-{}'.format(query_id, mass), 'w') as f:
             json.dump(matrix, f)
 """
+@app.route('/vue/xml/<mass>')
+def vue_xml(mass):
+    path = PALESTRINA_PATH + mass + '.mid.xml'
+    with open(path, 'r') as f:
+        xml = f.read()
+    return Response(xml, mimetype='application/xml')
+
+@app.route('/vue/mass/<mass>')
+def vue_mass(mass):
+    return render_template("vue_mass.html", mass=mass)
 
 @app.route('/vue/excerpt/<mass>/<note_indices>')
 def vue_excerpt(mass, note_indices):

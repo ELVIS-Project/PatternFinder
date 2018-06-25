@@ -48,17 +48,19 @@ def search(pattern_path, mass):
             # occ is a JSON object
             occ['mass'] = mass.split('.')[0]
             occ['loaded'] = False
+    print(result)
     return result
 
 def search_palestrina(pattern_path):
 
-    response = []
     masses = [m for m in os.listdir(palestrina_path) if m[-3:] == 'xml']
 
-    with Pool(2) as p:
-        response = [occ for sublst in p.starmap(search, zip([pattern_path] * len(masses), masses)) for occ in sublst]
+    #with Pool(2) as p:
+    #    response = [occ for sublst in p.starmap(search, zip([pattern_path] * len(masses), masses)) for occ in sublst]
+    response = [occ for sublst in [search(pattern_path, mass) for mass in masses] for occ in sublst]
 
-    return response
+    print(response)
+    return response or []
 
 def build_chains(matrix, last_t_offset, cur_p, cur_t):
 

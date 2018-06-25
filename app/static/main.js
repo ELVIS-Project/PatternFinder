@@ -28,7 +28,7 @@ Vue.component("verovio-humdrum-viewer", {
             }
         }
     },
-    props: ['targetWindowFilter', 'transpositionFilter'],
+    props: ['targetWindowFilter', 'transpositionFilter', 'diatonicOccFilter'],
     methods: {
         update: function(newstr) {
             this.input = newstr
@@ -64,7 +64,7 @@ Vue.component("verovio-humdrum-viewer", {
             range: true,
             min: 1,
             max: 15,
-            values: [1, 2],
+            values: [1, 1],
             slide: function(event, ui){
                 onPropChange('targetWindowFilter', ui.values)
             }
@@ -105,17 +105,15 @@ Vue.component("verovio-humdrum-viewer", {
                     <!-- DIATONIC OCCS -->
                     <label>
                         Filter out diatonic occurrences?
-                        <input type="checkbox" class="form-control" id="diatonicOccFilter" v-on:click="updateProp('diatonicOccFilter', $('#diatonicOccFilter').is(':checked'))"/>
+                        <input type="checkbox" class="form-control" v-bind="diatonicOccFilter" id="diatonicOccFilter" v-on:click="updateProp('diatonicOccFilter', $('#diatonicOccFilter').is(':checked'))"/>
                     </label>
 
                     <!-- TARGET WINDOW -->
-                    {{targetWindowFilter[0]}} - {{targetWindowFilter[1]}}
-                    # of inbetween target notes
+                    <p>{{targetWindowFilter[0]}} - {{targetWindowFilter[1]}} # of inbetween target notes</p>
                     <div id="targetWindowSlider"></div>
 
                     <!-- TRANSPOSITIONS -->
-                    {{transpositionFilter[0]}} - {{transpositionFilter[1]}}
-                    Chromatic transpositions mod 12
+                    <p>{{transpositionFilter[0]}} - {{transpositionFilter[1]}} Chromatic transpositions mod 12</p>
                     <div id="transpositionSlider"></div>
 
                 </div>
@@ -186,8 +184,8 @@ var vm = new Vue({
         infiniteScrollBusy: false,
         transpositionFilter: [-12, 12],
         numNotesFilter: 1,
-        diatonicOccFilter: false,
-        targetWindowFilter: [1, 2],
+        diatonicOccFilter: true,
+        targetWindowFilter: [1, 1],
         patternWindowFilter: 1
     },
     computed: {
