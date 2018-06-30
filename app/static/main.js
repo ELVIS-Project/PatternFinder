@@ -166,7 +166,7 @@ Vue.component("result", {
                 'excerpt',
                 occ['targetNotes'].join(',')]
                 .join('/')
-            var res = $.get().done(function(res){
+            var res = $.get(excerptUrl).done(function(res){
                 sr = new XMLSerializer()
                 xml = sr.serializeToString(res.documentElement)
                 renderXml(xml)
@@ -256,6 +256,7 @@ var vm = new Vue({
                 this.infiniteScrollBusy = false;
             }, 1000)
         },
+        /*
         getExcerpt: function(results, mass, note_list){
             var res = $.get('/vue/excerpt/' + mass +'/' + note_list.join(',')).done(function(res){
             sr = new XMLSerializer()
@@ -267,6 +268,7 @@ var vm = new Vue({
                 console.log("Failed to fetch")
             });
         },
+        */
         filterForDiatonicOccs: function(occ){
             /* Returns false if the occ is to be filtered out based on being a diatonic occurence*/
             // if the filter's off, take anything
