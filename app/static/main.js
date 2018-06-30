@@ -103,19 +103,31 @@ Vue.component("verovio-humdrum-viewer", {
 
                 <div class="col-md-3" id="filters">
                     <!-- DIATONIC OCCS -->
-                    <label>
-                        Filter out diatonic occurrences?
-                        <input type="checkbox" class="form-control" v-bind="diatonicOccFilter" id="diatonicOccFilter" v-on:click="updateProp('diatonicOccFilter', $('#diatonicOccFilter').is(':checked'))"/>
+                    <label class="w-100 mt-3">
+                        <span>Filter out inexact transpositions?</span>
+                        <input type="checkbox" class="form-control" v-bind:checked="diatonicOccFilter" id="diatonicOccFilter" v-on:click="updateProp('diatonicOccFilter', $('#diatonicOccFilter').is(':checked'))"/>
                     </label>
 
                     <!-- TARGET WINDOW -->
-                    <p>{{targetWindowFilter[0]}} - {{targetWindowFilter[1]}} # of inbetween target notes</p>
-                    <div id="targetWindowSlider"></div>
+                    <span> # of intervening notes</span>
+                    <div>
+                        <!--
+                            Minimum distance between two notes is actually 1,
+                            but we refer to it as # of intervening notes
+                            So index it from 0 just for the UI
+                        -->
+                        <span class="mr-2">{{targetWindowFilter[0] - 1}}</span>
+                        <div class="w-75 d-inline-block" id="targetWindowSlider"></div>
+                        <span class="ml-2">{{targetWindowFilter[1] - 1}}</span>
+                    </div>
 
                     <!-- TRANSPOSITIONS -->
-                    <p>{{transpositionFilter[0]}} - {{transpositionFilter[1]}} Chromatic transpositions mod 12</p>
-                    <div id="transpositionSlider"></div>
-
+                    <span>Chromatic transpositions mod 12</span>
+                    <div>
+                        <span class="mr-2">{{transpositionFilter[0]}}</span>
+                        <div class="w-75 d-inline-block" id="transpositionSlider"></div>
+                        <span class="ml-2">{{transpositionFilter[1]}}</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -163,7 +175,8 @@ Vue.component("result", {
         massProcessed: function() {
             var mass = this.occ['mass'].split('_')
             mass.splice(mass.length - 1, 0, 'à')
-            return mass.join(' ')
+            // Ignore the year e.g. (1601)
+            return mass.join(' ').replace(/\s\(\.*\)/, '')
         }
     },
     props: ['occ'], 
@@ -173,6 +186,9 @@ Vue.component("result", {
                 <h5 class="card-title">{{massProcessed}}</h5>
             </div>
             <span v-html="svg"></span>
+            <!--
+            <img v-bind:src="'data:image/svg+xml;charset=utf-8,' + svg">
+            -->
         </div>`
 });
 
@@ -240,6 +256,9 @@ var vm = new Vue({
             xml = sr.serializeToString(res.documentElement)
             svg = vrvToolkitVanilla.renderData(xml, xml_verovio_options)
             results.push(svg)
+            })
+            .fail(function(){
+                console.log("Failed to fetch")
             });
         },
         filterForDiatonicOccs: function(occ){
@@ -282,7 +301,7 @@ var vm = new Vue({
                             <a target="_blank" class="nav-link" href="https://github.com/ELVIS-Project/PatternFinder">Github</a> 
                         </li>
                     </ul>
-                    <span class="navbar-text navbar-right">TODO: SIMSSA LOGO</span>
+                    <span target="_blank" class="nav-text navbar-right">By David Garfinkle</span>
                 </div>
             </nav>
   

@@ -12,7 +12,6 @@ from flask import Flask, request, redirect, url_for, render_template, send_from_
 from flask_bootstrap import Bootstrap
 from werkzeug.utils import secure_filename
 
-from app.dpw2 import algorithm
 from patternfinder.geometric_helsinki import Finder
 
 us = music21.environment.UserSettings()

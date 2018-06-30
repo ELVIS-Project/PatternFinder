@@ -21,7 +21,7 @@ def w_wrapper(pattern, target, result_path):
 
 def wcpp_wrapper(pattern, target, result_path):
     args = ' '.join([wcpp_path, pattern, target, result_path])
-    print("calling " + args)
+    #print("calling " + args)
     subprocess.call(args, shell=True)
     return result_path
 
@@ -48,7 +48,6 @@ def search(pattern_path, mass):
             # occ is a JSON object
             occ['mass'] = mass.split('.')[0]
             occ['loaded'] = False
-    print(result)
     return result
 
 def search_palestrina(pattern_path):
@@ -59,7 +58,6 @@ def search_palestrina(pattern_path):
     #    response = [occ for sublst in p.starmap(search, zip([pattern_path] * len(masses), masses)) for occ in sublst]
     response = [occ for sublst in [search(pattern_path, mass) for mass in masses] for occ in sublst]
 
-    print(response)
     return response or []
 
 def build_chains(matrix, last_t_offset, cur_p, cur_t):

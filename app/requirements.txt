@@ -1,2 +1,5 @@
 flask
 flask-bootstrap
+music21
+pyyaml
+more_itertools
