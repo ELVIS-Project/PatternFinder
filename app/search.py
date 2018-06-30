@@ -94,9 +94,9 @@ def search():
 
     # indexed query can be either a path to the written file or a StringIO stream
     response = search_palestrina(indexed_query)
-    print("Received query: \n{}".format(query))
-    print("serving krn " + query or DEFAULT_KRN_QUERY)
-    return render_template('vue.html', response = response, default_krn = query or DEFAULT_KRN_QUERY)
+    print("Received query: \n{}".format(query_str))
+    print("serving krn " + query_str or DEFAULT_KRN_QUERY)
+    return render_template('vue.html', response = response, default_krn = query_str or DEFAULT_KRN_QUERY)
 
 @app.route('/')
 def index():
