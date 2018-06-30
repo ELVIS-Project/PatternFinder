@@ -160,7 +160,13 @@ Vue.component("result", {
         },
         getExcerpt: function(occ){
             var renderXml = this.renderXml
-            var res = $.get('/vue/excerpt/' + occ['mass'] +'/' + occ['targetNotes'].join(',')).done(function(res){
+            excerptUrl = '/' + [
+                'mass',
+                occ['mass'],
+                'excerpt',
+                occ['targetNotes'].join(',')]
+                .join('/')
+            var res = $.get().done(function(res){
                 sr = new XMLSerializer()
                 xml = sr.serializeToString(res.documentElement)
                 renderXml(xml)
