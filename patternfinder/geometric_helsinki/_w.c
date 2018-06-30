@@ -41,8 +41,7 @@ struct KEntry {
     struct KEntry* y; // backlink for building chains
 };
 
-struct Score* load_indexed_score(char *filePath){
-    FILE* data = fopen(filePath, "r");
+struct Score* load_indexed_score(FILE* data){
     char line[1024];
     struct Score* score = malloc(sizeof(struct Score));
 
@@ -73,11 +72,10 @@ struct Score* load_indexed_score(char *filePath){
         score->vectors[i].diatonicDiff = atoi(strtok(NULL, ",")); 
         score->vectors[i].chromaticDiff = atoi(strtok(NULL, ",")); 
     }
-    fclose(data);
     return score;
 }
 
-void print_score(struct Score* score){
+void printScore(struct Score* score){
     printf("%d notes\n", score->num_notes);
     printf("%d vectors\n", score->num_vectors);
     for (int i=0; i < score->num_vectors; i++){
@@ -106,8 +104,7 @@ void extract_chain(struct KEntry row, int* chain, int* maxTargetWindow, int* tra
     }
 }
 
-void write_chains_to_json(struct KEntry** KTables, struct Score* pattern, struct Score* target, char* file_path) {
-    FILE* output = fopen(file_path, "w");
+void write_chains_to_json(struct KEntry** KTables, struct Score* pattern, struct Score* target, FILE* output) {
     int num_occs = 0;
 
     fprintf(output, "[");
@@ -152,8 +149,6 @@ void write_chains_to_json(struct KEntry** KTables, struct Score* pattern, struct
     }
     fprintf(output, "]");
 
-    // End JSON hash
-    fclose(output);
 }
             
 
@@ -281,22 +276,44 @@ void algorithm(struct KEntry** KTables, struct Score* pattern, struct Score* tar
 }
 
 int main(int argc, char **argv) {
-    char *output_dest = argv[3];
 
+    int streamInput = 0;
+    FILE* patternStream;
+    FILE* outputStream;
+    FILE* targetStream; 
+
+    // FLAGS
     #ifdef DEBUG_W
-        printf("W reading pattern input %s\n", argv[1]);
+        printf("Checking flags... first is %s\n", argv[1]);
     #endif
-    struct Score *pattern = load_indexed_score(argv[1]); 
+    if (!strcmp(argv[1], "--stream")) {
+        #ifdef DEBUG_W
+            printf("SELECTED STREAM: Reading pattern from stdin; writing output to stdout\n");
+        #endif
+        streamInput = 1;
+        patternStream = stdin;
+        outputStream = stdout;
+        targetStream = fopen(argv[2], "r");
+    }
+    else {
+        #ifdef DEBUG_W
+            printf("No stream flag \n");
+        #endif
+        patternStream = fopen(argv[1], "r");
+        targetStream = fopen(argv[2], "r");
+        outputStream = fopen(argv[3], "w");
+    }
+
+    // PARSE INDEXED SCORES
+    struct Score *pattern = load_indexed_score(patternStream); 
     #ifdef DEBUG_W
-        print_score(pattern);
+        printf("Pattern Score \n");
+        printScore(pattern);
     #endif
 
+    struct Score *target = load_indexed_score(targetStream); 
     #ifdef DEBUG_W
-        printf("W reading mass input %s\n", argv[2]);
-    #endif
-    struct Score *target = load_indexed_score(argv[2]); 
-    #ifdef DEBUG_W
-        print_score(target);
+        printScore(target);
     #endif
 
     // Initialize K tables
@@ -323,7 +340,13 @@ int main(int argc, char **argv) {
     #ifdef DEBUG_W
         printf("chain analysis\n");
     #endif
-    write_chains_to_json(KTables, pattern, target, output_dest);
+    write_chains_to_json(KTables, pattern, target, outputStream);
+
+    // Close file pointer, but not stdin
+    if (!streamInput) {
+        fclose(outputStream);
+    }
+    fclose(targetStream);
 
     return 0;
 }

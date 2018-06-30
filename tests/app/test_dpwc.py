@@ -36,6 +36,17 @@ def test_w(pattern, target):
 
     print(result)
 
+def test_w_stream(pattern, target):
+    #w_pattern_path = intra_vectors(pattern, window = 1)
+    w_pattern_path = pattern + '.vectors'
+    #w_target_path = intra_vectors(target)
+    w_target_path = target + '.vectors'
+
+    with open(w_pattern_path, 'r') as f:
+        result = w_wrapper(f.read(), w_target_path)
+
+    print(result)
+
 def gdb_lemstrom():
     dpw_pattern_path = csv_notes(lemstrom_pattern)
     dpw_target_path = csv_notes(lemstrom_target)
@@ -81,5 +92,5 @@ if __name__ == '__main__':
 
     #gdb_lemstrom()
 
-    test_w(lemstrom_pattern, lemstrom_target)
+    test_w_stream(lemstrom_pattern, lemstrom_target)
     #test_wcpp(lemstrom_pattern, lemstrom_target)

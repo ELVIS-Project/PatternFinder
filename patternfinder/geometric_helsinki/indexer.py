@@ -1,4 +1,5 @@
 import csv
+import io
 import music21
 from patternfinder.geometric_helsinki.geometric_notes import NotePointSet
 from patternfinder.geometric_helsinki.finder import Finder
@@ -34,19 +35,23 @@ def intra_vectors(xml_input_path: str, dest: str = '', window = 15):
     notes = list(my_finder.sourcePointSet)
     vectors = my_finder.sourcePointSet.intra_vectors
 
-    if not dest:
-        dest = xml_input_path + '.vectors'
+    if dest == 'str':
+        file_obj = io.StringIO()
+    else:
+        file_obj = open(dest or (xml_input_path + '.vectors'))
 
-    with open(dest, 'w', newline='') as f:
-        csv_writer = csv.writer(f, delimiter=',')
-        csv_writer.writerow(['x', 'y', 'startIndex', 'endIndex', 'startPitch', 'endPitch', 'diatonicDiff', 'chromaticDiff'])
-        csv_writer.writerow([len(notes)])
-        csv_writer.writerow([len(vectors)])
-        for v in vectors:
-            csv_writer.writerow([v.x, v.y, v.noteStartIndex, v.noteEndIndex,
-                                 v.noteStart.pitch.ps,
-                                 v.noteEnd.pitch.ps,
-                                 v.noteEnd.pitch.diatonicNoteNum - v.noteStart.pitch.diatonicNoteNum,
-                                 int(v.noteEnd.pitch.ps - v.noteStart.pitch.ps)])
+    csv_writer = csv.writer(file_obj, delimiter=',')
+    csv_writer.writerow(['x', 'y', 'startIndex', 'endIndex', 'startPitch', 'endPitch', 'diatonicDiff', 'chromaticDiff'])
+    csv_writer.writerow([len(notes)])
+    csv_writer.writerow([len(vectors)])
+    for v in vectors:
+        csv_writer.writerow([v.x, v.y, v.noteStartIndex, v.noteEndIndex,
+                             v.noteStart.pitch.ps,
+                             v.noteEnd.pitch.ps,
+                             v.noteEnd.pitch.diatonicNoteNum - v.noteStart.pitch.diatonicNoteNum,
+                             int(v.noteEnd.pitch.ps - v.noteStart.pitch.ps)])
 
-    return dest
+    output = file_obj.getvalue() if dest == "str" else dest
+    file_obj.close()
+    return output
+

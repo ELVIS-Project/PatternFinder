@@ -1,4 +1,4 @@
-import subprocess
+from subprocess import Popen, PIPE, call
 from multiprocessing import Pool
 import os
 import json
@@ -13,11 +13,10 @@ dpwc_path = "/home/dgarfinkle/PatternFinder/patternfinder/geometric_helsinki/_dp
 w_path = "/home/dgarfinkle/PatternFinder/patternfinder/geometric_helsinki/_w"
 wcpp_path = "/home/dgarfinkle/PatternFinder/patternfinder/geometric_helsinki/_wcpp"
 
-def w_wrapper(pattern, target, result_path):
-    args = ' '.join([w_path, pattern, target, result_path])
-    print("calling " + args)
-    subprocess.call(args, shell=True)
-    return result_path
+def w_wrapper(pattern, target):
+    ps = Popen([w_path, '--stream', target], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+    output, _ = ps.communicate(input=pattern)
+    return output
 
 def wcpp_wrapper(pattern, target, result_path):
     args = ' '.join([wcpp_path, pattern, target, result_path])
@@ -32,31 +31,28 @@ def dpw_wrapper(pattern, target, result_path):
 def gdb_dpw_wrapper(pattern, target, result_path):
     subprocess.call('gdb --args {} {} {} {}'.format(dpwc_path, pattern, target, result_path), shell=True)
 
-def search(pattern_path, mass):
-    mass_vector_path = mass + '.vectors'
-    result_path = os.path.join('c_test', mass + '.chains')
-    print("Processing " + mass)
-    w_wrapper(
-        pattern=pattern_path,
-        target='"' + os.path.join(palestrina_path, mass_vector_path) + '"',
-        result_path='"' + result_path + '"')
-    with open(result_path, 'r') as f:
-        result = json.load(f)
+def search(pattern_str, mass_path):
+    mass_vector_path = mass_path + '.vectors'
+    result_path = os.path.join('c_test', mass_path + '.chains')
+    print("Processing " + mass_path)
+    result = w_wrapper(
+        pattern=pattern_str,
+        target='"' + os.path.join(palestrina_path, mass_vector_path) + '"')
     if result:
         # Result is a JSON list of objects
         for occ in result:
             # occ is a JSON object
-            occ['mass'] = mass.split('.')[0]
+            occ['mass'] = mass_path.split('.')[0]
             occ['loaded'] = False
     return result
 
-def search_palestrina(pattern_path):
+def search_palestrina(pattern_str):
 
     masses = [m for m in os.listdir(palestrina_path) if m[-3:] == 'xml']
 
     #with Pool(2) as p:
     #    response = [occ for sublst in p.starmap(search, zip([pattern_path] * len(masses), masses)) for occ in sublst]
-    response = [occ for sublst in [search(pattern_path, mass) for mass in masses] for occ in sublst]
+    response = [occ for sublst in [search(pattern_str, mass) for mass in masses] for occ in sublst]
 
     return response or []
 

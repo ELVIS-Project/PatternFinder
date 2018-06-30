@@ -86,19 +86,18 @@ def search():
     from app.dpwc import search_palestrina
     from patternfinder.geometric_helsinki.indexer import csv_notes, intra_vectors
 
-    query = request.args['krnText']
+    query_str = request.args['krnText']
     input_type = request.args['inputType']
-    tmp_query_path = '.'.join(['app/queries/query', input_type])
-    with open(tmp_query_path, 'w') as f:
-        f.write(query)
 
-    intra_vectors(tmp_query_path, window=1)
-    print("Query written to {} and indexed with suffix .notes".format(tmp_query_path))
-    response = search_palestrina(tmp_query_path + '.vectors')
+    indexed_query = intra_vectors(query_str, dest="str", window=1,)
+    print("Query indexed".format(query_str))
+
+    # indexed query can be either a path to the written file or a StringIO stream
+    response = search_palestrina(indexed_query)
     print("Received query: \n{}".format(query))
     print("serving krn " + query or DEFAULT_KRN_QUERY)
     return render_template('vue.html', response = response, default_krn = query or DEFAULT_KRN_QUERY)
 
 @app.route('/')
-def home():
+def index():
     return render_template('vue.html', response = [], default_krn = DEFAULT_KRN_QUERY)
