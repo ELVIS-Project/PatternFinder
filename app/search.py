@@ -92,7 +92,6 @@ def search():
     indexed_query = intra_vectors(query_str, dest="str", window=1,)
     print("Query indexed".format(query_str))
 
-    # indexed query can be either a path to the written file or a StringIO stream
     response = search_palestrina(indexed_query)
     print("Received query: \n{}".format(query_str))
     print("serving krn " + query_str or DEFAULT_KRN_QUERY)

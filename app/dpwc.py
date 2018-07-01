@@ -1,7 +1,11 @@
-from subprocess import Popen, PIPE, call
-from multiprocessing import Pool
+import sys
 import os
+import io
 import json
+
+from subprocess import Popen, PIPE, call, check_output
+from multiprocessing import Pool
+
 import music21
 
 us = music21.environment.UserSettings()
@@ -14,14 +18,22 @@ w_path = "/home/dgarfinkle/PatternFinder/patternfinder/geometric_helsinki/_w"
 wcpp_path = "/home/dgarfinkle/PatternFinder/patternfinder/geometric_helsinki/_wcpp"
 
 def w_wrapper(pattern, target):
-    ps = Popen([w_path, '--stream', target], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=True)
-    output, _ = ps.communicate(input=pattern)
+    #ps = Popen([w_path, '--stream', target], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+    #output, _ = ps.communicate(input=pattern)
+
+    #todo capture stdout
+    args = "echo '{}' | {} --stream {}".format(pattern, w_path, target)
+    output = str(check_output(args, shell=True), encoding='utf-8')
+
+    print("output " + output)
+
+
     return output
 
 def wcpp_wrapper(pattern, target, result_path):
     args = ' '.join([wcpp_path, pattern, target, result_path])
-    #print("calling " + args)
-    subprocess.call(args, shell=True)
+    print("calling " + args)
+    call(args, shell=True)
     return result_path
 
 def dpw_wrapper(pattern, target, result_path):
@@ -38,6 +50,7 @@ def search(pattern_str, mass_path):
     result = w_wrapper(
         pattern=pattern_str,
         target='"' + os.path.join(palestrina_path, mass_vector_path) + '"')
+    result = json.loads(result)
     if result:
         # Result is a JSON list of objects
         for occ in result:

@@ -83,7 +83,7 @@ Vue.component("verovio-humdrum-viewer", {
         $("#diatonicOccFilter").checkboxradio();
     },
     template: `
-    <form name="inputForm" action="/vue/search" method="get">
+    <form name="inputForm" action="/search" method="get">
         <input name="krnText" type="hidden" v-model="input"/>
         <input name="inputType" type="hidden" value="krn"/>
         <div class="container-fluid border border-light border-secondary pb-4">
