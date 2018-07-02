@@ -35,9 +35,7 @@ def load_default_settings():
                 'scale' : 'pure',
                 'threshold' : 'all',
                 'mismatches' : 0,
-                'interval_func' : 'semitones',
-                'pattern' : None,
-                'source' : None}
+                'interval_func' : 'semitones'}
     return default_settings
 
 class Finder(object):

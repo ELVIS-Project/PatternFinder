@@ -6,7 +6,7 @@ import json
 from subprocess import Popen, PIPE, call, check_output
 from multiprocessing import Pool
 
-w_path = "patternfinder/geometric_helsinki/_w"
+w_path = "/app/patternfinder/patternfinder/geometric_helsinki/_w"
 
 def w_wrapper(pattern, target):
     #ps = Popen([w_path, '--stream', target], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=True)

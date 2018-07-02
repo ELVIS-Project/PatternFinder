@@ -1,26 +1,37 @@
 from tiangolo/uwsgi-nginx-flask:python3.6
 
-WORKDIR /PatternFinder
+# Remove tiangolo's sample app
+RUN rm -rf /app/*
 
-ADD ./setup.py /PatternFinder
-ADD ./patternfinder /PatternFinder/patternfinder
-ADD ./requirements.txt /PatternFinder/requirements.txt
-ADD ./music_files /PatternFinder/music_files
-ADD ./app /PatternFinder/app
-ADD ./patternfinder.ini /PatternFinder/patternfinder.ini
-ADD ./patternfinder.conf /etc/nginx/conf.d/patternfinder.conf
-ADD ./wsgi.py /PatternFinder/wsgi.py
+WORKDIR /app
 
-RUN pip install -r requirements.txt
-RUN pip install -r app/requirements.txt
-RUN pip install ./
+RUN mkdir /app/patternfinder
+RUN mkdir /app/app
+
+# Directories
+ADD ./music_files /app/patternfinder/music_files
+ADD ./patternfinder /app/patternfinder/patternfinder
+ADD ./webapp/static /app/static
+ADD ./webapp/templates /app/app/templates
+
+# Files
+ADD ./setup.py /app/patternfinder/
+ADD ./requirements.txt /app/patternfinder/
+ADD ./webapp/requirements.txt /app/app/
+ADD ./webapp/main.py /app/app/
+ADD ./webapp/dpwc.py /app/app/
+ADD ./webapp/uwsgi.ini /app/
+
+RUN pip install -r /app/patternfinder/requirements.txt
+RUN pip install -r /app/app/requirements.txt
+RUN pip install /app/patternfinder/
 
 EXPOSE 80
 
-ENV FLASK_APP=app/search.py
+#ENV FLASK_APP=app/search.py
 
 #CMD ["flask", "run", "--host=0.0.0.0", "--debugger", "--reload"]
 
 #CMD ["python", "app/search.py"]
 
-CMD ["uwsgi", "--ini", "patternfinder.ini", "--mount", "/patternfinder=app.search:application", "--gid", "www-data"]
+#CMD service nginx restart & uwsgi --ini patternfinder.ini --mount /patternfinder=app.search:application --gid www-data

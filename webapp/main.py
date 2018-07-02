@@ -8,7 +8,7 @@ import multiprocessing
 import music21
 import yaml
 
-from flask import Flask, request, redirect, url_for, render_template, send_from_directory, Response
+from flask import Flask, request, redirect, url_for, render_template, send_from_directory, Response, send_file
 from flask_bootstrap import Bootstrap
 from werkzeug.utils import secure_filename
 
@@ -16,16 +16,16 @@ from app.dpwc import search_palestrina
 from patternfinder.geometric_helsinki.indexer import csv_notes, intra_vectors
 
 us = music21.environment.UserSettings()
-us['directoryScratch'] = os.path.abspath('music_files/music21_temp_output')
+us['directoryScratch'] = '/app/patternfinder/music_files/music21_temp_output'
 
-application = Flask(__name__)
-Bootstrap(application)
+app = Flask(__name__)
+Bootstrap(app)
 
-application.config.update(TEMPLATES_AUTO_RELOAD=True)
+app.config.update(TEMPLATES_AUTO_RELOAD=True)
 
 QUERY_PATH = 'app/queries/'
 RESULTS_PATH = 'app/results/'
-PALESTRINA_PATH = 'music_files/corpus/Palestrina/'
+PALESTRINA_PATH = '/app/patternfinder/music_files/corpus/Palestrina/'
 
 DEFAULT_KRN_QUERY = """**kern
 *clefG2
@@ -36,18 +36,18 @@ DEFAULT_KRN_QUERY = """**kern
 4B- f b- dd
 """
 
-@application.route('/xml/<mass>')
+@app.route('/xml/<mass>')
 def xml(mass):
     path = PALESTRINA_PATH + mass + '.mid.xml'
     with open(path, 'r') as f:
         xml = f.read()
     return Response(xml, mimetype='application/xml')
 
-@application.route('/mass/<mass>')
+@app.route('/mass/<mass>')
 def mass(mass):
     return render_template("vue_mass.html", mass=mass)
 
-@application.route('/mass/<mass>/excerpt/<note_indices>')
+@app.route('/mass/<mass>/excerpt/<note_indices>')
 def excerpt(mass, note_indices):
     from patternfinder.geometric_helsinki.geometric_notes import NotePointSet
     score = music21.converter.parse(PALESTRINA_PATH + mass + '.mid.xml')
@@ -82,23 +82,24 @@ def excerpt(mass, note_indices):
     sys.stdout = sys.__stdout__
     return Response(output, mimetype='application/xml')
 
-@application.route('/search', methods=['GET'])
+@app.route('/search', methods=['GET'])
 def search():
     query_str = request.args['krnText']
     input_type = request.args['inputType']
 
-    indexed_query = intra_vectors(query_str, dest="str", window=1,)
-    print("Query indexed".format(query_str))
+    print("Received query: \n{}".format(query_str))
+    indexed_query = intra_vectors(query_str, dest="str", window=1)
+    print("Query indexed.")
 
     response = search_palestrina(indexed_query, PALESTRINA_PATH)
-    print("Received query: \n{}".format(query_str))
     print("serving krn " + query_str or DEFAULT_KRN_QUERY)
-    return render_template('vue.html', response = response, default_krn = query_str or DEFAULT_KRN_QUERY)
+    return render_template('index.html', response = response, default_krn = query_str or DEFAULT_KRN_QUERY)
 
-@application.route('/')
+@app.route('/')
 def index():
-    return render_template('vue.html', response = [], default_krn = DEFAULT_KRN_QUERY)
+    #return render_template('vue.html', response = [], default_krn = DEFAULT_KRN_QUERY)
+    return render_template('index.html', response = [], default_krn = DEFAULT_KRN_QUERY)
 
 
 if __name__ == "__main__":
-    application.run(host='0.0.0.0', port=80)
+    app.run(host='0.0.0.0', port=80)

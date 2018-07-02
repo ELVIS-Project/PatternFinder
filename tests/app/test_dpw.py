@@ -3,7 +3,7 @@ import sys
 sys.path.insert(0, '/home/dgarfinkle/PatternFinder')
 
 import music21
-from app import dpwc
+from webapp import dpwc
 
 def test_dpw():
     source = music21.converter.parse('tinynotation: c4 e4 g4')
