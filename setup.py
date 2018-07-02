@@ -5,6 +5,6 @@ setup(name='PatternFinder',
         description='Polyphonic Music Pattern Finder',
         author='David Garfinkle',
         author_email='david.garfinkle@mail.mcgill.ca',
-        url='https://github.com/ELVIS-Project/VIS-Ohrwurm/',
-        packages=['geometric_helsinki']
+        url='https://github.com/ELVIS-Project/PatternFinder/',
+        packages=['patternfinder', 'patternfinder.geometric_helsinki', 'app']
         )

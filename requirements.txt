@@ -12,3 +12,5 @@ pandas
 pylint
 pytest
 pysolr
+numpy
+pandas

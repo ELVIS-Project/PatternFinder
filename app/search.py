@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(0, '/home/dgarfinkle/PatternFinder')
+sys.path.insert(0, '../')
 
 import os
 import json
@@ -12,10 +12,11 @@ from flask import Flask, request, redirect, url_for, render_template, send_from_
 from flask_bootstrap import Bootstrap
 from werkzeug.utils import secure_filename
 
-from patternfinder.geometric_helsinki import Finder
+from app.dpwc import search_palestrina
+from patternfinder.geometric_helsinki.indexer import csv_notes, intra_vectors
 
 us = music21.environment.UserSettings()
-us['directoryScratch'] = '/home/dgarfinkle/PatternFinder/music_files/music21_temp_output'
+us['directoryScratch'] = os.path.abspath('music_files/music21_temp_output')
 
 app = Flask(__name__)
 Bootstrap(app)
@@ -83,16 +84,13 @@ def excerpt(mass, note_indices):
 
 @app.route('/search', methods=['GET'])
 def search():
-    from app.dpwc import search_palestrina
-    from patternfinder.geometric_helsinki.indexer import csv_notes, intra_vectors
-
     query_str = request.args['krnText']
     input_type = request.args['inputType']
 
     indexed_query = intra_vectors(query_str, dest="str", window=1,)
     print("Query indexed".format(query_str))
 
-    response = search_palestrina(indexed_query)
+    response = search_palestrina(indexed_query, PALESTRINA_PATH)
     print("Received query: \n{}".format(query_str))
     print("serving krn " + query_str or DEFAULT_KRN_QUERY)
     return render_template('vue.html', response = response, default_krn = query_str or DEFAULT_KRN_QUERY)
@@ -100,3 +98,7 @@ def search():
 @app.route('/')
 def index():
     return render_template('vue.html', response = [], default_krn = DEFAULT_KRN_QUERY)
+
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=80)
