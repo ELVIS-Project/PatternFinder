@@ -18,10 +18,10 @@ from patternfinder.geometric_helsinki.indexer import csv_notes, intra_vectors
 us = music21.environment.UserSettings()
 us['directoryScratch'] = os.path.abspath('music_files/music21_temp_output')
 
-app = Flask(__name__)
-Bootstrap(app)
+application = Flask(__name__)
+Bootstrap(application)
 
-app.config.update(TEMPLATES_AUTO_RELOAD=True)
+application.config.update(TEMPLATES_AUTO_RELOAD=True)
 
 QUERY_PATH = 'app/queries/'
 RESULTS_PATH = 'app/results/'
@@ -36,18 +36,18 @@ DEFAULT_KRN_QUERY = """**kern
 4B- f b- dd
 """
 
-@app.route('/xml/<mass>')
+@application.route('/xml/<mass>')
 def xml(mass):
     path = PALESTRINA_PATH + mass + '.mid.xml'
     with open(path, 'r') as f:
         xml = f.read()
     return Response(xml, mimetype='application/xml')
 
-@app.route('/mass/<mass>')
+@application.route('/mass/<mass>')
 def mass(mass):
     return render_template("vue_mass.html", mass=mass)
 
-@app.route('/mass/<mass>/excerpt/<note_indices>')
+@application.route('/mass/<mass>/excerpt/<note_indices>')
 def excerpt(mass, note_indices):
     from patternfinder.geometric_helsinki.geometric_notes import NotePointSet
     score = music21.converter.parse(PALESTRINA_PATH + mass + '.mid.xml')
@@ -82,7 +82,7 @@ def excerpt(mass, note_indices):
     sys.stdout = sys.__stdout__
     return Response(output, mimetype='application/xml')
 
-@app.route('/search', methods=['GET'])
+@application.route('/search', methods=['GET'])
 def search():
     query_str = request.args['krnText']
     input_type = request.args['inputType']
@@ -95,10 +95,10 @@ def search():
     print("serving krn " + query_str or DEFAULT_KRN_QUERY)
     return render_template('vue.html', response = response, default_krn = query_str or DEFAULT_KRN_QUERY)
 
-@app.route('/')
+@application.route('/')
 def index():
     return render_template('vue.html', response = [], default_krn = DEFAULT_KRN_QUERY)
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=80)
+    application.run(host='0.0.0.0', port=80)
