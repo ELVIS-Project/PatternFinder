@@ -1,6 +1,4 @@
 import unittest
-import testtools
-import path
 
 import tests.geometric_helsinki
 

@@ -3,10 +3,10 @@ import doctest
 
 from patternfinder.geometric_helsinki import finder
 
-from test_lemstrom_example import lemstrom_example_suite
-from test_finder import finder_suite
-from test_algorithms import geometric_helsinki_overlapping_voices_suite
-from test_exact_matches import exact_matches_suite
+from tests.geometric_helsinki.test_lemstrom_example import lemstrom_example_suite
+from tests.geometric_helsinki.test_finder import finder_suite
+from tests.geometric_helsinki.test_algorithms import geometric_helsinki_overlapping_voices_suite
+from tests.geometric_helsinki.test_exact_matches import exact_matches_suite
 
 finder_doctest_suite = doctest.DocTestSuite(finder)
 

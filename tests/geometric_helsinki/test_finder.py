@@ -8,7 +8,7 @@ from pprint import pformat # for test fail error messages
 from tests.custom_assertions import CustomAssertions
 from tests.geometric_helsinki.test_lemstrom_example import LEM_PATH_PATTERN, LEM_PATH_SOURCE
 from patternfinder.geometric_helsinki.finder import Finder
-from patternfinder.geometric_helsinki.GeometricNotes import NotePointSet, InterNoteVector
+from patternfinder.geometric_helsinki.geometric_notes import NotePointSet, InterNoteVector
 
 TESTS = [
         ('scale', '4/4 c4 e4 g4', '4/4 c4 e4 g4 c2 e2 g2',
