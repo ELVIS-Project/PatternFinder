@@ -15,6 +15,7 @@ ADD ./webapp/static /app/static
 ADD ./webapp/templates /app/app/templates
 
 # Files
+ADD ./Makefile /app/patternfinder/
 ADD ./setup.py /app/patternfinder/
 ADD ./requirements.txt /app/patternfinder/
 ADD ./webapp/requirements.txt /app/app/

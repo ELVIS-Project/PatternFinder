@@ -1,5 +1,5 @@
 w: 
-	gcc patternfinder/geometric_helsinki/_w.c patternfinder/geometric_helsinki/c_pqueue/pqueue.c -g -I patternfinder/geometric_helsinki/ -o patternfinder/geometric_helsinki/_w -pg
+	gcc /app/patternfinder/patternfinder/geometric_helsinki/_w.c /app/patternfinder/patternfinder/geometric_helsinki/c_pqueue/pqueue.c -g -I /app/patternfinder/patternfinder/geometric_helsinki/ -o /app/patternfinder/patternfinder/geometric_helsinki/_w
 
 wpp:
 	gcc patternfinder/geometric_helsinki/_w.cpp patternfinder/geometric_helsinki/nlohmann/json.hpp -lstdc++ -std=c++11 -g -I patternfinder/geometric_helsinki/ -o patternfinder/geometric_helsinki/_wcpp -pg
