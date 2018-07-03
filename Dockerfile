@@ -27,6 +27,8 @@ RUN pip install -r /app/patternfinder/requirements.txt
 RUN pip install -r /app/app/requirements.txt
 RUN pip install /app/patternfinder/
 
+RUN make -f /app/patternfinder/Makefile w
+
 EXPOSE 80
 
 #ENV FLASK_APP=app/search.py
