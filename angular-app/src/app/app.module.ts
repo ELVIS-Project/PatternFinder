@@ -4,11 +4,13 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AppComponent } from './app.component';
 import { ExcerptComponent } from './excerpt/excerpt.component';
+import { MusicEditorComponent } from './music-editor/music-editor.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    ExcerptComponent
+    ExcerptComponent,
+    MusicEditorComponent
   ],
   imports: [
     BrowserModule,
