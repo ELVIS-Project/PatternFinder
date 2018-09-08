@@ -16,9 +16,13 @@ paths:
         - name: "inputType"
           in: "query"
           description: "Indicates the music encoding language of the query string"
-        - name: "query"
+          schema:
+            type: "string"
+        - name: "musicQuery"
           in: "query"
           description: "A music query string"
+          schema:
+            type: "string"
       responses:
         200:
           description: "The server successfully completed a search for the music query and is returning the result(s)" 
