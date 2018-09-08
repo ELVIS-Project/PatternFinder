@@ -1,4 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { VerovioHumdrumService } from '../verovio.service.ts';
+import { AceEditorComponent } from 'ng2-ace-editor';
+
+import defaultHumdrumInput from './default-input.ts';
 
 @Component({
   selector: 'app-music-editor',
@@ -7,10 +11,27 @@ import { Component, OnInit } from '@angular/core';
 })
 export class MusicEditorComponent implements OnInit {
 
-  constructor() { }
+  @ViewChild('editor') editor;
+  @ViewChild('renderedHumdrum') renderedHumdrumDiv;
 
-  ngOnInit() {
+  humdrumInput: string = defaultHumdrumInput;
+  renderedHumdrum: string;
+  aceOptions: any;
+
+  constructor(private verovio: VerovioHumdrumService) { }
+
+  ngAfterViewInit() {
+    // Register on-change event listener for the editor
+    this.editor.getEditor().on('change', (delta) => {
+      this.renderHumdrum();
+    });
   }
+
+  renderHumdrum() { 
+    this.renderedHumdrum = this.verovio.render(this.humdrumInput);
+    
+  }
+
 
 }
 

@@ -1,3 +1,12 @@
-<p>
-  music-editor works!
-</p>
+<div #musicEditor>
+  <ace-editor
+    #editor
+    [(value)] = "humdrumInput"
+    [mode] = "'text'"
+    [options] = "aceOptions"
+    [autoUpdateContent] = "true"></ace-editor>
+
+  <div #renderedHumdrum [innerHTML]="renderedHumdrum | rawHtml"></div>
+  <img [src]="renderedHumdrum | rawHtml"/>
+
+</div>
