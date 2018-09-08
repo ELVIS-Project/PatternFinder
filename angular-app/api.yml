@@ -1,0 +1,41 @@
+openapi: 3.0.1
+info: 
+  description: "Content-Based Music Retrieval"
+  version: "1.0.0"
+  title: "PatternFinder"
+  contact:
+    email: "david.garfinkle@mail.mcgill.ca"
+servers:
+  - "url": "https://132.206.14.238:8000" 
+    "description": "Development server"
+paths:
+  /search:
+    get:
+      operationId: "search"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "inputType"
+          in: "query"
+          description: "Indicates the music encoding language of the query string"
+        - name: "query"
+          in: "query"
+          description: "A music query string"
+      responses:
+        200:
+          description: "The server successfully completed a search for the music query and is returning the result(s)" 
+definitions:
+  occurrence:
+    type: "object"
+    properties:
+      mass:
+        type: "string"
+      targetNotes:
+        type: "array"
+        items: 
+          type: "integer"
+      diatonicOcc:
+        type: "boolean"
+      transposition:
+        type: "integer"
+
