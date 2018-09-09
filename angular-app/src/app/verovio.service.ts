@@ -16,6 +16,8 @@ export class VerovioHumdrumService {
     font: "Leipzig"
   };
 
+  tk: any;
+
   constructor() { 
     this.tk = new verovio.toolkit();
   }
