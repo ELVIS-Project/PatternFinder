@@ -8,6 +8,8 @@ info:
 servers:
   - "url": "https://132.206.14.238:8000" 
     "description": "Development server"
+  - "url": "https://patternfinder.elvisproject.ca"
+    "description": "Production server"
 paths:
   /search:
     get:
