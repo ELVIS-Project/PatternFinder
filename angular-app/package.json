@@ -24,6 +24,7 @@
     "bootstrap": "^4.1.3",
     "core-js": "^2.5.4",
     "ng2-ace-editor": "^0.3.8",
+    "openapi-codegen": "^1.5.1",
     "rxjs": "~6.2.0",
     "rxjs-compat": "^6.3.2",
     "zone.js": "~0.8.26"
