@@ -59,13 +59,17 @@ export class DefaultService {
     /**
      * 
      * 
+     * @param mass Name of the mass to retrieve
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getMass(observe?: 'body', reportProgress?: boolean): Observable<any>;
-    public getMass(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<any>>;
-    public getMass(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<any>>;
-    public getMass(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public getMass(mass: string, observe?: 'body', reportProgress?: boolean): Observable<any>;
+    public getMass(mass: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<any>>;
+    public getMass(mass: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<any>>;
+    public getMass(mass: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+        if (mass === null || mass === undefined) {
+            throw new Error('Required parameter mass was null or undefined when calling getMass.');
+        }
 
         let headers = this.defaultHeaders;
 
@@ -94,13 +98,21 @@ export class DefaultService {
     /**
      * 
      * 
+     * @param mass Name of the mass to retrieve
+     * @param noteIndices Indices of notes relative to the entire score which define the boundaries of this excerpt
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getMassExcerpt(observe?: 'body', reportProgress?: boolean): Observable<any>;
-    public getMassExcerpt(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<any>>;
-    public getMassExcerpt(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<any>>;
-    public getMassExcerpt(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public getMassExcerpt(mass: string, noteIndices: Array<number>, observe?: 'body', reportProgress?: boolean): Observable<any>;
+    public getMassExcerpt(mass: string, noteIndices: Array<number>, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<any>>;
+    public getMassExcerpt(mass: string, noteIndices: Array<number>, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<any>>;
+    public getMassExcerpt(mass: string, noteIndices: Array<number>, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+        if (mass === null || mass === undefined) {
+            throw new Error('Required parameter mass was null or undefined when calling getMassExcerpt.');
+        }
+        if (noteIndices === null || noteIndices === undefined) {
+            throw new Error('Required parameter noteIndices was null or undefined when calling getMassExcerpt.');
+        }
 
         let headers = this.defaultHeaders;
 

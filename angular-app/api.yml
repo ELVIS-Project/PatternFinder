@@ -31,12 +31,31 @@ paths:
   /mass/{mass}:
     get:
       operationId: "getMass"
+      parameters:
+        - name: "mass"
+          in: "path"
+          description: "Name of the mass to retrieve"
+          schema:
+            type: "string"
       responses:
         200:
           description: "The server successfully completed a search for this mass and is returning the music-encoded document"
   /mass/{mass}/excerpt/{noteIndices}:
     get:
       operationId: "getMassExcerpt"
+      parameters:
+        - name: "mass"
+          in: "path"
+          description: "Name of the mass to retrieve"
+          schema:
+            type: "string"
+        - name: "noteIndices"
+          in: "path"
+          description: "Indices of notes relative to the entire score which define the boundaries of this excerpt"
+          schema:
+            type: "array"
+            items: 
+              type: "integer"
       responses:
         200:
           description: "The server successfully found this mass and the requested note indices are within a valid range. The music-encoded document describing the measures of music including these note indices is returned."
