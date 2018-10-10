@@ -1,4 +1,6 @@
 import { Component, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+
 import { VerovioHumdrumService } from '../verovio-humdrum.service';
 import { AceEditorComponent } from 'ng2-ace-editor';
 
@@ -12,23 +14,32 @@ import defaultHumdrumInput from './default-input';
 export class MusicEditorComponent implements AfterViewInit{
 
   @ViewChild('editor') editor: AceEditorComponent;
+  @ViewChild('svgContainer') svgContainer: ElementRef;
 
   humdrumInput: string = defaultHumdrumInput;
   renderedHumdrum: string;
   aceOptions: any;
-  verovio: any;
+  svg: string;
 
-  constructor(private verovio: VerovioHumdrumService) { };
+  constructor(
+      private verovio: VerovioHumdrumService,
+      private sanitizer: DomSanitizer
+  ) { };
 
   ngAfterViewInit() {
+    // Initial render
+    this.renderHumdrum();
+
     // Register on-change event listener for the editor
     this.editor.getEditor().on('change', (delta) => {
+      this.humdrumInput = this.editor.value
       this.renderHumdrum();
     });
   };
 
   renderHumdrum() { 
-    this.renderedHumdrum = this.verovio.render(this.humdrumInput);
+    this.svg = this.verovio.render(this.humdrumInput);
+    this.svgContainer.nativeElement.innerHTML = this.svg;
   };
 
 
