@@ -3,7 +3,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 import { VerovioHumdrumService } from '../verovio-humdrum.service';
 import { AceEditorComponent } from 'ng2-ace-editor';
-import { DefaultService } from 'api/api/default.service.ts';
+import { DefaultService } from 'api/api/default.service';
 
 import defaultHumdrumInput from './default-input';
 
