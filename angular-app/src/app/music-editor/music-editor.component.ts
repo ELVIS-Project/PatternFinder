@@ -3,6 +3,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 import { VerovioHumdrumService } from '../verovio-humdrum.service';
 import { AceEditorComponent } from 'ng2-ace-editor';
+import { DefaultService } from 'api/api/default.service.ts';
 
 import defaultHumdrumInput from './default-input';
 
@@ -18,12 +19,14 @@ export class MusicEditorComponent implements AfterViewInit{
 
   humdrumInput: string = defaultHumdrumInput;
   renderedHumdrum: string;
+  results: string = "results";
   aceOptions: any;
   svg: string;
 
   constructor(
       private verovio: VerovioHumdrumService,
-      private sanitizer: DomSanitizer
+      private sanitizer: DomSanitizer,
+      private searchService: DefaultService
   ) { };
 
   ngAfterViewInit() {
@@ -41,6 +44,11 @@ export class MusicEditorComponent implements AfterViewInit{
     this.svg = this.verovio.render(this.humdrumInput);
     this.svgContainer.nativeElement.innerHTML = this.svg;
   };
+
+  search() {
+    this.searchService.search('krn', this.humdrumInput).subscribe(
+      data => { console.log(data) });
+  }
 
 
 }

@@ -1,11 +1,18 @@
 <div #musicEditor>
   <ace-editor
     #editor
+	class="float-left"
     [(value)] = "humdrumInput"
     [mode] = "'text'"
     [options] = "aceOptions"
     [autoUpdateContent] = "true"></ace-editor>
 
-  <div #svgContainer></div>
+  <div class="float-right" #svgContainer></div>
+
+  <button
+	type="submit"
+	(click)="search()">submit</button>
+
+  <pre>{{results}}</pre>
 
 </div>
