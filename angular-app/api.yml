@@ -20,7 +20,7 @@ paths:
           description: "Indicates the music encoding language of the query string"
           schema:
             type: "string"
-        - name: "musicQuery"
+        - name: "krnText"
           in: "query"
           description: "A music query string"
           schema:

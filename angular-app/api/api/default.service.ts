@@ -142,21 +142,21 @@ export class DefaultService {
      * 
      * 
      * @param inputType Indicates the music encoding language of the query string
-     * @param musicQuery A music query string
+     * @param krnText A music query string
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public search(inputType?: string, musicQuery?: string, observe?: 'body', reportProgress?: boolean): Observable<any>;
-    public search(inputType?: string, musicQuery?: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<any>>;
-    public search(inputType?: string, musicQuery?: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<any>>;
-    public search(inputType?: string, musicQuery?: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public search(inputType?: string, krnText?: string, observe?: 'body', reportProgress?: boolean): Observable<any>;
+    public search(inputType?: string, krnText?: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<any>>;
+    public search(inputType?: string, krnText?: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<any>>;
+    public search(inputType?: string, krnText?: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         let queryParameters = new HttpParams({encoder: new CustomHttpUrlEncodingCodec()});
         if (inputType !== undefined && inputType !== null) {
             queryParameters = queryParameters.set('inputType', <any>inputType);
         }
-        if (musicQuery !== undefined && musicQuery !== null) {
-            queryParameters = queryParameters.set('musicQuery', <any>musicQuery);
+        if (krnText !== undefined && krnText !== null) {
+            queryParameters = queryParameters.set('krnText', <any>krnText);
         }
 
         let headers = this.defaultHeaders;
