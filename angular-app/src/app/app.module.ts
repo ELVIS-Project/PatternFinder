@@ -4,7 +4,8 @@ import { HttpClientModule } from '@angular/common/http';
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { AceEditorModule } from 'ng2-ace-editor';
-import { ApiModule } from '';
+import { ApiModule } from 'api.module';
+import { BASE_PATH } from 'api/variables';
 
 import { AppComponent } from './app.component';
 import { ExcerptComponent } from './excerpt/excerpt.component';
@@ -23,7 +24,12 @@ import { MusicEditorComponent } from './music-editor/music-editor.component';
     AceEditorModule,
     ApiModule
   ],
-  providers: [],
+  providers: [
+    {
+      provide: BASE_PATH, 
+      useValue: "https://patternfinder.elvisproject.ca" 
+    }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
