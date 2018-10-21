@@ -26,8 +26,8 @@ import { MusicEditorComponent } from './music-editor/music-editor.component';
   ],
   providers: [
     {
-      provide: BASE_PATH, 
-      useValue: "https://patternfinder.elvisproject.ca" 
+      provide: BASE_PATH,
+      useValue: "http://132.206.14.238:80"
     }
   ],
   bootstrap: [AppComponent]
