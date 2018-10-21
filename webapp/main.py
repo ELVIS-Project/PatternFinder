@@ -10,6 +10,7 @@ import yaml
 
 from flask import Flask, request, redirect, url_for, render_template, send_from_directory, Response, send_file
 from flask_bootstrap import Bootstrap
+from flask_cors import CORS
 from werkzeug.utils import secure_filename
 
 from app.dpwc import search_palestrina
@@ -20,6 +21,7 @@ us['directoryScratch'] = '/app/patternfinder/music_files/music21_temp_output'
 
 app = Flask(__name__)
 Bootstrap(app)
+CORS(app)
 
 app.config.update(TEMPLATES_AUTO_RELOAD=True)
 
