@@ -1,13 +1,18 @@
 openapi: 3.0.1
-info: 
+info:
   description: "Content-Based Music Retrieval"
   version: "1.0.0"
   title: "PatternFinder"
   contact:
     email: "david.garfinkle@mail.mcgill.ca"
 servers:
-  - "url": "https://132.206.14.238:8000" 
+  - "url": "https://132.206.14.238:{port}/{basePath}"
     "description": "Development server"
+    "variables":
+        port:
+          default: "8080"
+        basePath:
+          default: "api/v1"
   - "url": "https://patternfinder.elvisproject.ca"
     "description": "Production server"
 paths:
@@ -20,7 +25,7 @@ paths:
           description: "Indicates the music encoding language of the query string"
           schema:
             type: "string"
-        - name: "krnText"
+        - name: "query"
           in: "query"
           description: "A music query string"
           schema:
@@ -28,29 +33,23 @@ paths:
       responses:
         200:
           description: "The server successfully completed a search for the music query and is returning the result(s)" 
-  /mass/{mass}:
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/occurrence"
+  /piece/{pieceName}:
     get:
-      operationId: "getMass"
+      operationId: "getPiece"
       parameters:
-        - name: "mass"
+        - name: "pieceName"
           in: "path"
-          description: "Name of the mass to retrieve"
-          schema:
-            type: "string"
-      responses:
-        200:
-          description: "The server successfully completed a search for this mass and is returning the music-encoded document"
-  /mass/{mass}/excerpt/{noteIndices}:
-    get:
-      operationId: "getMassExcerpt"
-      parameters:
-        - name: "mass"
-          in: "path"
-          description: "Name of the mass to retrieve"
+          description: "Name of the piece to retrieve"
           schema:
             type: "string"
         - name: "noteIndices"
-          in: "path"
+          in: "query"
           description: "Indices of notes relative to the entire score which define the boundaries of this excerpt"
           schema:
             type: "array"
@@ -58,13 +57,13 @@ paths:
               type: "integer"
       responses:
         200:
-          description: "The server successfully found this mass and the requested note indices are within a valid range. The music-encoded document describing the measures of music including these note indices is returned."
+          description: "The server successfully completed a search for this mass and is returning the music-encoded document or an excerpt thereof"
 components:
   schemas:
     occurrence:
       type: "object"
       properties:
-        mass:
+        pieceName:
           type: "string"
         targetNotes:
           type: "array"
