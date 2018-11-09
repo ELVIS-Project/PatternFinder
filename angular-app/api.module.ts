@@ -1,5 +1,4 @@
 import { NgModule, ModuleWithProviders, SkipSelf, Optional } from '@angular/core';
-<<<<<<< HEAD
 import { Configuration } from './api/configuration';
 import { HttpClient } from '@angular/common/http';
 
