@@ -1,5 +1,4 @@
 openapi: 3.0.1
-<<<<<<< HEAD
 info:
   description: "Content-Based Music Retrieval"
   version: "1.0.0"
