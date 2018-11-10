@@ -20,7 +20,7 @@ ADD ./setup.py /app/patternfinder/
 ADD ./requirements.txt /app/patternfinder/
 ADD ./webapp/requirements.txt /app/app/
 ADD ./webapp/main.py /app/app/
-ADD ./webapp/dpwc.py /app/app/
+ADD ./patternfinder/geometric_helsinki/dpwc.py /app/app/
 ADD ./webapp/uwsgi.ini /app/
 
 RUN pip install -r /app/patternfinder/requirements.txt

@@ -10,9 +10,10 @@ import yaml
 
 from flask import Flask, request, redirect, url_for, render_template, send_from_directory, Response, send_file
 from flask_bootstrap import Bootstrap
+from flask_cors import CORS
 from werkzeug.utils import secure_filename
 
-from app.dpwc import search_palestrina
+from patternfinder.geometric_helsinki.dpwc import search_scores
 from patternfinder.geometric_helsinki.indexer import csv_notes, intra_vectors
 
 us = music21.environment.UserSettings()
@@ -20,6 +21,7 @@ us['directoryScratch'] = '/app/patternfinder/music_files/music21_temp_output'
 
 app = Flask(__name__)
 Bootstrap(app)
+CORS(app)
 
 app.config.update(TEMPLATES_AUTO_RELOAD=True)
 
@@ -91,7 +93,7 @@ def search():
     indexed_query = intra_vectors(query_str, dest="str", window=1)
     print("Query indexed.")
 
-    response = search_palestrina(indexed_query, PALESTRINA_PATH)
+    response = search_scores(indexed_query, PALESTRINA_PATH)
     print("serving krn " + query_str or DEFAULT_KRN_QUERY)
     return render_template('index.html', response = response, default_krn = query_str or DEFAULT_KRN_QUERY)
 
